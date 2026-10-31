@@ -14,9 +14,9 @@
   /* The light ground behind store product photos, close to their own backgrounds */
   --color-product: var(--product);
 
-  /* Two faces: Panchang for display, Switzer for everything else */
-  --font-sans: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-panchang), var(--font-switzer), ui-sans-serif, sans-serif;
+  /* Two faces: DM Serif Display for display, DM Sans for everything else */
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-dm-serif), Georgia, serif;
 
   /* Five type steps */
   --text-small: var(--step-small);
@@ -120,19 +120,25 @@
   h1,
   h2,
   h3 {
-    @apply font-display uppercase;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    @apply font-display;
+    font-weight: 400;
+    letter-spacing: -0.02em;
     line-height: 1;
+  }
+  h1,
+  h2 {
+    line-height: 1.05;
   }
   /* Section headings: a touch less aggressive than hero headings */
   h2 {
-    letter-spacing: -0.005em;
+    letter-spacing: -0.015em;
   }
   h3 {
-    text-transform: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
     letter-spacing: normal;
     font-size: var(--step-lead);
+    text-transform: none;
   }
   :focus-visible {
     outline: 2px solid var(--brass);

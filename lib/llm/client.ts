@@ -23,18 +23,19 @@ type StructuredRequest<T extends z.ZodType> = {
  * fails validation (CLAUDE.md section 6).
  */
 export async function generateStructured<T extends z.ZodType>(req: StructuredRequest<T>): Promise<z.infer<T>> {
-  const config = LLM[req.task];
-  const { model, maxTokens } = config;
-  const thinking = "thinking" in config ? config.thinking : undefined;
+  const { model, maxTokens } = LLM[req.task];
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const response = await anthropic().messages.parse({
         model,
         max_tokens: maxTokens,
-        system: req.system,
+        // Cache system prompts: cuts input token cost ~90% on repeated calls once the prompt
+        // exceeds the 1024-token minimum. Silently ignored for shorter prompts.
+        system: req.system
+          ? [{ type: "text" as const, text: req.system, cache_control: { type: "ephemeral" } as const }]
+          : undefined,
         messages: [{ role: "user", content: req.content }],
-        ...(thinking ? { thinking } : {}),
         output_config: { format: zodOutputFormat(req.schema), effort: req.effort },
       });
       if (process.env.NODE_ENV !== "production") {

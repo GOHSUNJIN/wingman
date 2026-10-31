@@ -102,7 +102,7 @@ export function HeroWindow({ before, after, alt }: Props) {
         {/* Text sits above the picture and leaves before the opening reaches it */}
         <div className="hero__text pointer-events-none absolute inset-0 px-(--margin)">
           <header className="pointer-events-auto flex h-16 items-center justify-between pt-[env(safe-area-inset-top)] md:h-20">
-            <span className="font-display text-small tracking-[-0.01em] uppercase">Wingman</span>
+            <span className="font-display text-lead tracking-[-0.01em]">Wingman</span>
             <nav aria-label="Main" className="flex gap-6 text-small">
               <a href="#looks" className="text-link hidden min-h-11 items-center md:inline-flex">
                 The looks
@@ -118,7 +118,7 @@ export function HeroWindow({ before, after, alt }: Props) {
 
           <h1
             id="hero-heading"
-            className="absolute top-[calc(env(safe-area-inset-top)+4.5rem)] left-(--margin) text-[10vw] min-[900px]:top-auto min-[900px]:bottom-[calc(var(--text-bottom)-0.08em)] min-[900px]:max-w-[calc(var(--side)-3rem)] min-[900px]:text-[min(calc((28vw-3rem)/5.9),5.5rem)]"
+            className="italic absolute top-[calc(env(safe-area-inset-top)+4.5rem)] left-(--margin) text-[10vw] min-[900px]:top-auto min-[900px]:bottom-[calc(var(--text-bottom)-0.08em)] min-[900px]:max-w-[calc(var(--side)-3rem)] min-[900px]:text-[min(calc((28vw-3rem)/5.9),5.5rem)]"
           >
             <span className="rise-line">
               <span style={{ "--i": 0 } as React.CSSProperties}>See it</span>

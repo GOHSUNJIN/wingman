@@ -111,9 +111,11 @@ export async function checkedFace(hash: string, width: number, height: number): 
 }
 
 async function lookAtPhoto(normalised: Buffer): Promise<PhotoVision> {
-  const preview = await sharp(normalised).resize(1568, 1568, { fit: "inside" }).jpeg({ quality: 85 }).toBuffer();
+  // 1024px is enough to count people, judge framing and locate the face box.
+  // Haiku handles this vision task at ~4x lower cost than Sonnet.
+  const preview = await sharp(normalised).resize(1024, 1024, { fit: "inside" }).jpeg({ quality: 85 }).toBuffer();
   return generateStructured({
-    task: "agent",
+    task: "light",
     label: "photo-check",
     effort: "low",
     schema: VisionSchema,

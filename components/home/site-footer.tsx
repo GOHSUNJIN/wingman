@@ -9,22 +9,32 @@ const MENU = [
   { label: "The stores", href: "#stores" },
 ];
 
-/** A designed close: the name at full width over the menu set large. No picture, so none repeats. */
 export function SiteFooter() {
   return (
-    <footer className="relative z-10 bg-background px-(--margin) pt-20 pb-8 md:pt-32">
-      <p aria-hidden className="font-display text-[12vw] leading-[0.85] tracking-[-0.03em] uppercase">
-        Wingman
-      </p>
+    <footer className="relative z-10 border-t bg-background px-(--margin) pt-16 pb-10 md:pt-24 md:pb-12" style={{ borderColor: "var(--line)" }}>
+      <div className="grid gap-12 md:grid-cols-12 md:gap-6">
+        <div className="md:col-span-5">
+          <p className="font-display text-[2.5rem] leading-none tracking-[-0.02em]">Wingman</p>
+          <p className="mt-4 max-w-[32ch] text-muted-foreground">
+            AI occasion stylist for men in Singapore. Real stores, real try-ons, one tap to checkout.
+          </p>
+          <div className="mt-6">
+            <Link href="/style" className="btn">
+              Style me
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
+                <path d="M5 12h14m-6-6 6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        </div>
 
-      <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-12 md:gap-6">
-        <nav aria-label="Footer" className="md:col-span-6">
-          <ul className="group/menu flex flex-col gap-5 md:gap-7">
+        <nav aria-label="Footer" className="md:col-span-5 md:col-start-8 md:self-end">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-1 md:flex md:flex-col md:gap-2">
             {MENU.map((item) => (
               <li key={item.label}>
                 <Link
                   href={item.href}
-                  className="-my-2 inline-block py-2 text-head leading-none font-medium tracking-[-0.02em] transition-[color,transform] duration-200 ease-(--ease-out) group-hover/menu:text-muted-foreground hover:translate-x-3 hover:!text-ivory"
+                  className="text-link inline-flex min-h-11 items-center text-muted-foreground"
                 >
                   {item.label}
                 </Link>
@@ -32,19 +42,10 @@ export function SiteFooter() {
             ))}
           </ul>
         </nav>
-
-        <div className="flex flex-col gap-6 md:col-span-5 md:col-start-8 md:justify-end">
-          <p>
-            Try-on and skin analysis by YouCam AI. Products from independent Singapore stores; you check out on their
-            site.
-          </p>
-          <p>Your photo is never stored, and your try-ons are deleted after 24 hours.</p>
-        </div>
       </div>
 
-      <p className="mt-20 max-w-[64ch] text-small text-muted-foreground md:mt-28">
-          Wingman, built for the YouCam API hackathon. Model photos by MART PRODUCTION, Estefania Milazzo, Gabby K (Monstera Production), Ivan S, Atahan Demir and Alvin Ramadhian on Pexels; every try-on on this
-          page is a real YouCam render, in pieces from Colony Clothing, Kevin Seah and Pharaoh&apos;s Horses.
+      <p className="mt-12 border-t pt-6 text-small text-muted-foreground" style={{ borderColor: "var(--line)" }}>
+        Wingman, built for the YouCam API hackathon. Model photos by MART PRODUCTION, Estefania Milazzo, Gabby K (Monstera Production), Ivan S, Atahan Demir and Alvin Ramadhian on Pexels; every try-on on this page is a real YouCam render, in pieces from Colony Clothing, Kevin Seah and Pharaoh&apos;s Horses.
       </p>
     </footer>
   );

@@ -1,22 +1,19 @@
 import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { DM_Serif_Display, DM_Sans } from "next/font/google";
 
-/* Panchang (display) and Switzer (text), Fontshare, ITF Free Font License */
-const panchang = localFont({
-  src: "./fonts/Panchang-Bold.woff2",
-  weight: "700",
-  variable: "--font-panchang",
+const dmSerifDisplay = DM_Serif_Display({
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-dm-serif",
   display: "swap",
 });
 
-const switzer = localFont({
-  src: [
-    { path: "./fonts/Switzer-Regular.woff2", weight: "400" },
-    { path: "./fonts/Switzer-Medium.woff2", weight: "500" },
-  ],
-  variable: "--font-switzer",
+const dmSans = DM_Sans({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -45,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${panchang.variable} ${switzer.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${dmSerifDisplay.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <head>
         {/* Entrance motion only runs when script does, so nothing stays hidden without it */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
