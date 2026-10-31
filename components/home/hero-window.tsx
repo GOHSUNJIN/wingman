@@ -130,7 +130,7 @@ export function HeroWindow({ before, after, alt }: Props) {
 
           <div className="pointer-events-auto absolute inset-x-(--margin) top-[calc(var(--win-top)+var(--win-h)+1.25rem)] min-[900px]:inset-x-auto min-[900px]:top-auto min-[900px]:right-(--margin) min-[900px]:bottom-(--text-bottom) min-[900px]:w-[min(calc(var(--side)-3rem),24rem)]">
             <p data-load style={{ "--d": "420ms" } as React.CSSProperties} className="max-w-[34ch] text-body">
-              One photo, one sentence, and you have a complete outfit tried on you — from stores you can buy from today.
+              One photo, one sentence, and you have a complete outfit tried on you. From stores you can buy from today.
             </p>
             <div data-load style={{ "--d": "500ms" } as React.CSSProperties} className="mt-4 flex flex-col gap-1 min-[900px]:mt-6">
               <Link href="/style" className="btn w-full min-[900px]:w-auto min-[900px]:self-start">

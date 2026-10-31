@@ -369,7 +369,7 @@
   }
 }
 
-/* Subtle grain overlay — adds depth without changing the palette */
+/* Subtle grain overlay; adds depth without changing the palette */
 body::after {
   content: "";
   position: fixed;

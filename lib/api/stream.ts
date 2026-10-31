@@ -8,7 +8,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { YouCamError, userMessage } from "@/lib/youcam/errors";
 
 // Soft in-memory rate limit: max 3 style requests per IP per 60 s.
-// Resets per serverless instance — a soft cap, not a hard one, but blocks accidental hammering.
+// Resets per serverless instance; a soft cap, not a hard one, but blocks accidental hammering.
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 3;
 const ipCounts = new Map<string, { count: number; resetAt: number }>();

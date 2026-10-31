@@ -83,7 +83,7 @@ flowchart TD
 | Framework | Next.js 15 (App Router), TypeScript strict |
 | Styling | Tailwind CSS 4, Panchang + Switzer fonts (self-hosted) |
 | Database and storage | Supabase Postgres + private storage buckets with signed URLs |
-| AI | Claude via `@anthropic-ai/sdk`: Sonnet 5.5 for styling, Fit Check and prep plans; Haiku 5.5 for catalog tagging |
+| AI | Claude via `@anthropic-ai/sdk`: `claude-sonnet-4-6` for styling, Fit Check and prep plans; `claude-haiku-4-5-20251001` for catalog tagging |
 | Vision | YouCam API, server-side only |
 | Images | sharp |
 | Validation | Zod on every API input and every Claude output |
@@ -98,7 +98,7 @@ You need Node 20 or newer, a [Supabase](https://supabase.com) project, a YouCam 
 **1. Clone and install**
 
 ```bash
-git clone https://github.com/love98ed/wingman.git
+git clone https://github.com/GOHSUNJIN/wingman.git
 cd wingman
 npm install
 cp .env.example .env.local

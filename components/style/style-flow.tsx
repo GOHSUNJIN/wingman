@@ -311,7 +311,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
                 const names = withScores.map((l) => `${l.name} (${l.fitCheck!.score}/10)`).join(", ");
                 droppedMsg =
                   withScores.length === 1
-                    ? `Wingman left out ${names} — scored below 6/10 for this occasion.`
+                    ? `Wingman left out ${names} (scored below 6/10 for this occasion).`
                     : `Wingman left out ${withScores.length} looks that scored below 6/10: ${names}.`;
               } else {
                 droppedMsg = `Wingman left out ${event.dropped === 1 ? "a look" : `${event.dropped} looks`} that scored below 6/10 for this occasion.`;

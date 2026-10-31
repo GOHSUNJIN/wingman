@@ -68,7 +68,7 @@ export function FitCheck() {
   );
 }
 
-/** Large animated score ring for the home page — triggers fill when scrolled into view. */
+/** Large animated score ring for the home page; triggers fill when scrolled into view. */
 function ScoreRing({ score }: { score: number }) {
   const r = 56;
   const circ = 2 * Math.PI * r;
