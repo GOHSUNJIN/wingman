@@ -61,7 +61,11 @@ export function CompareStep({
         </p>
       </div>
 
-      <div className="mt-8 grid max-w-3xl grid-cols-3 gap-2 sm:gap-4" aria-live="polite">
+      {/* Horizontal scroll on mobile so three columns never compress below 200px each */}
+      <div
+        className="no-scrollbar -mx-(--margin) mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-(--margin) px-(--margin) sm:mx-0 sm:grid sm:max-w-3xl sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0"
+        aria-live="polite"
+      >
         {columns.map((version, i) => (
           <Column
             key={TIERS[i]}
@@ -126,7 +130,7 @@ function Column({
   const waiting = !render && !finished;
 
   return (
-    <section aria-label={`${TIER_LABELS[tier]}${current ? ", your look" : ""}`} className={cn("card-cell min-w-0", current ? "bg-surface-raised" : "bg-surface")}>
+    <section aria-label={`${TIER_LABELS[tier]}${current ? ", your look" : ""}`} className={cn("card-cell w-[72vw] min-w-[220px] shrink-0 snap-center sm:w-auto sm:shrink", current ? "bg-surface-raised" : "bg-surface")}>
       <div className="relative aspect-[4/5] overflow-hidden bg-surface-raised">
         {render ? (
           <Image src={render} alt={`You in the ${TIER_LABELS[tier]} version`} fill sizes="(min-width: 640px) 16rem, 30vw" className="animate-in object-cover fade-in duration-500" {...RAW_IMG_PROPS} />

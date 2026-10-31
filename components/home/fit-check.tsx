@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { sgd } from "@/lib/utils/format";
 import { FIT_CHECK } from "./looks-data";
 
@@ -20,10 +23,9 @@ export function FitCheck() {
         <p data-reveal style={{ "--d": "60ms" } as React.CSSProperties} className="mt-4 max-w-[40ch]">
           Every look is scored on you before you see it. This is the mid-range linen look above.
         </p>
-        <p data-reveal style={{ "--d": "120ms" } as React.CSSProperties} className="mt-10 flex items-baseline gap-4">
-          <span className="font-display text-display leading-none text-brass">{FIT_CHECK.score.toFixed(1)}</span>
-          <span className="text-lead">out of 10</span>
-        </p>
+        <div data-reveal style={{ "--d": "120ms" } as React.CSSProperties} className="mt-10">
+          <ScoreRing score={FIT_CHECK.score} />
+        </div>
         <p data-reveal style={{ "--d": "180ms" } as React.CSSProperties} className="mt-6 max-w-[46ch] text-lead">
           {FIT_CHECK.reasoning}
         </p>
@@ -63,5 +65,56 @@ export function FitCheck() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Large animated score ring for the home page — triggers fill when scrolled into view. */
+function ScoreRing({ score }: { score: number }) {
+  const r = 56;
+  const circ = 2 * Math.PI * r;
+  const ref = useRef<HTMLDivElement>(null);
+  const [filled, setFilled] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const id = requestAnimationFrame(() => setFilled(true));
+          observer.disconnect();
+          return () => cancelAnimationFrame(id);
+        }
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const offset = filled ? circ - (score / 10) * circ : circ;
+
+  return (
+    <div ref={ref} className="relative inline-flex items-center justify-center" aria-label={`${score.toFixed(1)} out of 10`}>
+      <svg width="144" height="144" viewBox="0 0 144 144" style={{ transform: "rotate(-90deg)" }} aria-hidden>
+        <circle cx="72" cy="72" r={r} fill="none" stroke="var(--surface)" strokeWidth="6" />
+        <circle
+          cx="72"
+          cy="72"
+          r={r}
+          fill="none"
+          stroke="var(--brass)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={`${circ} ${circ}`}
+          strokeDashoffset={offset}
+          style={{ transition: filled ? "stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1)" : "none" }}
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center leading-none">
+        <span className="font-display text-display leading-none text-brass">{score.toFixed(1)}</span>
+        <span className="mt-2 text-lead text-muted-foreground">out of 10</span>
+      </div>
+    </div>
   );
 }

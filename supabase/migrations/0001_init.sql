@@ -29,6 +29,9 @@ create index if not exists products_store_idx on products (store);
 create index if not exists products_occasions_idx on products using gin (occasions);
 
 -- User photos (auto-deleted after 24 hours) ---------------------------------
+-- This table was created for tracking selfies but is never written to in practice:
+-- photos are processed in-request and immediately discarded; only renders are stored.
+-- Kept here so the schema stays consistent with existing deployed databases.
 create table if not exists selfies (
   id uuid primary key default gen_random_uuid(),
   storage_path text not null,                  -- private bucket `selfies`

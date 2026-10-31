@@ -303,9 +303,22 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
             setNotice(event.reply);
             break;
           case "prune": {
-            setLooks((prev) => event.keep.flatMap((i) => (prev[i] ? [prev[i]] : [])));
-            const dropped = `Wingman left out ${event.dropped === 1 ? "a look" : `${event.dropped} looks`} that didn't score well enough to show you.`;
-            setNotice((prev) => (prev ? `${prev} ${dropped}` : dropped));
+            let droppedMsg = "";
+            setLooks((prev) => {
+              const removed = prev.filter((_, i) => !event.keep.includes(i));
+              const withScores = removed.filter((l) => l.fitCheck != null);
+              if (withScores.length > 0) {
+                const names = withScores.map((l) => `${l.name} (${l.fitCheck!.score}/10)`).join(", ");
+                droppedMsg =
+                  withScores.length === 1
+                    ? `Wingman left out ${names} — scored below 6/10 for this occasion.`
+                    : `Wingman left out ${withScores.length} looks that scored below 6/10: ${names}.`;
+              } else {
+                droppedMsg = `Wingman left out ${event.dropped === 1 ? "a look" : `${event.dropped} looks`} that scored below 6/10 for this occasion.`;
+              }
+              return event.keep.flatMap((i) => (prev[i] ? [prev[i]] : []));
+            });
+            setNotice((prev) => (prev ? `${prev} ${droppedMsg}` : droppedMsg));
             setCompares({});
             setFocusLook(0);
             break;
@@ -650,39 +663,44 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
 
   if (phase === "photo") {
     return (
-      <PhotoStep
-        photo={photo}
-        onPhoto={(next) => {
-          setPhotoNotice(null);
-          setPhoto(next);
-        }}
-        onNext={() => go("occasion")}
-        notice={photoNotice}
-      />
+      <div key="photo" className="animate-step-enter">
+        <PhotoStep
+          photo={photo}
+          onPhoto={(next) => {
+            setPhotoNotice(null);
+            setPhoto(next);
+          }}
+          onNext={() => go("occasion")}
+          notice={photoNotice}
+        />
+      </div>
     );
   }
   if (phase === "occasion") {
     return (
-      <OccasionStep
-        photo={photo}
-        occasionId={occasionId}
-        sentence={sentence}
-        tier={tier}
-        onOccasion={(id) => {
-          // Swap the starter sentence only if the user hasn't written their own
-          const typed = !OCCASION_CHOICES.some((o) => o.example === sentence) && sentence.trim() !== "";
-          setOccasionId(id);
-          if (!typed) setSentence(OCCASION_CHOICES.find((o) => o.id === id)!.example);
-        }}
-        onSentence={setSentence}
-        onTier={setTier}
-        onBack={() => (previous === "photo" ? back() : go("photo"))}
-        onSubmit={run}
-      />
+      <div key="occasion" className="animate-step-enter">
+        <OccasionStep
+          photo={photo}
+          occasionId={occasionId}
+          sentence={sentence}
+          tier={tier}
+          onOccasion={(id) => {
+            // Swap the starter sentence only if the user hasn't written their own
+            const typed = !OCCASION_CHOICES.some((o) => o.example === sentence) && sentence.trim() !== "";
+            setOccasionId(id);
+            if (!typed) setSentence(OCCASION_CHOICES.find((o) => o.id === id)!.example);
+          }}
+          onSentence={setSentence}
+          onTier={setTier}
+          onBack={() => (previous === "photo" ? back() : go("photo"))}
+          onSubmit={run}
+        />
+      </div>
     );
   }
   if (phase === "loading") {
     return (
+      <div key="loading" className="animate-step-enter">
       <LoadingStep
         photo={photo}
         progress={progress}
@@ -692,112 +710,128 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
         retrying={retrying > 0}
         onRetry={retryImages}
         onContinue={skipMissingImages}
+        occasion={parsed}
       />
+      </div>
     );
   }
   if (phase === "error" && error) {
     return (
-      <ErrorStep
-        code={error.code}
-        message={error.message}
-        onRetry={run}
-        onNewPhoto={() => {
-          setPhoto(null);
-          returnTo("photo");
-        }}
-        onBack={() => returnTo("occasion")}
-        onDeletePhoto={() => void deletePhoto()}
-      />
+      <div key="error" className="animate-step-enter">
+        <ErrorStep
+          code={error.code}
+          message={error.message}
+          onRetry={run}
+          onNewPhoto={() => {
+            setPhoto(null);
+            returnTo("photo");
+          }}
+          onBack={() => returnTo("occasion")}
+          onDeletePhoto={() => void deletePhoto()}
+        />
+      </div>
     );
   }
   if (phase === "compare" && looks[comparing] && compares[comparing]) {
     return (
-      <CompareStep
-        look={looks[comparing]}
-        state={compares[comparing]}
-        photo={photo}
-        onChoose={chooseVersion}
-        onBack={back}
-        backLabel={previous ? BACK_LABELS[previous] : undefined}
-        onRetry={() => void startCompare(comparing)}
-      />
+      <div key="compare" className="animate-step-enter">
+        <CompareStep
+          look={looks[comparing]}
+          state={compares[comparing]}
+          photo={photo}
+          onChoose={chooseVersion}
+          onBack={back}
+          backLabel={previous ? BACK_LABELS[previous] : undefined}
+          onRetry={() => void startCompare(comparing)}
+        />
+      </div>
     );
   }
   const swapLook = looks[swapping.look];
   if (phase === "swap" && swapLook) {
     return (
-      <SwapStep
-        look={swapLook}
-        slot={swapping.slot}
-        cheaper={swapping.cheaper}
-        state={swapOptions[optionsKey(swapLook, swapping.slot, swapping.cheaper)] ?? { status: "loading", options: [] }}
-        onPick={(option) => void applyPiece(swapping.look, option)}
-        onBack={back}
-        onRetry={() => void loadSwapOptions(swapLook, swapping.slot, swapping.cheaper)}
-      />
+      <div key="swap" className="animate-step-enter">
+        <SwapStep
+          look={swapLook}
+          slot={swapping.slot}
+          cheaper={swapping.cheaper}
+          state={swapOptions[optionsKey(swapLook, swapping.slot, swapping.cheaper)] ?? { status: "loading", options: [] }}
+          onPick={(option) => void applyPiece(swapping.look, option)}
+          onBack={back}
+          onRetry={() => void loadSwapOptions(swapLook, swapping.slot, swapping.cheaper)}
+        />
+      </div>
     );
   }
   if (phase === "prep") {
     return (
-      <PrepStep plan={prep?.plan ?? null} skinAnalysed={prep?.skinAnalysed ?? false} setting={parsed?.setting} onBack={back}
-        backLabel={previous ? BACK_LABELS[previous] : undefined} />
+      <div key="prep" className="animate-step-enter">
+        <PrepStep plan={prep?.plan ?? null} skinAnalysed={prep?.skinAnalysed ?? false} setting={parsed?.setting} onBack={back}
+          backLabel={previous ? BACK_LABELS[previous] : undefined} />
+      </div>
     );
   }
   if (phase === "browse") {
     return (
-      <BrowseStep
-        filters={browseFilters}
-        onFilters={setBrowseFilters}
-        looks={looks}
-        inCart={new Set(cart.map((l) => l.id))}
-        onAddToLook={(index, item) => void applyPiece(index, item)}
-        onAddToCart={(item) => addToCart([item])}
-        onBack={back}
-        backLabel={previous ? BACK_LABELS[previous] : undefined}
-      />
+      <div key="browse" className="animate-step-enter">
+        <BrowseStep
+          filters={browseFilters}
+          onFilters={setBrowseFilters}
+          looks={looks}
+          inCart={new Set(cart.map((l) => l.id))}
+          onAddToLook={(index, item) => void applyPiece(index, item)}
+          onAddToCart={(item) => addToCart([item])}
+          onBack={back}
+          backLabel={previous ? BACK_LABELS[previous] : undefined}
+        />
+      </div>
     );
   }
   if (phase === "cart") {
     return (
-      <CartStep
-        lines={cart}
-        onSize={(id, variantId) => setCart((prev) => prev.map((l) => (l.id === id ? { ...l, variantId } : l)))}
-        onQty={(id, qty) =>
-          setCart((prev) => prev.map((l) => (l.id === id ? { ...l, qty: Math.min(MAX_QTY, Math.max(1, qty)) } : l)))
-        }
-        onRemove={(id) => setCart((prev) => prev.filter((l) => l.id !== id))}
-        onRestore={(line, index) =>
-          setCart((prev) => (prev.some((l) => l.id === line.id) ? prev : [...prev.slice(0, index), line, ...prev.slice(index)]))
-        }
-        onBack={back}
-        backLabel={previous ? BACK_LABELS[previous] : undefined}
-      />
+      <div key="cart" className="animate-step-enter">
+        <CartStep
+          lines={cart}
+          onSize={(id, variantId) => setCart((prev) => prev.map((l) => (l.id === id ? { ...l, variantId } : l)))}
+          onQty={(id, qty) =>
+            setCart((prev) => prev.map((l) => (l.id === id ? { ...l, qty: Math.min(MAX_QTY, Math.max(1, qty)) } : l)))
+          }
+          onRemove={(id) => setCart((prev) => prev.filter((l) => l.id !== id))}
+          onRestore={(line, index) =>
+            setCart((prev) => (prev.some((l) => l.id === line.id) ? prev : [...prev.slice(0, index), line, ...prev.slice(index)]))
+          }
+          onBack={back}
+          backLabel={previous ? BACK_LABELS[previous] : undefined}
+        />
+      </div>
     );
   }
   return (
-    <LooksStep
-      looks={looks}
-      photo={photo}
-      occasion={parsed}
-      tier={tier}
-      scoring={progress.step === "scoring" || looks.some((l) => !l.fitCheck)}
-      notice={notice}
-      onRestart={() => go("occasion")}
-      onCompare={parsed ? openCompare : undefined}
-      onSwap={parsed ? openSwap : undefined}
-      onRefine={parsed ? refine : undefined}
-      cart={cart}
-      onAddToCart={(look) => {
-        addToCart(look.items.filter((item) => showsInRender(look, item.slot)));
-        go("cart");
-      }}
-      onAddPiece={(item) => addToCart([item])}
-      onViewCart={() => go("cart")}
-      focusLook={focusLook}
-      hasPrep={prep != null}
-      onPrep={() => go("prep")}
-      onBrowse={() => go("browse")}
-      onDeletePhoto={() => void deletePhoto()}
-    />
+    <div key="looks" className="animate-step-enter">
+      <LooksStep
+        looks={looks}
+        photo={photo}
+        occasion={parsed}
+        tier={tier}
+        scoring={progress.step === "scoring" || looks.some((l) => !l.fitCheck)}
+        notice={notice}
+        onRestart={() => go("occasion")}
+        onCompare={parsed ? openCompare : undefined}
+        onSwap={parsed ? openSwap : undefined}
+        onRefine={parsed ? refine : undefined}
+        cart={cart}
+        onAddToCart={(look) => {
+          addToCart(look.items.filter((item) => showsInRender(look, item.slot)));
+          go("cart");
+        }}
+        onAddPiece={(item) => addToCart([item])}
+        onViewCart={() => go("cart")}
+        focusLook={focusLook}
+        hasPrep={prep != null}
+        onPrep={() => go("prep")}
+        onBrowse={() => go("browse")}
+        onDeletePhoto={() => void deletePhoto()}
+      />
+    </div>
   );
 }

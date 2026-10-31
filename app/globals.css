@@ -32,8 +32,9 @@
   --radius-2xl: var(--radius);
   --radius-3xl: var(--radius);
 
-  --animate-nudge: nudge 2.4s cubic-bezier(0.76, 0, 0.24, 1) 1.6s 2;
+  --animate-nudge: nudge 2.4s cubic-bezier(0.76, 0, 0.24, 1) 0.6s 2;
   --animate-scan: scan 2.4s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+  --animate-step-enter: step-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Loading: a band of brass light passes over the photo */
@@ -69,14 +70,19 @@
   --surface-raised: #1c1c1f;
   --line: rgb(255 255 255 / 0.09);
   --text: #ecebe8;
-  --text-muted: #9c978e;
+  --text-muted: #aba49c;
   --brass: #c8a96a;
   --brass-strong: #d9bd85;
   --product: #d9d7d2;
   --success: #5fb58a;
   --danger: #e06c5f;
 
-  --radius: 0px;
+  /* Tier accent: budget warm amber, mid reuses brass, luxury cool silver */
+  --tier-budget: #c4875a;
+  --tier-mid: var(--brass);
+  --tier-luxury: #b8b0a6;
+
+  --radius: 6px;
 
   /* 14px floor: product names, prices and sizes use it, so it must stay readable on a phone */
   --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
@@ -116,8 +122,17 @@
   h3 {
     @apply font-display uppercase;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     line-height: 1;
+  }
+  /* Section headings: a touch less aggressive than hero headings */
+  h2 {
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: var(--step-lead);
   }
   :focus-visible {
     outline: 2px solid var(--brass);
@@ -157,6 +172,7 @@
     justify-content: center;
     padding: 0 0.875rem;
     background: var(--surface-raised);
+    border-radius: var(--radius);
     font-size: var(--step-small);
     font-weight: 500;
     transition:
@@ -174,7 +190,7 @@
       background: var(--bg);
     }
   }
-  /* The one button: flat brass, square corners */
+  /* The one button: flat brass, rounded */
   .btn {
     display: inline-flex;
     min-height: 3.25rem;
@@ -183,6 +199,7 @@
     gap: 0.625rem;
     padding: 0 1.5rem;
     background: var(--brass);
+    border-radius: var(--radius);
     color: var(--bg);
     font-weight: 500;
     transition:
@@ -338,6 +355,31 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* Flow step enter: slides up gently on each phase change */
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Subtle grain overlay — adds depth without changing the palette */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+  mix-blend-mode: overlay;
 }
 
 @media (prefers-reduced-motion: reduce) {

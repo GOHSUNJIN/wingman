@@ -4,7 +4,10 @@ import { displayName } from "@/lib/catalog/names";
 import type { Formality, Occasion, Product } from "@/lib/catalog/types";
 import { sha256 } from "@/lib/utils/hash";
 
-/** How many candidates per slot Claude sees: enough choice, small prompt. */
+// Tops get the largest pool (30) because they drive colour and formality choices for the whole look.
+// Outerwear and watches are optional slots with a narrower catalog, so 12 is enough.
+// Shoes and bottoms sit at 20: varied enough to avoid repeats across 2-3 looks, small enough to
+// keep the prompt under the token budget. Raise these if the catalog grows beyond ~5,000 products.
 const POOL_SIZE: Record<Slot, number> = { top: 30, outerwear: 12, bottom: 20, shoes: 20, watch: 12 };
 
 /**

@@ -7,6 +7,31 @@ import { deleteExpired } from "@/lib/privacy";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { YouCamError, userMessage } from "@/lib/youcam/errors";
 
+// Soft in-memory rate limit: max 3 style requests per IP per 60 s.
+// Resets per serverless instance — a soft cap, not a hard one, but blocks accidental hammering.
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 3;
+const ipCounts = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipCounts.get(ip);
+  if (!entry || entry.resetAt < now) {
+    ipCounts.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_MAX;
+}
+
+function clientIp(request: Request): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
 type ErrorEvent = { type: "error"; code: string; message: string };
 
 /**
@@ -82,6 +107,9 @@ export function photoStreamRoute<T, E>(opts: {
   run: (photo: Buffer, fields: T, send: (event: E | ErrorEvent) => void) => Promise<unknown>;
 }) {
   return async (request: Request): Promise<Response> => {
+    if (isRateLimited(clientIp(request))) {
+      return NextResponse.json({ error: "Too many requests. Please wait a moment and try again." }, { status: 429 });
+    }
     let form: FormData;
     try {
       form = await request.formData();

@@ -14,9 +14,9 @@ export function Stores() {
         </h2>
         <dl className="mt-10 flex flex-col gap-8">
           {[
-            [String(STORES.length), "independent Singapore stores"],
-            [IN_STOCK_PIECES.toLocaleString("en-SG"), "pieces in stock to wear tonight"],
-            ["One tap", "to each store's own checkout, sizes filled in"],
+            [String(STORES.length), "local stores. Real stock, real prices."],
+            [IN_STOCK_PIECES.toLocaleString("en-SG"), "pieces you can buy today."],
+            ["One tap", "to checkout, with your size already picked."],
           ].map(([figure, label], i) => (
             <div key={label} data-reveal style={{ "--d": `${80 + i * 80}ms` } as React.CSSProperties}>
               <dt className="font-display text-head leading-none tabular-nums">{figure}</dt>

@@ -75,17 +75,23 @@ export function CartStep({
 
       {stores.map((group) => {
         const missing = group.missingSizes;
+        const itemCount = group.lines.length;
         return (
-          <section key={group.store} aria-labelledby={`store-${group.store}`} className="mt-10">
-            <h2 id={`store-${group.store}`} className="text-lead">
-              {group.storeName}
-            </h2>
+          <section key={group.store} aria-labelledby={`store-${group.store}`} className="mt-10 border-l-2 pl-4" style={{ borderColor: "var(--brass)" }}>
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 id={`store-${group.store}`} className="text-lead">
+                {group.storeName}
+              </h2>
+              <span className="shrink-0 text-small text-muted-foreground tabular-nums">
+                {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+              </span>
+            </div>
             <ul className="mt-4 flex flex-col gap-2">
               {group.lines.map((line) => (
                 <CartItem key={line.id} line={line} onSize={onSize} onQty={onQty} onRemove={remove} />
               ))}
             </ul>
-            <p className="mt-4 flex justify-between">
+            <p className="mt-4 flex items-baseline justify-between gap-4 bg-surface px-4 py-3 text-small">
               <span>Subtotal</span>
               <span className="tabular-nums">{sgd(group.subtotal)}</span>
             </p>

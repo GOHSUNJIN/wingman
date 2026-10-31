@@ -59,7 +59,7 @@ export function OccasionPicker() {
       </figure>
 
       <div className="flex flex-col md:col-span-5 md:row-start-2 md:pt-6">
-        <ul aria-label="Occasions" className="grid grid-cols-2 gap-x-4 md:grid-cols-1">
+        <ul aria-label="Occasions" className="flex flex-col">
           {CHOICES.map((o, i) => {
             const on = selected === o.id;
             return (
@@ -79,6 +79,11 @@ export function OccasionPicker() {
                   />
                   {o.label}
                 </button>
+                {on && (
+                  <p className="mb-2 ml-[1.375rem] max-w-[36ch] text-small text-muted-foreground italic">
+                    &ldquo;{o.example}&rdquo;
+                  </p>
+                )}
               </li>
             );
           })}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FlowShell, RAW_IMG_PROPS } from "@/components/style/flow-shell";
 import type { Photo, Progress } from "@/components/style/style-flow";
 import { STYLE_STEPS, type Look, type RenderKind, type StyleStep } from "@/lib/agent/events";
+import type { ParsedOccasion } from "@/lib/agent/schemas";
 import { expectedKinds, imageStatus } from "@/lib/agent/images";
 import { cn } from "@/lib/utils/cn";
 
@@ -25,6 +26,7 @@ export function LoadingStep({
   retrying,
   onRetry,
   onContinue,
+  occasion,
 }: {
   photo: Photo | null;
   progress: Progress;
@@ -38,6 +40,8 @@ export function LoadingStep({
   retrying: boolean;
   onRetry: () => void;
   onContinue: () => void;
+  /** Parsed occasion, available once step reaches "picking". */
+  occasion?: ParsedOccasion | null;
 }) {
   const current = STYLE_STEPS.indexOf(progress.step);
   const status = imageStatus(looks);
@@ -129,15 +133,36 @@ export function LoadingStep({
         </div>
       )}
 
-      {!stuck && (
-        <section aria-labelledby="wait-heading" className="mt-10 bg-surface p-5">
+      {!stuck && occasion && (
+        <section aria-labelledby="context-heading" className="mt-10 rounded-sm bg-surface p-5">
+          <h2 id="context-heading" className="subhead text-small text-muted-foreground">
+            What Wingman heard
+          </h2>
+          <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 text-small">
+            {[
+              ["Occasion", occasion.occasion],
+              ["Setting", occasion.setting],
+              ["Vibe", occasion.formality],
+              ["Time", occasion.timeOfDay],
+            ].map(([label, value]) =>
+              value ? (
+                <div key={label}>
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd className="mt-0.5 capitalize">{value}</dd>
+                </div>
+              ) : null,
+            )}
+          </dl>
+        </section>
+      )}
+      {!stuck && !occasion && (
+        <section aria-labelledby="wait-heading" className="mt-10 rounded-sm bg-surface p-5">
           <h2 id="wait-heading" className="subhead">
-            While you wait
+            What is coming
           </h2>
           <p className="mt-2">
-            Wingman is picking in-stock pieces from independent Singapore stores and trying each look on your photo. When
-            they open, you can swap any piece, see it cheaper, compare the look at three budgets and check out at each
-            store.
+            Real pieces from Singapore stores, tried on your photo. When they open, you can swap any piece, see it at a
+            different budget, and check out at each store.
           </p>
         </section>
       )}

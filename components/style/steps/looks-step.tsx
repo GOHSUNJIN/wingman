@@ -109,6 +109,7 @@ export function LooksStep({
       step={`${TIER_LABELS[tier]}${occasion ? `, ${occasion.setting}` : ""}`}
       wide
       back={{ label: "Back to the occasion", onClick: onRestart }}
+      progress={{ current: 3, total: 3 }}
     >
       <div className="max-w-xl">
         <h1 className="mt-2 text-head">{looks.length === 1 ? "Your look" : "Your looks"}</h1>
@@ -146,20 +147,38 @@ export function LooksStep({
           <LookCard key={active} {...cardProps(shown, Math.min(active, looks.length - 1))} wide />
         </div>
       ) : (
-        <div
-          ref={track}
-          onScroll={(e) => {
-            const el = e.currentTarget;
-            const width = (el.children[0] as HTMLElement | undefined)?.offsetWidth ?? el.clientWidth;
-            setActive(Math.round(el.scrollLeft / (width + 16)));
-          }}
-          className="no-scrollbar -mx-(--margin) mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-(--margin) px-(--margin) md:mx-0 md:px-0"
-          aria-label="Looks"
-        >
-          {looks.map((look, i) => (
-            <LookCard key={i} {...cardProps(look, i)} />
-          ))}
-        </div>
+        <>
+          <div
+            ref={track}
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              const width = (el.children[0] as HTMLElement | undefined)?.offsetWidth ?? el.clientWidth;
+              setActive(Math.round(el.scrollLeft / (width + 16)));
+            }}
+            className="no-scrollbar -mx-(--margin) mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-(--margin) px-(--margin) md:mx-0 md:px-0"
+            aria-label="Looks"
+          >
+            {looks.map((look, i) => (
+              <LookCard key={i} {...cardProps(look, i)} />
+            ))}
+          </div>
+          {looks.length > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2" aria-label={`Look ${active + 1} of ${looks.length}`} role="status">
+              {looks.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to look ${i + 1}`}
+                  className={cn(
+                    "rounded-full transition-all duration-300",
+                    active === i ? "size-2 bg-brass" : "size-1.5 bg-surface-raised hover:bg-muted-foreground",
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <div className="mt-10 flex max-w-xl flex-col items-start">
@@ -227,7 +246,7 @@ function LookCard({
     <article
       aria-label={`Look ${index + 1} of ${count}: ${look.name}`}
       className={cn(
-        "relative flex shrink-0 flex-col bg-surface",
+        "relative flex shrink-0 flex-col overflow-hidden rounded-sm bg-surface",
         wide ? "grid grid-cols-12" : "w-[86%] snap-center sm:w-[24rem]",
       )}
     >
@@ -315,19 +334,22 @@ function LookCard({
 
         {tab === "look" ? (
           <div role="tabpanel" id={`${tabId}-look`} aria-labelledby={`${tabId}-look-tab`}>
-            {/* Score and label on one line, the reasoning full width below, so it reads at any width */}
-            <div className="mt-5 bg-surface-raised p-4" aria-live="polite">
+            <div className="mt-5 rounded-sm bg-surface-raised p-4" aria-live="polite">
               {look.fitCheck ? (
-                <>
-                  <p className="flex items-baseline gap-3">
-                    <span className="font-display text-head leading-none text-brass">{look.fitCheck.score.toFixed(1)}</span>
-                    <span className="sr-only"> out of 10</span>
-                    <span className="font-medium">Fit check</span>
-                  </p>
-                  <p className="mt-3">{look.fitCheck.reasoning}</p>
-                </>
+                <div className="flex items-start gap-4">
+                  <FitRing score={look.fitCheck.score} />
+                  <div className="min-w-0 flex-1 pt-1">
+                    <p className="font-medium">Fit Check</p>
+                    <p className="mt-2 text-small">{look.fitCheck.reasoning}</p>
+                  </div>
+                </div>
               ) : (
-                <p className="text-small text-muted-foreground">{scoring ? "Scoring this look…" : "No score for this look."}</p>
+                <div className="flex items-center gap-3">
+                  <div className="grid size-20 shrink-0 place-items-center rounded-full bg-surface">
+                    <span className="text-small text-muted-foreground">…</span>
+                  </div>
+                  <p className="text-small text-muted-foreground">{scoring ? "Scoring this look…" : "No score."}</p>
+                </div>
               )}
             </div>
 
@@ -462,6 +484,47 @@ function PieceRow({
         </span>
       )}
     </li>
+  );
+}
+
+/** Animated SVG arc that fills to the score when it arrives. */
+function FitRing({ score }: { score: number }) {
+  const r = 32;
+  const circ = 2 * Math.PI * r;
+  const [filled, setFilled] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setFilled(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const offset = filled ? circ - (score / 10) * circ : circ;
+  const color = score >= 8 ? "var(--success)" : score >= 6 ? "var(--brass)" : "var(--danger)";
+
+  return (
+    <div className="relative flex size-20 shrink-0 items-center justify-center" aria-hidden>
+      <svg width="80" height="80" viewBox="0 0 80 80" style={{ transform: "rotate(-90deg)" }}>
+        <circle cx="40" cy="40" r={r} fill="none" stroke="var(--surface)" strokeWidth="5" />
+        <circle
+          cx="40"
+          cy="40"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={`${circ} ${circ}`}
+          strokeDashoffset={offset}
+          style={{ transition: filled ? "stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1)" : "none" }}
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center leading-none">
+        <span className="font-display text-[1.35rem]" style={{ color }}>
+          {score.toFixed(1)}
+        </span>
+        <span className="mt-0.5 text-small text-muted-foreground">/10</span>
+      </div>
+    </div>
   );
 }
 

@@ -28,14 +28,23 @@ export function PrepStep({
       </p>
 
       {plan && (
-        <ol className="mt-8 flex flex-col gap-2">
+        <ol className="mt-8 flex flex-col gap-3">
           {plan.steps.map((step, i) => (
-            <li key={step.title} className="bg-surface p-5">
-              <h2 className="text-lead">
-                <span className="sr-only">Step {i + 1}: </span>
-                {step.title}
-              </h2>
-              <p className="mt-2">{step.detail}</p>
+            <li key={step.title} className="flex gap-4 rounded-sm bg-surface p-5">
+              <span
+                className="flex size-8 shrink-0 items-center justify-center rounded-full font-display text-small leading-none text-brass"
+                style={{ background: "var(--surface-raised)" }}
+                aria-hidden
+              >
+                {i + 1}
+              </span>
+              <div className="min-w-0 pt-0.5">
+                <h2 className="text-lead">
+                  <span className="sr-only">Step {i + 1}: </span>
+                  {step.title}
+                </h2>
+                <p className="mt-2">{step.detail}</p>
+              </div>
             </li>
           ))}
         </ol>

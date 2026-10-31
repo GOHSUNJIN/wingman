@@ -7,6 +7,7 @@ export function FlowShell({
   children,
   wide = false,
   back,
+  progress,
 }: {
   step?: string;
   children: React.ReactNode;
@@ -14,6 +15,8 @@ export function FlowShell({
   back?: { label: string; href?: string; onClick?: () => void };
   /** The looks carousel uses the full width on larger screens. */
   wide?: boolean;
+  /** Optional 1-indexed step progress shown as dots in the header. */
+  progress?: { current: number; total: number };
 }) {
   return (
     <div className="min-h-dvh pb-[max(env(safe-area-inset-bottom),2rem)]">
@@ -26,7 +29,31 @@ export function FlowShell({
         <Link href="/" className="inline-flex min-h-11 items-center font-display text-small uppercase">
           Wingman
         </Link>
-        {step && <span className="text-right text-small text-muted-foreground">{step}</span>}
+        <div className="flex items-center gap-4">
+          {progress && (
+            <div
+              className="flex items-center gap-1.5"
+              aria-label={`Step ${progress.current} of ${progress.total}`}
+              role="status"
+            >
+              {Array.from({ length: progress.total }, (_, i) => (
+                <span
+                  key={i}
+                  aria-hidden
+                  className={cn(
+                    "rounded-full transition-all duration-500",
+                    i < progress.current
+                      ? "size-2 bg-brass"
+                      : i === progress.current
+                        ? "size-1.5 bg-ivory/60"
+                        : "size-1.5 bg-surface-raised",
+                  )}
+                />
+              ))}
+            </div>
+          )}
+          {step && <span className="text-right text-small text-muted-foreground">{step}</span>}
+        </div>
       </header>
       <main className={cn("mx-auto px-(--margin)", wide ? "max-w-5xl" : "max-w-xl")}>
         {back && <BackLink {...back} />}

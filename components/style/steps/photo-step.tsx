@@ -75,7 +75,7 @@ export function PhotoStep({
   const shown = hard ? [hard] : soft;
 
   return (
-    <FlowShell step="Photo, then occasion" back={{ label: "Back to the home page", href: "/" }}>
+    <FlowShell step="Photo" back={{ label: "Back to the home page", href: "/" }} progress={{ current: 1, total: 3 }}>
       <h1 className="mt-2 text-head">Your photo</h1>
       {notice && (
         <p role="status" className="mt-4 bg-surface p-3">
@@ -98,16 +98,23 @@ export function PhotoStep({
 
       <label
         htmlFor={inputId}
-        className="relative mt-8 block aspect-[4/5] w-full cursor-pointer overflow-hidden bg-surface transition-colors hover:bg-surface-raised focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-brass"
+        className="relative mt-8 block aspect-[4/5] w-full cursor-pointer overflow-hidden rounded-sm bg-surface transition-colors hover:bg-surface-raised focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-brass"
       >
         {photo ? (
           <Image src={photo.url} alt="Your photo" fill sizes="(min-width: 640px) 36rem, 100vw" className="object-cover" {...RAW_IMG_PROPS} />
         ) : (
-          <span className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
-            <svg viewBox="0 0 24 24" className="size-8 text-brass" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            <span className="text-lead">{busy ? "Reading your photo…" : "Take or choose a photo"}</span>
+          <span className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center">
+            {/* Dashed upload border */}
+            <span className="absolute inset-4 rounded-sm" style={{ border: "1.5px dashed var(--line)" }} aria-hidden />
+            <span className="relative flex flex-col items-center gap-3">
+              <svg viewBox="0 0 24 24" className="size-10 text-brass" fill="none" stroke="currentColor" strokeWidth={1.4} aria-hidden>
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
+                <path d="M16 8l-4-4-4 4" />
+                <path d="M12 4v12" />
+              </svg>
+              <span className="text-lead">{busy ? "Reading your photo…" : "Tap to upload or take a photo"}</span>
+              <span className="text-small text-muted-foreground">Waist up, facing the camera</span>
+            </span>
           </span>
         )}
         <input

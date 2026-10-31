@@ -57,18 +57,24 @@ export function SwapStep({
           : `Pick one to update the look and its total. The ${name} show as a product card, not in the try-on.`}
       </p>
 
-      <div className="mt-6 flex items-center gap-3 bg-surface p-2">
-        <ProductImage src={current.image} sizes="64px" className="size-16" />
-        <span className="min-w-0 flex-1">
-          <span className="block text-small text-muted-foreground">Now · {current.storeName}</span>
-          <a href={current.url} target="_blank" rel="noopener" className="text-link line-clamp-2 min-h-11 text-small">
+      <div className="mt-6 flex gap-4 border-l-2 pl-4" style={{ borderColor: "var(--brass)" }}>
+        <ProductImage src={current.image} sizes="96px" className="size-24 shrink-0" />
+        <div className="min-w-0 flex-1 py-1">
+          <span className="block text-small text-muted-foreground">Currently wearing</span>
+          <a href={current.url} target="_blank" rel="noopener" className="text-link mt-1 line-clamp-2 min-h-11 text-small leading-snug">
             {displayName(current.name, current.storeName)}
           </a>
-        </span>
-        <span className="shrink-0 text-small tabular-nums">{sgd(current.price)}</span>
+          <span className="mt-1 block text-small text-muted-foreground">{current.storeName}</span>
+          <span className="mt-1 block text-small tabular-nums">{sgd(current.price)}</span>
+        </div>
       </div>
 
-      <h2 className="mt-10 text-lead">{cheaper ? "Cheaper picks" : "Alternatives"}</h2>
+      <h2 className="mt-10 text-lead">
+        {cheaper ? "Cheaper picks" : "Alternatives"}
+        {state.status === "done" && state.options.length > 0 && (
+          <span className="ml-2 text-small text-muted-foreground tabular-nums">({state.options.length})</span>
+        )}
+      </h2>
       {state.status === "loading" && (
         <p className="mt-4 text-muted-foreground" aria-live="polite">
           Finding {cheaper ? "cheaper " : ""}

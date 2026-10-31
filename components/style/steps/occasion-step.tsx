@@ -23,7 +23,7 @@ export function OccasionStep(props: {
   const ready = props.sentence.trim().length >= 3;
 
   return (
-    <FlowShell step="Photo, then occasion">
+    <FlowShell step="Occasion" progress={{ current: 2, total: 3 }}>
       <div className="mt-4 flex items-center justify-between gap-4">
         <h1 className="text-head">The occasion</h1>
         {props.photo && (
@@ -90,8 +90,14 @@ export function OccasionStep(props: {
 
         <fieldset>
           <legend className="font-medium">Budget</legend>
-          <div role="radiogroup" aria-label="Budget" className="mt-3 grid grid-cols-3 gap-1 bg-surface p-1">
-            {TIERS.map((t) => {
+          <div role="radiogroup" aria-label="Budget" className="mt-3 grid grid-cols-3 gap-1">
+            {(
+              [
+                { t: "budget", hint: "Under S$200 per piece" },
+                { t: "mid", hint: "S$200–500 per piece" },
+                { t: "luxury", hint: "S$500+ per piece" },
+              ] as const
+            ).map(({ t, hint }) => {
               const on = props.tier === t;
               return (
                 <button
@@ -100,14 +106,19 @@ export function OccasionStep(props: {
                   role="radio"
                   aria-checked={on}
                   onClick={() => props.onTier(t)}
-                  className={cn("min-h-11 transition-colors", on ? "bg-ivory text-background" : "text-ivory hover:bg-surface-raised")}
+                  className={cn(
+                    "flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-sm border px-2 py-3 text-center transition-all duration-200",
+                    on
+                      ? "border-brass bg-surface-raised text-ivory shadow-[0_0_0_1px_var(--brass)]"
+                      : "border-transparent bg-surface text-ivory hover:bg-surface-raised",
+                  )}
                 >
-                  {TIER_LABELS[t]}
+                  <span className="font-medium">{TIER_LABELS[t]}</span>
+                  <span className="text-small text-muted-foreground leading-tight">{hint}</span>
                 </button>
               );
             })}
           </div>
-          <p className="mt-2 text-small text-muted-foreground">Relative to what Singapore stores charge for each piece.</p>
         </fieldset>
 
         <div className="flex flex-col gap-2">
