@@ -33,7 +33,6 @@ export async function parseOccasion(text: string) {
   return generateStructured({
     task: "agent",
     label: "parse-occasion",
-    effort: "low",
     schema: ParsedOccasionSchema,
     system:
       "You read one sentence a man wrote about an upcoming event in Singapore and classify it. " +
@@ -69,7 +68,6 @@ export async function refineOccasion(args: {
   const update = await generateStructured({
     task: "agent",
     label: "refine-occasion",
-    effort: "low",
     schema: RefinedOccasionSchema,
     system:
       "A man is refining the outfits Wingman picked for his event. Update the brief to reflect his request and return " +
@@ -127,7 +125,6 @@ export async function selectLooks(args: {
   const result = await generateStructured({
     task: "agent",
     label: "select-looks",
-    effort: "medium",
     schema: LookPicksSchema,
     system:
       "You are Wingman, a menswear stylist in Singapore. Build up to 3 distinct, coherent outfits for this man and this " +
@@ -171,7 +168,6 @@ export async function matchTiers(args: {
   const result = await generateStructured({
     task: "agent",
     label: "match-tiers",
-    effort: "low",
     schema: TierPicksSchema,
     system:
       "You are Wingman, a menswear stylist in Singapore. A man liked a look; show him the same look at other price tiers. " +
@@ -206,7 +202,6 @@ export async function pickAlternatives(args: {
   const result = await generateStructured({
     task: "agent",
     label: "swap-options",
-    effort: "low",
     schema: SwapPicksSchema,
     system:
       "You are Wingman, a menswear stylist in Singapore. A man wants to swap one piece of an outfit. From the listed " +
@@ -244,7 +239,6 @@ export async function fitCheck(args: {
   const result = await generateStructured({
     task: "agent",
     label: "fit-check",
-    effort: "low",
     schema: FitCheckSchema,
     system:
       "You are Wingman's Fit Check. For each look, in order, give an honest score out of 10 (one decimal) for how well it " +
@@ -262,7 +256,6 @@ export async function prepPlan(args: { occasion: ParsedOccasion; skin: string | 
   return generateStructured({
     task: "light",
     label: "prep-plan",
-    effort: "low",
     schema: PrepPlanSchema,
     system:
       "You write a three-step grooming routine for the night before an event. Each step has a short title (2 to 4 words) " +

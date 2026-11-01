@@ -38,7 +38,6 @@ export async function tagBatch(products: ShopifyProduct[]): Promise<ProductTag[]
   const result = await generateStructured({
     task: "tagging",
     label: `tag x${products.length}`,
-    effort: "low",
     schema: TagBatchSchema,
     system: SYSTEM,
     content: [{ type: "text", text: JSON.stringify(products.map((p, n) => describe(p, n))) }],
@@ -65,7 +64,6 @@ export async function judgeImage(url: string): Promise<ImageVerdict> {
   return generateStructured({
     task: "tagging",
     label: "image-check",
-    effort: "low",
     schema: ImageVerdictSchema,
     content: [
       { type: "image", source: { type: "url", url } },

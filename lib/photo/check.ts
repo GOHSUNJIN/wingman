@@ -117,7 +117,6 @@ async function lookAtPhoto(normalised: Buffer): Promise<PhotoVision> {
   return generateStructured({
     task: "light",
     label: "photo-check",
-    effort: "low",
     schema: VisionSchema,
     content: [
       { type: "image", source: { type: "base64", media_type: "image/jpeg", data: preview.toString("base64") } },

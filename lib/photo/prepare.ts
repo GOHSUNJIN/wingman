@@ -75,7 +75,6 @@ export async function locateFace(jpeg: Buffer, width: number, height: number): P
   const result = await generateStructured({
     task: "agent",
     label: "face-box",
-    effort: "low",
     schema: FaceBoxSchema,
     content: [
       { type: "image", source: { type: "base64", media_type: "image/jpeg", data: preview.toString("base64") } },

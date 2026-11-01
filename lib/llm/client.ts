@@ -15,7 +15,6 @@ type StructuredRequest<T extends z.ZodType> = {
   schema: T;
   system?: string;
   content: Anthropic.ContentBlockParam[];
-  effort?: "low" | "medium" | "high";
 };
 
 /**
@@ -36,7 +35,7 @@ export async function generateStructured<T extends z.ZodType>(req: StructuredReq
           ? [{ type: "text" as const, text: req.system, cache_control: { type: "ephemeral" } as const }]
           : undefined,
         messages: [{ role: "user", content: req.content }],
-        output_config: { format: zodOutputFormat(req.schema), effort: req.effort },
+        output_config: { format: zodOutputFormat(req.schema) },
       });
       if (process.env.NODE_ENV !== "production") {
         const u = response.usage;
