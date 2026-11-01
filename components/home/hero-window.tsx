@@ -2,21 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = {
-  before: string;
   after: string;
   alt: string;
 };
 
-/**
- * The first screen: the styled render seen through a window that opens to the edges on scroll.
- * Drag (or use arrow keys) inside the window to compare the original photo with the render.
- */
-export function HeroWindow({ before, after, alt }: Props) {
+export function HeroWindow({ after, alt }: Props) {
   const ref = useRef<HTMLElement>(null);
-  const [split, setSplit] = useState(50);
 
   // Scroll progress drives --p: 0 is the small window, 1 is full-bleed
   useEffect(() => {
@@ -46,7 +40,7 @@ export function HeroWindow({ before, after, alt }: Props) {
   return (
     <section ref={ref} className="hero relative" aria-labelledby="hero-heading">
       <div className="sticky top-0 h-svh overflow-hidden">
-        {/* Picture layer: laid out full-bleed, only the opening changes */}
+        {/* Picture layer */}
         <div className="hero__window absolute inset-0 bg-surface">
           <div className="hero__picture absolute inset-0">
             <Image
@@ -57,49 +51,10 @@ export function HeroWindow({ before, after, alt }: Props) {
               sizes="100vw"
               className="object-cover object-[50%_22%] min-[900px]:object-[50%_42%]"
             />
-            <div
-              className="absolute inset-0"
-              style={{
-                clipPath: `inset(0 calc(100% - (var(--side) * var(--k) + ${split / 100} * (100% - 2 * var(--side) * var(--k)))) 0 0)`,
-              }}
-            >
-              <Image
-                src={before}
-                alt={`${alt}, original photo`}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover object-[50%_22%] min-[900px]:object-[50%_42%]"
-              />
-            </div>
-          </div>
-
-          <div className="hero__frame">
-            <span className="absolute top-3 left-3 bg-background px-2.5 py-1 text-small">Your photo</span>
-            <span className="absolute top-3 right-3 bg-brass px-2.5 py-1 text-small text-background">Styled</span>
-
-            <div className="pointer-events-none absolute inset-y-0" style={{ left: `${split}%` }}>
-              <div className="absolute inset-y-0 -left-px w-0.5 bg-ivory" />
-              <div className="absolute top-1/2 -left-6 grid size-12 -translate-y-1/2 animate-nudge place-items-center bg-ivory text-background">
-                <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path d="m9 6-6 6 6 6M15 6l6 6-6 6" />
-                </svg>
-              </div>
-            </div>
-
-            <input
-              type="range"
-              min={2}
-              max={98}
-              value={split}
-              onChange={(e) => setSplit(Number(e.target.value))}
-              aria-label="Compare original photo and styled look"
-              className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
-            />
           </div>
         </div>
 
-        {/* Text sits above the picture and leaves before the opening reaches it */}
+        {/* Text */}
         <div className="hero__text pointer-events-none absolute inset-0 px-(--margin)">
           <header className="pointer-events-auto flex h-16 items-center justify-between pt-[env(safe-area-inset-top)] md:h-20">
             <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: "20px", letterSpacing: "0.2em", color: "#ECEBE8" }}>WINGMAN</span>

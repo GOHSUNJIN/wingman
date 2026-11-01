@@ -10,6 +10,7 @@ type FeaturedRow = {
   price: number;
   category: string;
   image: string;
+  url: string;
 };
 
 async function fetchFeatured(): Promise<FeaturedRow[]> {
@@ -20,7 +21,7 @@ async function fetchFeatured(): Promise<FeaturedRow[]> {
       categories.map((cat) =>
         db
           .from("products")
-          .select("id, name, store_name, price, category, image")
+          .select("id, name, store_name, price, category, image, url")
           .eq("in_stock", true)
           .eq("category", cat)
           .not("image", "is", null)
@@ -84,15 +85,28 @@ export async function PiecesGrid() {
           <div
             style={{
               marginTop: "56px",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: "16px",
+              display: "flex",
+              gap: 0,
             }}
           >
-            {featured.map((piece) => (
-              <figure
+            {featured.map((piece, i) => (
+              <a
                 key={piece.id}
-                style={{ margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}
+                href={piece.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  textDecoration: "none",
+                  color: "inherit",
+                  paddingRight: i < featured.length - 1 ? "24px" : 0,
+                  paddingLeft: i > 0 ? "24px" : 0,
+                  borderRight: i < featured.length - 1 ? "1px solid #2A2A2E" : "none",
+                }}
               >
                 <div
                   style={{
@@ -111,16 +125,32 @@ export async function PiecesGrid() {
                     unoptimized
                   />
                 </div>
-                <figcaption style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <span style={{ fontSize: "14px", color: "#ECEBE8" }}>{piece.name}</span>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                  <span style={{ fontSize: "14px", color: "#ECEBE8", lineHeight: 1.3 }}>
+                    {piece.name}
+                  </span>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      gap: "8px",
+                    }}
+                  >
                     <span style={{ fontSize: "13px", color: "#9C978E" }}>{piece.store_name}</span>
-                    <span style={{ fontSize: "13px", color: "#9C978E", fontVariantNumeric: "tabular-nums" }}>
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "#9C978E",
+                        fontVariantNumeric: "tabular-nums",
+                        flexShrink: 0,
+                      }}
+                    >
                       {sgd(piece.price)}
                     </span>
                   </div>
-                </figcaption>
-              </figure>
+                </div>
+              </a>
             ))}
           </div>
         )}

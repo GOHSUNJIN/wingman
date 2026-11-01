@@ -9,13 +9,13 @@ import { PiecesGrid } from "@/components/home/pieces-grid";
 import { PrivacyBand } from "@/components/home/privacy-band";
 import { SiteFooter } from "@/components/home/site-footer";
 import { Reveal } from "@/components/shared/reveal";
-import { BEFORE, OCCASION_LOOKS } from "@/components/home/looks-data";
+import { OCCASION_LOOKS } from "@/components/home/looks-data";
 
 export default function Home() {
   return (
     <>
       <main className="overflow-x-clip">
-        <HeroWindow before={BEFORE} after={OCCASION_LOOKS.wedding.render} alt="Man in a navy blazer" />
+        <HeroWindow after={OCCASION_LOOKS.wedding.render} alt="Man in a navy blazer" />
         <OccasionMarquee />
         <Lookbook />
         <FitCheck />
