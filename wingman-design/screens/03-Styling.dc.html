@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wingman · Styling</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0B}
+a{color:#ECEBE8}a:hover{color:#C8A96A}
+@keyframes wmIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes wmPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+@keyframes wmScan{0%{top:-120px}100%{top:100%}}
+@keyframes wmReveal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes wmBreath{0%,100%{opacity:.55}50%{opacity:1}}
+.wm-in{animation:wmIn .7s cubic-bezier(.2,.7,.2,1) both}
+.wm-pulse{animation:wmPulse 1.6s ease-in-out infinite}
+.wm-scan{animation:wmScan 4.5s cubic-bezier(.45,0,.55,1) infinite}
+.wm-scan-fast{animation:wmScan 2.8s cubic-bezier(.45,0,.55,1) infinite}
+.wm-r1{animation:wmReveal 1.2s cubic-bezier(.2,.7,.2,1) .3s both}
+.wm-r2{animation:wmReveal 1.2s cubic-bezier(.2,.7,.2,1) .9s both}
+.wm-r3{animation:wmReveal 1.2s cubic-bezier(.2,.7,.2,1) 1.5s both}
+.wm-breath{animation:wmBreath 2.4s ease-in-out infinite}
+.wm-back{color:#9C978E;text-decoration:none}
+.wm-back:hover{color:#ECEBE8}
+.wm-heading{animation:wmIn .6s cubic-bezier(.2,.7,.2,1) both}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; background: #0A0A0B; color: #ECEBE8; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 64px; flex: none; background: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 40px">
+<div style="font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: 0.2em">WINGMAN</div>
+<div style="display: flex; align-items: center; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px" aria-label="Step 3 of 5">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span class="wm-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+</div>
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">03 · Styling</span>
+</div>
+</header>
+
+<main class="wm-in" style="flex: 1; display: flex; min-height: 0">
+
+<section style="width: 628px; flex: none; position: relative; overflow: hidden; background: #141416">
+<svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block" role="img" aria-label="Your selfie being analysed (placeholder)">
+<rect width="600" height="900" fill="#2A2622"></rect>
+<path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="#33302C"></path>
+<path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#CFCAC1"></path>
+<path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D"></path>
+<ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F"></ellipse>
+<path d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z" fill="#16130F"></path>
+<path d="M160 486 Q90 512 66 620" stroke="#4A4540" stroke-width="3" fill="none"></path>
+</svg>
+<div style="position: absolute; inset: 0; background: rgba(10,10,11,0.25)"></div>
+<div class="wm-scan" aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 120px; display: flex; flex-direction: column; justify-content: flex-end">
+<div style="flex: 1; background: rgba(200,169,106,0.07)"></div>
+<div style="height: 2px; background: #C8A96A"></div>
+</div>
+<div style="position: absolute; left: 40px; bottom: 36px; display: flex; align-items: center; gap: 10px">
+<span class="wm-pulse" style="width: 6px; height: 6px; border-radius: 50%; background: #C8A96A"></span>
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #ECEBE8">Reading shoulders, build and skin tone</span>
+</div>
+</section>
+
+<section style="flex: 1; min-width: 0; padding: 52px 96px 40px 88px; box-sizing: border-box; display: flex; flex-direction: column">
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">Wedding guest · Mid-range · Saturday 7pm</span>
+<sc-if value="{{phaseA}}" hint-placeholder-val="{{ false }}">
+<h1 class="wm-heading" style="margin: 14px 0 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 60px; line-height: 1">Picking Your Looks</h1>
+</sc-if>
+<sc-if value="{{phaseB}}" hint-placeholder-val="{{ true }}">
+<h1 class="wm-heading" style="margin: 14px 0 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 60px; line-height: 1">Trying Them On You</h1>
+</sc-if>
+
+<p style="margin: 14px 0 0; font-size: 14px; color: #9C978E">Usually takes about a minute. Keep this tab open.</p>
+<div style="margin-top: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<figure class="wm-r1" style="margin: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="height: 260px; position: relative; overflow: hidden; background: #1C1C1F">
+<svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block" role="img" aria-label="Look 1 try-on: navy blazer, white shirt, brown tie (placeholder)">
+<rect width="600" height="900" fill="#26231F"></rect>
+<path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="#1A1E2B"></path>
+<path d="M150 600 L138 900" stroke="#10131B" stroke-width="5"></path>
+<path d="M450 600 L462 900" stroke="#10131B" stroke-width="5"></path>
+<path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#E4E0D8"></path>
+<path d="M292 496 L308 496 L314 520 L318 690 L300 716 L282 690 L286 520 Z" fill="#4A3526"></path>
+<path d="M246 452 L216 470 L250 560 L230 580 L300 760 L272 600 Z" fill="#222738"></path>
+<path d="M354 452 L384 470 L350 560 L370 580 L300 760 L328 600 Z" fill="#222738"></path>
+<circle cx="300" cy="790" r="7" fill="#0E1016"></circle>
+<path d="M392 604 L434 598 L432 612 L394 616 Z" fill="#E4E0D8"></path>
+<path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D"></path>
+<ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F"></ellipse>
+<path d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z" fill="#16130F"></path>
+<path d="M160 486 Q90 512 66 620" stroke="#3A4058" stroke-width="3" fill="none"></path>
+</svg>
+</div>
+<figcaption style="display: flex; justify-content: space-between; font-size: 13px"><span>Look 1 · Ballroom Navy</span><span style="color: #5FB58A">Ready</span></figcaption>
+</figure>
+<figure class="wm-r2" style="margin: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="height: 260px; position: relative; overflow: hidden; background: #1C1C1F">
+<svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" class="wm-breath" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block" aria-hidden="true">
+<path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="#26262A"></path>
+<ellipse cx="300" cy="288" rx="80" ry="100" fill="#26262A"></ellipse>
+<path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#26262A"></path>
+</svg>
+<div class="wm-scan-fast" aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 120px; display: flex; flex-direction: column; justify-content: flex-end">
+<div style="flex: 1; background: rgba(200,169,106,0.06)"></div>
+<div style="height: 1px; background: #C8A96A"></div>
+</div>
+</div>
+<figcaption style="display: flex; justify-content: space-between; font-size: 13px"><span>Look 2 · Warm Charcoal</span><span style="color: #9C978E">Rendering</span></figcaption>
+</figure>
+<figure class="wm-r3" style="margin: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="height: 260px; position: relative; overflow: hidden; background: #141416">
+<svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block" aria-hidden="true">
+<path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="#1C1C1F"></path>
+<ellipse cx="300" cy="288" rx="80" ry="100" fill="#1C1C1F"></ellipse>
+<path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#1C1C1F"></path>
+</svg>
+</div>
+<figcaption style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #9C978E">Look 3 · Soft Tailoring</span><span style="color: #9C978E">Queued</span></figcaption>
+</figure>
+</div>
+
+<div style="margin-top: 44px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px">
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+<li style="display: flex; gap: 16px; height: 44px">
+<div style="width: 10px; display: flex; flex-direction: column; align-items: center"><span style="width: 10px; height: 10px; border-radius: 50%; background: #C8A96A; margin-top: 5px"></span><span style="flex: 1; width: 1px; background: #C8A96A; margin-top: 4px"></span></div>
+<span style="font-size: 15px">Reading the occasion</span>
+</li>
+<li style="display: flex; gap: 16px; height: 44px">
+<div style="width: 10px; display: flex; flex-direction: column; align-items: center"><span style="width: 10px; height: 10px; border-radius: 50%; background: #C8A96A; margin-top: 5px"></span><span style="flex: 1; width: 1px; background: #3A3A3F; margin-top: 4px"></span></div>
+<span style="font-size: 15px">Pulling 3 looks from 5 stores</span>
+</li>
+<li style="display: flex; gap: 16px; height: 44px">
+<div style="width: 10px; display: flex; flex-direction: column; align-items: center"><span class="wm-pulse" style="width: 10px; height: 10px; border-radius: 50%; background: #C8A96A; margin-top: 5px"></span><span style="flex: 1; width: 1px; background: #3A3A3F; margin-top: 4px"></span></div>
+<span style="font-size: 15px; font-weight: 600">Trying them on you · 1 of 3</span>
+</li>
+<li style="display: flex; gap: 16px; height: 44px">
+<div style="width: 10px; display: flex; flex-direction: column; align-items: center"><span style="width: 10px; height: 10px; border-radius: 50%; background: #3A3A3F; margin-top: 5px"></span></div>
+<span style="font-size: 15px; color: #9C978E">Scoring the fit</span>
+</li>
+</ol>
+
+<div style="display: flex; flex-direction: column; gap: 18px">
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">What Wingman heard</span>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px">
+<div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #9C978E">Occasion</dt><dd style="margin: 0; font-size: 15px">Wedding Guest</dd></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #9C978E">Setting</dt><dd style="margin: 0; font-size: 15px">Hotel Ballroom, Indoors</dd></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #9C978E">Vibe</dt><dd style="margin: 0; font-size: 15px">Smart Formal, Not Upstaging</dd></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #9C978E">Time</dt><dd style="margin: 0; font-size: 15px">Saturday, 7pm</dd></div>
+</dl>
+</div>
+</div>
+
+<a href="Looks.dc.html" class="wm-back" style="margin-top: auto; font-size: 13px; align-self: flex-start">Skip to Your Looks →</a>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState({ a: !(this.state && this.state.a) }), 3200);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const a = !!(this.state && this.state.a);
+    return { phaseA: a, phaseB: !a };
+  }
+}
+</script>
+</body>
+</html>

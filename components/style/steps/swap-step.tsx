@@ -215,6 +215,8 @@ export function SwapStep({
               fontWeight: 400,
               fontSize: 52,
               lineHeight: 1,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.02em",
             }}
           >
             {cheaper ? `Cheaper ${name}` : `Swapping the ${name.charAt(0).toUpperCase() + name.slice(1)}`}

@@ -168,6 +168,8 @@ export function PrepStep({
               fontWeight: 400,
               fontSize: 60,
               lineHeight: 1,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.02em",
             }}
           >
             The Night Before

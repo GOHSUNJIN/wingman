@@ -323,6 +323,8 @@ export function BrowseStep({
                   fontWeight: 400,
                   fontSize: 44,
                   lineHeight: 1,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.02em",
                 }}
               >
                 Every Piece

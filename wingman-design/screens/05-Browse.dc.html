@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wingman · Browse every piece</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0B}
+a{color:#ECEBE8}a:hover{color:#C8A96A}
+button{font-family:inherit}
+@keyframes wmIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes wmPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+@keyframes wmSlide{from{transform:translateX(100%)}to{transform:none}}
+.wm-in{animation:wmIn .7s cubic-bezier(.2,.7,.2,1) both}
+.wm-pulse{animation:wmPulse 1.6s ease-in-out infinite}
+.wm-slide{animation:wmSlide .45s cubic-bezier(.2,.7,.2,1) both}
+.wm-back{color:#9C978E;text-decoration:none}
+.wm-back:hover{color:#ECEBE8}
+.wm-gold{background:#C8A96A;color:#0A0A0B;text-decoration:none}
+.wm-gold:hover{background:#D6BA80;color:#0A0A0B}
+.wm-u{color:#ECEBE8;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.wm-m{color:#9C978E;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.wm-m:hover{color:#ECEBE8}
+.wm-chip:hover{background:#26262A}
+.wm-card:hover .wm-thumb{background:#232327}
+.wm-scroll::-webkit-scrollbar{width:6px}.wm-scroll::-webkit-scrollbar-thumb{background:#2A2A2E}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; background: #0A0A0B; color: #ECEBE8; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 64px; flex: none; background: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 40px">
+<div style="font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: 0.2em">WINGMAN</div>
+<div style="display: flex; align-items: center; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px" aria-label="Step 4 of 5">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span class="wm-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+</div>
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">04 · Browse every piece</span>
+</div>
+</header>
+
+<main class="wm-in" style="flex: 1; display: flex; min-height: 0; position: relative">
+
+<aside class="wm-scroll" aria-label="Filters" style="width: 260px; flex: none; background: #141416; padding: 28px 28px 32px; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; gap: 26px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1">148</span>
+<span style="font-size: 12px; color: #9C978E">pieces across 5 stores</span>
+</div>
+
+<fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Category</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<button style="height: 30px; padding: 0 12px; border: 0; background: #ECEBE8; color: #0A0A0B; font-size: 13px; font-weight: 600; cursor: pointer" aria-pressed="true">All</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Jackets</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Shirts</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Trousers</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Shoes</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Accessories</button>
+</div>
+</fieldset>
+
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Budget</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Budget</button>
+<button style="height: 30px; padding: 0 12px; border: 0; background: #ECEBE8; color: #0A0A0B; font-size: 13px; font-weight: 600; cursor: pointer" aria-pressed="true">Mid-Range</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Luxury</button>
+</div>
+</fieldset>
+
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Price</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Under S$100</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">S$100–250</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">S$250+</button>
+</div>
+</fieldset>
+
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Colour</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<button class="wm-chip" style="height: 30px; padding: 0 12px 0 8px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; background: #2A3148"></span>Navy</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px 0 8px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; background: #4A4A50"></span>Charcoal</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px 0 8px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; background: #6B4A32"></span>Brown</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px 0 8px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; background: #D9CDB5"></span>Cream</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px 0 8px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; background: #55583F"></span>Olive</button>
+</div>
+</fieldset>
+
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Size</legend>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button class="wm-chip" style="height: 30px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">S</button>
+<button style="height: 30px; border: 0; background: #ECEBE8; color: #0A0A0B; font-size: 13px; font-weight: 600; cursor: pointer" aria-pressed="true">M</button>
+<button class="wm-chip" style="height: 30px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">L</button>
+<button class="wm-chip" style="height: 30px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">XL</button>
+</div>
+</fieldset>
+
+<fieldset style="border: 0; margin: 0; padding: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Store</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Benjamin Barker</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">COS</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Massimo Dutti</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Uniqlo</button>
+<button class="wm-chip" style="height: 30px; padding: 0 12px; border: 0; background: #1C1C1F; color: #ECEBE8; font-size: 13px; cursor: pointer">Kapok</button>
+</div>
+</fieldset>
+</aside>
+
+<section class="wm-scroll" style="flex: 1; min-width: 0; overflow-y: auto; padding: 32px 48px 48px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<a href="Looks.dc.html" class="wm-back" style="font-size: 13px">← Your Looks</a>
+<h1 style="margin: 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 44px; line-height: 1">Every Piece</h1>
+</div>
+<span style="font-size: 13px; color: #9C978E">Sorted by fit for your occasion</span>
+</div>
+
+<div style="margin-top: 28px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px 24px">
+<sc-for list="{{items}}" as="p" hint-placeholder-count="12">
+<button onClick="{{p.pick}}" class="wm-card" aria-pressed="{{p.sel}}" style="background: none; border: 0; padding: 0; text-align: left; color: #ECEBE8; cursor: pointer; display: flex; flex-direction: column; gap: 12px">
+<div class="wm-thumb" style="{{p.thumbStyle}}">
+<sc-if value="{{p.isJacket}}" hint-placeholder-val="{{ true }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><path d="M30 20 L42 16 L50 30 L58 16 L70 20 L84 44 L76 48 L72 40 L72 86 L28 86 L28 40 L24 48 L16 44 Z" fill="{{p.color}}"></path><path d="M42 16 L50 54 L58 16" stroke="#0A0A0B" stroke-opacity="0.5" stroke-width="1.2" fill="none"></path></svg></sc-if>
+<sc-if value="{{p.isShirt}}" hint-placeholder-val="{{ false }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><path d="M32 18 L44 14 L50 22 L56 14 L68 18 L84 40 L76 46 L70 38 L70 86 L30 86 L30 38 L24 46 L16 40 Z" fill="{{p.color}}"></path><path d="M50 22 L50 86" stroke="#0A0A0B" stroke-opacity="0.25" fill="none"></path></svg></sc-if>
+<sc-if value="{{p.isTrousers}}" hint-placeholder-val="{{ false }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><path d="M34 12 L66 12 L70 88 L56 88 L50 36 L44 88 L30 88 Z" fill="{{p.color}}"></path></svg></sc-if>
+<sc-if value="{{p.isShoes}}" hint-placeholder-val="{{ false }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><path d="M12 64 Q12 50 26 50 L42 52 Q56 60 78 62 Q90 64 90 72 L90 76 L12 76 Z" fill="{{p.color}}"></path><path d="M12 76 L90 76" stroke="#0A0A0B" stroke-opacity="0.5" stroke-width="3"></path></svg></sc-if>
+<sc-if value="{{p.isBelt}}" hint-placeholder-val="{{ false }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><rect x="8" y="42" width="84" height="14" fill="{{p.color}}"></rect><rect x="58" y="38" width="16" height="22" fill="none" stroke="#C9C4BB" stroke-width="3"></rect></svg></sc-if>
+<sc-if value="{{p.isSquare}}" hint-placeholder-val="{{ false }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><path d="M22 30 L78 30 L78 72 L22 72 Z" fill="{{p.color}}"></path><path d="M22 30 L50 54 L78 30" stroke="#0A0A0B" stroke-opacity="0.3" fill="none"></path></svg></sc-if>
+<sc-if value="{{p.isWatch}}" hint-placeholder-val="{{ false }}"><svg width="130" height="130" viewBox="0 0 100 100" aria-hidden="true"><rect x="40" y="10" width="20" height="80" fill="{{p.color}}"></rect><circle cx="50" cy="50" r="18" fill="#C9C4BB"></circle><circle cx="50" cy="50" r="14" fill="#0E0E10"></circle><path d="M50 50 L50 40 M50 50 L57 54" stroke="#ECEBE8" stroke-width="1.5"></path></svg></sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 15px">{{p.name}}</span>
+<span style="display: flex; justify-content: space-between; font-size: 13px; color: #9C978E"><span>{{p.store}}</span><span style="color: #ECEBE8">{{p.price}}</span></span>
+</div>
+</button>
+</sc-for>
+</div>
+</section>
+
+<sc-if value="{{open}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; top: 0; bottom: 0; left: 260px; right: 0; background: rgba(10,10,11,0.55)"></div>
+<aside class="wm-slide wm-scroll" aria-label="Piece details" style="position: absolute; top: 0; right: 0; bottom: 0; width: 460px; background: #1C1C1F; padding: 28px 44px 32px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-size: 12px; color: #9C978E">{{cur.cat}}</span>
+<button onClick="{{close}}" class="wm-m" style="background: none; border: 0; padding: 0; font-size: 13px; cursor: pointer">Close</button>
+</div>
+<div style="margin-top: 18px; height: 300px; flex: none; background: #26262A; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{cur.isJacket}}" hint-placeholder-val="{{ true }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><path d="M30 20 L42 16 L50 30 L58 16 L70 20 L84 44 L76 48 L72 40 L72 86 L28 86 L28 40 L24 48 L16 44 Z" fill="{{cur.color}}"></path><path d="M42 16 L50 54 L58 16" stroke="#0A0A0B" stroke-opacity="0.5" stroke-width="1" fill="none"></path></svg></sc-if>
+<sc-if value="{{cur.isShirt}}" hint-placeholder-val="{{ false }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><path d="M32 18 L44 14 L50 22 L56 14 L68 18 L84 40 L76 46 L70 38 L70 86 L30 86 L30 38 L24 46 L16 40 Z" fill="{{cur.color}}"></path></svg></sc-if>
+<sc-if value="{{cur.isTrousers}}" hint-placeholder-val="{{ false }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><path d="M34 12 L66 12 L70 88 L56 88 L50 36 L44 88 L30 88 Z" fill="{{cur.color}}"></path></svg></sc-if>
+<sc-if value="{{cur.isShoes}}" hint-placeholder-val="{{ false }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><path d="M12 64 Q12 50 26 50 L42 52 Q56 60 78 62 Q90 64 90 72 L90 76 L12 76 Z" fill="{{cur.color}}"></path></svg></sc-if>
+<sc-if value="{{cur.isBelt}}" hint-placeholder-val="{{ false }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><rect x="8" y="42" width="84" height="14" fill="{{cur.color}}"></rect><rect x="58" y="38" width="16" height="22" fill="none" stroke="#C9C4BB" stroke-width="3"></rect></svg></sc-if>
+<sc-if value="{{cur.isSquare}}" hint-placeholder-val="{{ false }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><path d="M22 30 L78 30 L78 72 L22 72 Z" fill="{{cur.color}}"></path></svg></sc-if>
+<sc-if value="{{cur.isWatch}}" hint-placeholder-val="{{ false }}"><svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="{{cur.name}}"><rect x="40" y="10" width="20" height="80" fill="{{cur.color}}"></rect><circle cx="50" cy="50" r="18" fill="#C9C4BB"></circle><circle cx="50" cy="50" r="14" fill="#0E0E10"></circle></svg></sc-if>
+</div>
+<h2 style="margin: 24px 0 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 30px; line-height: 1.1">{{cur.name}}</h2>
+<div style="margin-top: 8px; display: flex; justify-content: space-between; font-size: 15px"><span style="color: #9C978E">{{cur.store}}</span><span>{{cur.price}}</span></div>
+
+<div style="margin-top: 22px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; color: #9C978E">Size</span>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px">
+<button style="height: 36px; border: 0; background: #26262A; color: #ECEBE8; font-size: 13px; cursor: pointer">46</button>
+<button style="height: 36px; border: 0; background: #26262A; color: #ECEBE8; font-size: 13px; cursor: pointer">48</button>
+<button style="height: 36px; border: 0; background: #ECEBE8; color: #0A0A0B; font-size: 13px; font-weight: 600; cursor: pointer" aria-pressed="true">50</button>
+<button style="height: 36px; border: 0; background: #26262A; color: #ECEBE8; font-size: 13px; cursor: pointer">52</button>
+<button disabled style="height: 36px; border: 0; background: #1C1C1F; color: #6A665F; font-size: 13px; text-decoration: line-through">54</button>
+</div>
+</div>
+
+<fieldset style="margin: 22px 0 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 12px; color: #9C978E">Add to which look</legend>
+<sc-for list="{{targets}}" as="t" hint-placeholder-count="3">
+<label style="{{t.style}}"><input type="radio" name="look" checked="{{t.checked}}" onChange="{{t.pick}}" style="accent-color: #ECEBE8; margin: 0"><span style="flex: 1">{{t.label}}</span><span style="color: #9C978E">{{t.score}}</span></label>
+</sc-for>
+</fieldset>
+
+<a href="Cart.dc.html" class="wm-gold" style="margin-top: auto; height: 52px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">Add to Cart · {{cur.price}}</a>
+</aside>
+</sc-if>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const sel = s.sel ?? 0;
+    const open = s.open ?? true;
+    const tgt = s.tgt ?? 0;
+    const cats = { jacket: 'Jackets', shirt: 'Shirts', trousers: 'Trousers', shoes: 'Shoes', belt: 'Accessories', square: 'Accessories', watch: 'Accessories' };
+    const raw = [
+      ['Navy Hopsack Blazer', 'Benjamin Barker', 'S$289', 'jacket', '#2A3148'],
+      ['White Poplin Shirt', 'Massimo Dutti', 'S$89', 'shirt', '#E4E0D8'],
+      ['Charcoal Wool Trousers', 'Benjamin Barker', 'S$149', 'trousers', '#3A3A3F'],
+      ['Suede Penny Loafers', 'Massimo Dutti', 'S$229', 'shoes', '#6B4A32'],
+      ['Charcoal Wool Jacket', 'Massimo Dutti', 'S$329', 'jacket', '#4A4A50'],
+      ['Cream Knit Polo', 'COS', 'S$95', 'shirt', '#D9CDB5'],
+      ['Taupe Pleated Trousers', 'COS', 'S$135', 'trousers', '#8A7B68'],
+      ['Steel Field Watch', 'Kapok', 'S$245', 'watch', '#3A3A3F'],
+      ['Unstructured Cotton Blazer', 'COS', 'S$250', 'jacket', '#55583F'],
+      ['Ecru Oxford Shirt', 'Uniqlo', 'S$50', 'shirt', '#E6DCC8'],
+      ['Leather Belt', 'Massimo Dutti', 'S$69', 'belt', '#5A3C28'],
+      ['Silk-Blend Pocket Square', 'COS', 'S$39', 'square', '#D8D2C6']
+    ];
+    const items = raw.map((r, i) => {
+      const kind = r[3];
+      const on = open && i === sel;
+      return {
+        name: r[0], store: r[1], price: r[2], color: r[4], cat: cats[kind],
+        isJacket: kind === 'jacket', isShirt: kind === 'shirt', isTrousers: kind === 'trousers', isShoes: kind === 'shoes',
+        isBelt: kind === 'belt', isSquare: kind === 'square', isWatch: kind === 'watch',
+        sel: on ? 'true' : 'false',
+        thumbStyle: 'aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; background: ' + (on ? '#26262A; outline: 1px solid #ECEBE8; outline-offset: -1px' : '#141416'),
+        pick: () => this.setState({ sel: i, open: true })
+      };
+    });
+    const looks = [['Look 1 · Ballroom Navy', '8.4'], ['Look 2 · Warm Charcoal', '7.9'], ['Look 3 · Soft Tailoring', '7.2']];
+    const targets = looks.map((l, i) => ({
+      label: l[0], score: l[1], checked: i === tgt,
+      style: 'height: 44px; padding: 0 14px; display: flex; align-items: center; gap: 12px; font-size: 14px; cursor: pointer; background: ' + (i === tgt ? '#26262A' : 'transparent'),
+      pick: () => this.setState({ tgt: i })
+    }));
+    return { items, cur: items[sel], open, targets, close: () => this.setState({ open: false }) };
+  }
+}
+</script>
+</body>
+</html>

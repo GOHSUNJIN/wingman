@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wingman · Swap a piece</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0B}
+a{color:#ECEBE8}a:hover{color:#C8A96A}
+button{font-family:inherit}
+@keyframes wmIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes wmPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+@keyframes wmScan{0%{top:-120px}100%{top:100%}}
+.wm-in{animation:wmIn .7s cubic-bezier(.2,.7,.2,1) both}
+.wm-pulse{animation:wmPulse 1.6s ease-in-out infinite}
+.wm-scan{animation:wmScan 3.2s cubic-bezier(.45,0,.55,1) infinite}
+.wm-back{color:#9C978E;text-decoration:none}
+.wm-back:hover{color:#ECEBE8}
+.wm-gold{background:#C8A96A;color:#0A0A0B;text-decoration:none}
+.wm-gold:hover{background:#D6BA80;color:#0A0A0B}
+.wm-alt:hover .wm-thumb{background:#232327}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; background: #0A0A0B; color: #ECEBE8; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 64px; flex: none; background: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 40px">
+<div style="font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: 0.2em">WINGMAN</div>
+<div style="display: flex; align-items: center; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px" aria-label="Step 4 of 5">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span class="wm-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+</div>
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">04 · Swap a piece</span>
+</div>
+</header>
+
+<main class="wm-in" style="flex: 1; display: flex; min-height: 0">
+
+<section style="width: 628px; flex: none; position: relative; overflow: hidden; background: #141416">
+<svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block" role="img" aria-label="Try-on placeholder: you in Look 1 with the selected jacket">
+<rect width="600" height="900" fill="#26231F"></rect>
+<path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="{{jacket}}"></path>
+<path d="M150 600 L138 900" stroke="#0A0A0B" stroke-opacity="0.35" stroke-width="5"></path>
+<path d="M450 600 L462 900" stroke="#0A0A0B" stroke-opacity="0.35" stroke-width="5"></path>
+<path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#E4E0D8"></path>
+<path d="M292 496 L308 496 L314 520 L318 690 L300 716 L282 690 L286 520 Z" fill="#4A3526"></path>
+<path d="M246 452 L216 470 L250 560 L230 580 L300 760 L272 600 Z" fill="{{lapel}}"></path>
+<path d="M354 452 L384 470 L350 560 L370 580 L300 760 L328 600 Z" fill="{{lapel}}"></path>
+<circle cx="300" cy="790" r="7" fill="#0A0A0B" fill-opacity="0.6"></circle>
+<path d="M392 604 L434 598 L432 612 L394 616 Z" fill="#E4E0D8"></path>
+<path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D"></path>
+<ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F"></ellipse>
+<path d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z" fill="#16130F"></path>
+<path d="M160 486 Q90 512 66 620" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="3" fill="none"></path>
+</svg>
+<div style="position: absolute; top: 32px; left: 36px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; color: #9C978E">Look 1</span>
+<span style="font-family: 'DM Serif Display', serif; font-size: 22px">Ballroom Navy</span>
+</div>
+<sc-if value="{{rendering}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; inset: 0; background: rgba(10,10,11,0.2)"></div>
+<div class="wm-scan" aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 120px; display: flex; flex-direction: column; justify-content: flex-end">
+<div style="flex: 1; background: rgba(200,169,106,0.07)"></div>
+<div style="height: 2px; background: #C8A96A"></div>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 140px; background: linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))"></div>
+<div style="position: absolute; left: 36px; right: 36px; bottom: 30px; display: flex; align-items: center; gap: 10px">
+<span class="wm-pulse" style="width: 6px; height: 6px; border-radius: 50%; background: #C8A96A"></span>
+<span style="font-size: 13px">Trying on the {{curName}}</span>
+</div>
+</sc-if>
+</section>
+
+<section style="flex: 1; min-width: 0; padding: 40px 80px 40px 72px; box-sizing: border-box; display: flex; flex-direction: column">
+<a href="Looks.dc.html" class="wm-back" style="font-size: 13px">← Look 1 · Ballroom Navy</a>
+<h1 style="margin: 18px 0 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 52px; line-height: 1">Swapping the Jacket</h1>
+
+<div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center; gap: 24px">
+<p style="margin: 0; font-size: 14px; color: #9C978E">Currently: <span style="color: #ECEBE8">Navy Hopsack Blazer</span> · Benjamin Barker · S$289</p>
+<button role="switch" aria-checked="{{cheapStr}}" onClick="{{toggle}}" style="background: none; border: 0; padding: 0; height: 44px; display: flex; align-items: center; gap: 12px; color: #ECEBE8; font-size: 14px; cursor: pointer; flex: none">
+<span>Find Cheaper</span>
+<span style="{{trackStyle}}"><span style="{{knobStyle}}"></span></span>
+</button>
+</div>
+
+<div style="margin-top: 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 16px">
+<sc-for list="{{alts}}" as="a" hint-placeholder-count="6">
+<button onClick="{{a.pick}}" aria-pressed="{{a.sel}}" class="wm-alt" style="background: none; border: 0; padding: 0; text-align: left; color: #ECEBE8; cursor: pointer; display: flex; flex-direction: column; gap: 10px">
+<div class="wm-thumb" style="{{a.thumbStyle}}">
+<svg width="120" height="120" viewBox="0 0 100 100" aria-hidden="true"><path d="M30 20 L42 16 L50 30 L58 16 L70 20 L84 44 L76 48 L72 40 L72 86 L28 86 L28 40 L24 48 L16 44 Z" fill="{{a.color}}"></path><path d="M42 16 L50 54 L58 16" stroke="#0A0A0B" stroke-opacity="0.5" stroke-width="1.2" fill="none"></path></svg>
+<sc-if value="{{a.isSel}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 600; background: #ECEBE8; color: #0A0A0B; padding: 4px 8px">Trying on</span></sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 14px">{{a.name}}</span>
+<span style="display: flex; justify-content: space-between; font-size: 13px; color: #9C978E"><span>{{a.store}}</span><span style="color: #ECEBE8">{{a.price}}</span></span>
+<span style="{{a.diffStyle}}">{{a.diff}} vs current</span>
+</div>
+</button>
+</sc-for>
+</div>
+
+<a href="Looks.dc.html" class="wm-gold" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">Keep This Swap</a>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const cheap = !!s.cheap;
+    const picked = s.picked ?? 'Midnight Wool Blazer';
+    const all = [
+      { name: 'Midnight Wool Blazer', store: 'Massimo Dutti', price: 359, color: '#1E2233', lapel: '#272C40' },
+      { name: 'Navy Unstructured Blazer', store: 'COS', price: 250, color: '#2E3550', lapel: '#363E5C' },
+      { name: 'Charcoal Flannel Blazer', store: 'Benjamin Barker', price: 319, color: '#45454B', lapel: '#4F4F56' },
+      { name: 'Navy Jersey Blazer', store: 'Uniqlo', price: 99, color: '#2A3148', lapel: '#333B55' },
+      { name: 'Brown Houndstooth Blazer', store: 'Massimo Dutti', price: 299, color: '#5A4636', lapel: '#655040' },
+      { name: 'Black Textured Blazer', store: 'COS', price: 230, color: '#1A1A1C', lapel: '#232326' }
+    ];
+    const list = cheap ? all.filter((a) => a.price < 289) : all;
+    const cur = all.find((a) => a.name === picked) || all[0];
+    const alts = list.map((a) => {
+      const on = a.name === picked;
+      return {
+        ...a,
+        price: 'S$' + a.price,
+        isSel: on, sel: on ? 'true' : 'false',
+        diff: (a.price < 289 ? '−S$' : '+S$') + Math.abs(a.price - 289),
+        diffStyle: 'font-size: 12px; font-weight: 600; color: ' + (a.price < 289 ? '#5FB58A' : '#9C978E'),
+        thumbStyle: 'position: relative; height: 170px; display: flex; align-items: center; justify-content: center; background: ' + (on ? '#26262A; outline: 1px solid #ECEBE8; outline-offset: -1px' : '#141416'),
+        pick: () => this.setState({ picked: a.name })
+      };
+    });
+    return {
+      alts,
+      jacket: cur.color, lapel: cur.lapel, curName: cur.name.toLowerCase(),
+      rendering: true,
+      cheapStr: cheap ? 'true' : 'false',
+      trackStyle: 'width: 40px; height: 22px; display: flex; align-items: center; padding: 3px; box-sizing: border-box; background: ' + (cheap ? '#ECEBE8' : '#2A2A2E') + '; justify-content: ' + (cheap ? 'flex-end' : 'flex-start'),
+      knobStyle: 'width: 16px; height: 16px; background: ' + (cheap ? '#0A0A0B' : '#9C978E'),
+      toggle: () => this.setState({ cheap: !cheap })
+    };
+  }
+}
+</script>
+</body>
+</html>

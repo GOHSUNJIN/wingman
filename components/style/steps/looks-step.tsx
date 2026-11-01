@@ -405,6 +405,8 @@ export function LooksStep({
                     fontWeight: 400,
                     fontSize: 40,
                     lineHeight: 1.05,
+                    textTransform: "uppercase" as const,
+                    letterSpacing: "0.02em",
                   }}
                 >
                   {shown.name}
@@ -679,7 +681,7 @@ export function LooksStep({
       </header>
 
       <div style={{ maxWidth: 480 }}>
-        <h1 style={{ margin: 0, fontFamily: "var(--font-dm-serif), serif", fontWeight: 400, fontSize: 40 }}>
+        <h1 style={{ margin: 0, fontFamily: "var(--font-dm-serif), serif", fontWeight: 400, fontSize: 40, textTransform: "uppercase" as const, letterSpacing: "0.02em" }}>
           {looks.length === 1 ? "Your look" : "Your looks"}
         </h1>
         <p style={{ marginTop: 12, fontSize: 15, color: "#9C978E" }}>

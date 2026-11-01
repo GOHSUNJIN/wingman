@@ -368,6 +368,8 @@ export function PhotoStep({
               fontWeight: 400,
               fontSize: "64px",
               lineHeight: 1,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.02em",
             }}
           >
             Your Photo

@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 
 type Props = {
   after: string;
@@ -10,92 +7,159 @@ type Props = {
 };
 
 export function HeroWindow({ after, alt }: Props) {
-  const ref = useRef<HTMLElement>(null);
-
-  // Scroll progress drives --p: 0 is the small window, 1 is full-bleed
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const distance = window.innerHeight * (window.innerWidth >= 900 ? 1 : 0.7);
-      const p = Math.min(1, Math.max(0, -el.getBoundingClientRect().top / distance));
-      el.style.setProperty("--p", p.toFixed(4));
-      el.toggleAttribute("data-open", p > 0.42);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
   return (
-    <section ref={ref} className="hero relative" aria-labelledby="hero-heading">
-      <div className="sticky top-0 h-svh overflow-hidden">
-        {/* Picture layer */}
-        <div className="hero__window absolute inset-0 bg-surface">
-          <div className="hero__picture absolute inset-0">
-            <Image
-              src={after}
-              alt={`${alt}, styled by Wingman`}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-[50%_22%] min-[900px]:object-[50%_42%]"
-            />
+    <section
+      aria-labelledby="hero-heading"
+      style={{
+        height: "100dvh",
+        background: "#0A0A0B",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      {/* Nav */}
+      <header
+        style={{
+          height: 72,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 clamp(24px, 5vw, 80px)",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-dm-serif), Georgia, serif",
+            fontSize: "20px",
+            letterSpacing: "0.2em",
+            color: "#ECEBE8",
+          }}
+        >
+          WINGMAN
+        </span>
+        <nav aria-label="Main" style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+          <a href="#looks" style={{ fontSize: "14px", color: "#9C978E", textDecoration: "none" }}>
+            The looks
+          </a>
+          <a href="#how" style={{ fontSize: "14px", color: "#9C978E", textDecoration: "none" }}>
+            How it works
+          </a>
+          <Link
+            href="/style"
+            style={{
+              fontSize: "14px",
+              color: "#ECEBE8",
+              textDecoration: "none",
+              borderBottom: "1px solid #C8A96A",
+              paddingBottom: "2px",
+            }}
+          >
+            Style me
+          </Link>
+        </nav>
+      </header>
+
+      {/* Main: text left, render right */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          minHeight: 0,
+        }}
+      >
+        {/* Left: headline + CTA */}
+        <div
+          style={{
+            flex: "0 0 clamp(340px, 48%, 600px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "0 clamp(24px, 5vw, 80px) 80px",
+          }}
+        >
+          <h1
+            id="hero-heading"
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-dm-serif), Georgia, serif",
+              fontWeight: 400,
+              fontSize: "clamp(52px, 6vw, 88px)",
+              lineHeight: 1.0,
+              color: "#ECEBE8",
+            }}
+          >
+            Walk In
+            <br />
+            <span style={{ fontStyle: "italic", color: "#C8A96A" }}>Already Sure.</span>
+          </h1>
+
+          <p
+            style={{
+              margin: "28px 0 0",
+              fontSize: "17px",
+              lineHeight: 1.6,
+              color: "#9C978E",
+              maxWidth: "36ch",
+            }}
+          >
+            One photo, one sentence about the occasion. Wingman builds you 2–3 full looks from
+            real Singapore stores and tries them on your selfie before you spend a cent.
+          </p>
+
+          <div style={{ marginTop: "44px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <Link
+              href="/style"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                height: "54px",
+                padding: "0 28px",
+                background: "#C8A96A",
+                color: "#0A0A0B",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+                fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+                alignSelf: "flex-start",
+              }}
+            >
+              Upload Your Photo
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
+                <path d="M5 12h14m-6-6 6 6-6 6" />
+              </svg>
+            </Link>
           </div>
         </div>
 
-        {/* Text */}
-        <div className="hero__text pointer-events-none absolute inset-0 px-(--margin)">
-          <header className="pointer-events-auto flex h-16 items-center justify-between pt-[env(safe-area-inset-top)] md:h-20">
-            <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: "20px", letterSpacing: "0.2em", color: "#ECEBE8" }}>WINGMAN</span>
-            <nav aria-label="Main" className="flex gap-6 text-small">
-              <a href="#looks" className="text-link hidden min-h-11 items-center md:inline-flex">
-                The looks
-              </a>
-              <a href="#how" className="text-link hidden min-h-11 items-center md:inline-flex">
-                How it works
-              </a>
-              <Link href="/style" className="text-link inline-flex min-h-11 items-center">
-                Style me
-              </Link>
-            </nav>
-          </header>
-
-          <h1
-            id="hero-heading"
-            className="italic absolute top-[calc(env(safe-area-inset-top)+4.5rem)] left-(--margin) text-[10vw] min-[900px]:top-auto min-[900px]:bottom-[calc(var(--text-bottom)-0.08em)] min-[900px]:max-w-[calc(var(--side)-3rem)] min-[900px]:text-[min(calc((28vw-3rem)/5.9),5.5rem)]"
-          >
-            <span className="rise-line">
-              <span style={{ "--i": 0 } as React.CSSProperties}>See it</span>
-            </span>
-            <span className="rise-line">
-              <span style={{ "--i": 1 } as React.CSSProperties}>on you</span>
-            </span>
-          </h1>
-
-          <div className="pointer-events-auto absolute inset-x-(--margin) top-[calc(var(--win-top)+var(--win-h)+1.25rem)] min-[900px]:inset-x-auto min-[900px]:top-auto min-[900px]:right-(--margin) min-[900px]:bottom-(--text-bottom) min-[900px]:w-[min(calc(var(--side)-3rem),24rem)]">
-            <p data-load style={{ "--d": "420ms" } as React.CSSProperties} className="max-w-[34ch] text-body">
-              One photo, one sentence, and you have a complete outfit tried on you. From stores you can buy from today.
-            </p>
-            <div data-load style={{ "--d": "500ms" } as React.CSSProperties} className="mt-4 flex flex-col gap-1 min-[900px]:mt-6">
-              <Link href="/style" className="btn w-full min-[900px]:w-auto min-[900px]:self-start">
-                Start with a photo
-                <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
-                  <path d="M5 12h14m-6-6 6 6-6 6" />
-                </svg>
-              </Link>
-            </div>
-          </div>
+        {/* Right: render image */}
+        <div
+          style={{
+            flex: 1,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <Image
+            src={after}
+            alt={alt}
+            fill
+            priority
+            sizes="52vw"
+            style={{ objectFit: "cover", objectPosition: "50% 18%" }}
+            unoptimized
+          />
+          {/* subtle left scrim so text doesn't compete */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to right, #0A0A0B 0%, transparent 25%)",
+            }}
+          />
         </div>
       </div>
     </section>

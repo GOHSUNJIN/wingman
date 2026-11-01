@@ -192,6 +192,8 @@ export function LoadingStep({
               fontWeight: 400,
               fontSize: 60,
               lineHeight: 1,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.02em",
               animation: "wmIn 0.6s cubic-bezier(0.2,0.7,0.2,1) both",
             }}
           >

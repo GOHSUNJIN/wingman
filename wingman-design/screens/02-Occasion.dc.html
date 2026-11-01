@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wingman · The occasion</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0B}
+a{color:#ECEBE8}a:hover{color:#C8A96A}
+button,textarea{font-family:inherit}
+@keyframes wmIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes wmPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+.wm-in{animation:wmIn .7s cubic-bezier(.2,.7,.2,1) both}
+.wm-pulse{animation:wmPulse 1.6s ease-in-out infinite}
+.wm-back{color:#9C978E;text-decoration:none}
+.wm-back:hover{color:#ECEBE8}
+.wm-gold{background:#C8A96A;color:#0A0A0B;text-decoration:none}
+.wm-gold:hover{background:#D6BA80;color:#0A0A0B}
+.wm-u{color:#ECEBE8;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.wm-chip:hover{background:#26262A}
+.wm-card:hover{background:#1C1C1F}
+textarea:focus{outline:1px solid #9C978E;outline-offset:0}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; background: #0A0A0B; color: #ECEBE8; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 64px; flex: none; background: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 40px">
+<div style="font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: 0.2em">WINGMAN</div>
+<div style="display: flex; align-items: center; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px" aria-label="Step 2 of 5">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span class="wm-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #C8A96A"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+<span style="width: 8px; height: 8px; border-radius: 50%; background: #3A3A3F"></span>
+</div>
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">02 · The occasion</span>
+</div>
+</header>
+
+<main class="wm-in" style="flex: 1; display: flex; min-height: 0">
+
+<section style="width: 628px; flex: none; position: relative; overflow: hidden; background: #141416">
+<svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block" role="img" aria-label="Your selfie (placeholder)">
+<rect width="600" height="900" fill="#2A2622"></rect>
+<path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="#33302C"></path>
+<path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#CFCAC1"></path>
+<path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D"></path>
+<ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D"></ellipse>
+<ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F"></ellipse>
+<path d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z" fill="#16130F"></path>
+<path d="M160 486 Q90 512 66 620" stroke="#4A4540" stroke-width="3" fill="none"></path>
+</svg>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 260px; background: linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))"></div>
+<div style="position: absolute; left: 40px; bottom: 36px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">Styling for</span>
+<span style="font-family: 'DM Serif Display', serif; font-size: 28px">You, on the Day</span>
+</div>
+</section>
+
+<section style="flex: 1; min-width: 0; padding: 44px 96px 40px 88px; box-sizing: border-box; display: flex; flex-direction: column">
+<a href="Main.dc.html" class="wm-back" style="font-size: 13px">← Your Photo</a>
+<h1 style="margin: 20px 0 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 60px; line-height: 1">The Occasion</h1>
+
+<div style="margin-top: 36px; display: flex; flex-direction: column; gap: 14px">
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">What's on</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{occasions}}" as="o" hint-placeholder-count="6">
+<button onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" class="{{o.cls}}" style="{{o.style}}">{{o.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="margin-top: 32px; display: flex; flex-direction: column; gap: 14px">
+<label for="event" style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">Describe the event</label>
+<textarea id="event" rows="4" style="height: 132px; resize: none; background: #141416; color: #ECEBE8; border: 0; padding: 18px 20px; font-size: 16px; line-height: 1.6; box-sizing: border-box">My cousin's wedding dinner at a hotel ballroom, Saturday 7pm. Invite says smart formal. I want to look sharp without upstaging the groom.</textarea>
+</div>
+
+<div style="margin-top: 32px; display: flex; flex-direction: column; gap: 14px">
+<span style="font-size: 12px; letter-spacing: 0.02em; color: #9C978E">Budget for the whole look</span>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{tiers}}" as="t" hint-placeholder-count="3">
+<button onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" class="wm-card" style="{{t.style}}">
+<span style="font-size: 15px; font-weight: 600">{{t.name}}</span>
+<span style="font-family: 'DM Serif Display', serif; font-size: 26px">{{t.range}}</span>
+<span style="font-size: 13px; color: #9C978E">{{t.note}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<a href="Styling.dc.html" class="wm-gold" style="margin-top: auto; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; letter-spacing: 0.04em">Style Me →</a>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const occ = s.occ ?? 'Wedding Guest';
+    const tier = s.tier ?? 'Mid-range';
+    const chipBase = 'height: 44px; padding: 0 20px; border: 0; font-size: 14px; cursor: pointer; ';
+    const occasions = ['First Date', 'Interview', 'Wedding Guest', 'CNY', 'Company D&D', 'Night Out'].map((label) => {
+      const on = label === occ;
+      return {
+        label,
+        pressed: on ? 'true' : 'false',
+        cls: on ? '' : 'wm-chip',
+        style: chipBase + (on ? 'background: #ECEBE8; color: #0A0A0B; font-weight: 600' : 'background: #1C1C1F; color: #ECEBE8'),
+        pick: () => this.setState({ occ: label })
+      };
+    });
+    const cardBase = 'text-align: left; padding: 20px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; color: #ECEBE8; box-sizing: border-box; ';
+    const tiers = [
+      { name: 'Budget', range: 'S$150–350', note: 'High-street staples' },
+      { name: 'Mid-range', range: 'S$350–800', note: 'Considered labels' },
+      { name: 'Luxury', range: 'S$800+', note: 'Investment pieces' }
+    ].map((t) => {
+      const on = t.name === tier;
+      return {
+        ...t,
+        pressed: on ? 'true' : 'false',
+        style: cardBase + (on ? 'background: #1C1C1F; border: 1px solid #ECEBE8' : 'background: #141416; border: 1px solid transparent'),
+        pick: () => this.setState({ tier: t.name })
+      };
+    });
+    return { occasions, tiers };
+  }
+}
+</script>
+</body>
+</html>
