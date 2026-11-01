@@ -561,6 +561,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
       }
       await readEvents<SwapEvent>(res.body, (event) => {
         if (event.type === "render") patch((l) => ({ ...l, renders: { ...l.renders, [event.kind]: event.url } }));
+        else if (event.type === "renderFailed") patch((l) => ({ ...l, renders: { ...l.renders, failed: { ...l.renders.failed, [event.kind]: event.code } } }));
         else if (event.type === "fitcheck") patch((l) => ({ ...l, fitCheck: event.check }));
         else if (event.type === "error") { console.error("[wingman/swap] error event", event.message); fail(event.message); }
       });

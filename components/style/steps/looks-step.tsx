@@ -139,7 +139,7 @@ export function LooksStep({
       </div>
 
       {looks.length > 1 && (
-        <LookSwitcher looks={looks} photo={photo} active={active} onChoose={(i) => (wide ? setActive(i) : goTo(i))} />
+        <LookSwitcher looks={looks} photo={photo} active={active} onChoose={(i) => (wide ? setActive(i) : goTo(i))} wide={wide} />
       )}
 
       {wide && shown ? (
@@ -238,8 +238,15 @@ function LookCard({
   ].filter(Boolean) as { url: string; label: string }[];
   const rendering = !look.renders.outfit && look.renders.errors.length === 0;
   const [tab, setTab] = useState<"look" | "additional">("look");
+  // Items actually visible in the render (outerwear if present, else top)
   const onThem = look.items.filter((i) => showsInRender(look, i.slot));
-  const alongside = look.items.filter((i) => !showsInRender(look, i.slot));
+  // When outerwear is rendered, the top (base layer) belongs in "Swap or save" — not "Also in this look"
+  const hasOuterwear = look.items.some((i) => i.slot === "outerwear");
+  const swappable = hasOuterwear
+    ? look.items.filter((i) => i.slot === "outerwear" || i.slot === "top")
+    : onThem;
+  // "Also in this look": bottom, shoes, watch only
+  const alongside = look.items.filter((i) => !swappable.some((s) => s.id === i.id));
   const tabId = `look-${index}`;
 
   return (
@@ -276,6 +283,20 @@ function LookCard({
                 ? "Try-ons are paused for now, so here are the pieces on their own."
                 : "The try-on didn't work for this one; the pieces are below."}
             </p>
+          )}
+          {/* Score ring overlaid on image for laptop — removes duplication in the details panel */}
+          {wide && (
+            <div className="absolute top-4 right-4">
+              {look.fitCheck ? (
+                <div className="bg-background/80 p-1.5">
+                  <FitRing score={look.fitCheck.score} />
+                </div>
+              ) : scoring ? (
+                <div className="grid size-[5.5rem] place-items-center bg-background/80">
+                  <span className="text-small text-muted-foreground">Scoring…</span>
+                </div>
+              ) : null}
+            </div>
           )}
         </div>
 
@@ -336,18 +357,44 @@ function LookCard({
           <div role="tabpanel" id={`${tabId}-look`} aria-labelledby={`${tabId}-look-tab`}>
             <div className="mt-5 rounded-sm bg-surface-raised p-4" aria-live="polite">
               {look.fitCheck ? (
-                <div className="flex items-start gap-4">
-                  <FitRing score={look.fitCheck.score} />
-                  <div className="min-w-0 flex-1 pt-1">
-                    <p className="font-medium">Fit Check</p>
+                wide ? (
+                  /* Wide: ring is overlaid on the image; show score + reasoning as text */
+                  <div>
+                    <p className="font-medium">
+                      Fit Check{" "}
+                      <span
+                        className="tabular-nums"
+                        style={{
+                          color:
+                            look.fitCheck.score >= 8
+                              ? "var(--success)"
+                              : look.fitCheck.score >= 6
+                                ? "var(--brass)"
+                                : "var(--danger)",
+                        }}
+                      >
+                        {look.fitCheck.score.toFixed(1)}/10
+                      </span>
+                    </p>
                     <p className="mt-2 text-small">{look.fitCheck.reasoning}</p>
                   </div>
-                </div>
+                ) : (
+                  /* Mobile: ring in panel */
+                  <div className="flex items-start gap-4">
+                    <FitRing score={look.fitCheck.score} />
+                    <div className="min-w-0 flex-1 pt-1">
+                      <p className="font-medium">Fit Check</p>
+                      <p className="mt-2 text-small">{look.fitCheck.reasoning}</p>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="flex items-center gap-3">
-                  <div className="grid size-20 shrink-0 place-items-center rounded-full bg-surface">
-                    <span className="text-small text-muted-foreground">…</span>
-                  </div>
+                  {!wide && (
+                    <div className="grid size-20 shrink-0 place-items-center rounded-full bg-surface">
+                      <span className="text-small text-muted-foreground">…</span>
+                    </div>
+                  )}
                   <p className="text-small text-muted-foreground">{scoring ? "Scoring this look…" : "No score."}</p>
                 </div>
               )}
@@ -372,10 +419,10 @@ function LookCard({
             <section className="mt-5">
               <h3 className="subhead">Swap or save</h3>
               <p className="mt-1 text-small">
-                Swap any piece for one of six in-stock alternatives, or see cheaper ones that go with the rest of the look.
+                Swap any piece for one of six in-stock alternatives, or find cheaper ones that go with the rest of the look.
               </p>
               <ul className="mt-3 flex flex-col gap-3">
-                {onThem.map((item) => (
+                {swappable.map((item) => (
                   <PieceRow key={item.slot} item={item} onSwap={onSwap} onCheaper={onCheaper} />
                 ))}
               </ul>
@@ -389,8 +436,6 @@ function LookCard({
                     <PieceRow
                       key={item.slot}
                       item={item}
-                      onSwap={onSwap}
-                      onCheaper={onCheaper}
                       inCart={cartIds.has(item.id)}
                       onAdd={() => onAddPiece(item)}
                     />
@@ -418,7 +463,11 @@ function LookCard({
   );
 }
 
-/** One piece of a look: photo, store, name and price linking to the store, Swap and Cheaper buttons, and Add for pieces not in the try-on. */
+/**
+ * One piece in a look. Two modes:
+ * - onSwap present → "Swap or save" row: Swap + Cheaper buttons
+ * - onSwap absent, onAdd present → "Also in this look" row: View link + Add button
+ */
 function PieceRow({
   item,
   onSwap,
@@ -444,33 +493,17 @@ function PieceRow({
           <span className="block text-small tabular-nums">{sgd(item.price)}</span>
         </span>
       </a>
-      {(onSwap || onCheaper || onAdd) && (
+      {onSwap ? (
+        /* Swap or save mode */
         <span className="flex shrink-0 flex-col gap-1">
-          {onAdd &&
-            (inCart ? (
-              <button type="button" disabled className="btn-quiet">
-                In cart
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onAdd}
-                aria-label={`Add the ${SLOT_LABELS[item.slot].toLowerCase()} to your cart`}
-                className="btn-quiet"
-              >
-                Add
-              </button>
-            ))}
-          {onSwap && (
-            <button
-              type="button"
-              onClick={() => onSwap(item.slot)}
-              aria-label={`Swap the ${SLOT_LABELS[item.slot].toLowerCase()}`}
-              className="btn-quiet"
-            >
-              Swap
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => onSwap(item.slot)}
+            aria-label={`Swap the ${SLOT_LABELS[item.slot].toLowerCase()}`}
+            className="btn-quiet"
+          >
+            Swap
+          </button>
           {onCheaper && (
             <button
               type="button"
@@ -482,7 +515,37 @@ function PieceRow({
             </button>
           )}
         </span>
-      )}
+      ) : onAdd ? (
+        /* Also in this look mode: View (link to store) + Add to cart */
+        <span className="flex shrink-0 flex-col gap-1">
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener"
+            aria-label={`View ${displayName(item.name, item.storeName)} at ${item.storeName}`}
+            className="btn-quiet inline-flex items-center justify-center gap-1.5"
+          >
+            View
+            <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path d="M7 17L17 7M7 7h10v10" />
+            </svg>
+          </a>
+          {inCart ? (
+            <button type="button" disabled className="btn-quiet">
+              In cart
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onAdd}
+              aria-label={`Add the ${SLOT_LABELS[item.slot].toLowerCase()} to your cart`}
+              className="btn-quiet"
+            >
+              Add
+            </button>
+          )}
+        </span>
+      ) : null}
     </li>
   );
 }
@@ -541,18 +604,59 @@ function useWide() {
   return wide;
 }
 
-/** One button per look: its try-on, name and score. Picks the look shown (or scrolls to it on a phone). */
+/** One button per look: picks the look shown (or scrolls to it on mobile). */
 function LookSwitcher({
   looks,
   photo,
   active,
   onChoose,
+  wide = false,
 }: {
   looks: Look[];
   photo: Photo | null;
   active: number;
   onChoose: (index: number) => void;
+  wide?: boolean;
 }) {
+  if (wide) {
+    /* Desktop: horizontal underline tabs — clean, no thumbnails */
+    return (
+      <div role="tablist" aria-label="Choose a look" className="mt-8 flex border-b" style={{ borderColor: "var(--line)" }}>
+        {looks.map((look, i) => {
+          const on = active === i;
+          const scoreColor =
+            look.fitCheck
+              ? look.fitCheck.score >= 8
+                ? "var(--success)"
+                : look.fitCheck.score >= 6
+                  ? "var(--brass)"
+                  : "var(--danger)"
+              : "var(--text-muted)";
+          return (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              aria-label={`Look ${i + 1}: ${look.name}${look.fitCheck ? `, scored ${look.fitCheck.score.toFixed(1)}` : ""}`}
+              onClick={() => onChoose(i)}
+              className={cn(
+                "-mb-px flex min-h-11 flex-1 items-center justify-between gap-4 border-b-2 pb-3 pr-4 text-left text-small transition-colors",
+                on ? "border-brass" : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <span className={cn("line-clamp-1 font-medium", !on && "font-normal")}>{look.name}</span>
+              <span className="shrink-0 tabular-nums" style={{ color: on ? scoreColor : undefined }}>
+                {look.fitCheck ? `${look.fitCheck.score.toFixed(1)}` : "…"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  /* Mobile: thumbnail grid */
   return (
     <div role="tablist" aria-label="Choose a look" className="mt-8 grid grid-cols-3 gap-1">
       {looks.map((look, i) => {
