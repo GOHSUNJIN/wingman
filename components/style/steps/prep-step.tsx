@@ -1,6 +1,6 @@
 "use client";
 
-import { FlowShell } from "@/components/style/flow-shell";
+import Link from "next/link";
 import type { PrepPlan } from "@/lib/agent/schemas";
 
 /** The three-step grooming routine for the night before, from skin analysis when it worked. */
@@ -15,53 +15,290 @@ export function PrepStep({
   skinAnalysed: boolean;
   setting?: string;
   onBack: () => void;
-  /** Names the screen the back button returns to. */
   backLabel?: string;
 }) {
   return (
-    <FlowShell step="Prep plan">
-      <h1 className="mt-4 text-head">The night before</h1>
-      <p className="mt-4">
-        {plan
-          ? `Three things to do the evening before${setting ? ` the ${setting}` : ""}, so you show up looking rested.`
-          : "Your plan is still being written. It arrives a few seconds after your looks."}
-      </p>
+    <div
+      style={{
+        height: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        background: "#0A0A0B",
+        color: "#ECEBE8",
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+      }}
+    >
+      {/* ── Header ── */}
+      <header
+        style={{
+          height: 64,
+          flexShrink: 0,
+          background: "#141416",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 40px",
+        }}
+      >
+        <Link
+          href="/"
+          style={{
+            fontFamily: "var(--font-dm-serif), serif",
+            fontSize: 20,
+            letterSpacing: "0.2em",
+            color: "#ECEBE8",
+            textDecoration: "none",
+          }}
+        >
+          WINGMAN
+        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <WmDots current={4} />
+          <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Your prep plan</span>
+        </div>
+      </header>
 
-      {plan && (
-        <ol className="mt-8 flex flex-col gap-3">
-          {plan.steps.map((step, i) => (
-            <li key={step.title} className="flex gap-4 rounded-sm bg-surface p-5">
-              <span
-                className="flex size-8 shrink-0 items-center justify-center rounded-full font-display text-small leading-none text-brass"
-                style={{ background: "var(--surface-raised)" }}
-                aria-hidden
-              >
-                {i + 1}
-              </span>
-              <div className="min-w-0 pt-0.5">
-                <h2 className="text-lead">
-                  <span className="sr-only">Step {i + 1}: </span>
-                  {step.title}
-                </h2>
-                <p className="mt-2">{step.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
+      {/* ── Main ── */}
+      <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
+        {/* Left: photo panel with face bracket */}
+        <section
+          style={{
+            width: 628,
+            flexShrink: 0,
+            position: "relative",
+            overflow: "hidden",
+            background: "#141416",
+          }}
+        >
+          <PersonWithNavySvg />
 
-      {plan && (
-        <p className="mt-8 text-small text-muted-foreground">
-          {skinAnalysed
-            ? "Tailored to a skin reading from your photo. "
-            : "We couldn't read your skin from this photo (an angle or glasses can do that), so these are general tips. "}
-          Grooming tips only, not medical advice.
-        </p>
-      )}
+          {/* Face bracket */}
+          <div
+            aria-hidden="true"
+            style={{ position: "absolute", left: 204, top: 112, width: 220, height: 272 }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 22,
+                height: 22,
+                borderLeft: "1px solid #ECEBE8",
+                borderTop: "1px solid #ECEBE8",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                width: 22,
+                height: 22,
+                borderRight: "1px solid #ECEBE8",
+                borderTop: "1px solid #ECEBE8",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                bottom: 0,
+                width: 22,
+                height: 22,
+                borderLeft: "1px solid #ECEBE8",
+                borderBottom: "1px solid #ECEBE8",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                bottom: 0,
+                width: 22,
+                height: 22,
+                borderRight: "1px solid #ECEBE8",
+                borderBottom: "1px solid #ECEBE8",
+              }}
+            />
+            <span style={{ position: "absolute", left: 0, top: 284, fontSize: 12, color: "#ECEBE8" }}>
+              Grooming focus
+            </span>
+          </div>
 
-      <button type="button" onClick={onBack} className="text-link mt-6 min-h-11 text-muted-foreground">
-        {backLabel}
-      </button>
-    </FlowShell>
+          {/* Bottom gradient + label */}
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 200,
+              background: "linear-gradient(to top, rgba(10,10,11,0.85), rgba(10,10,11,0))",
+            }}
+          />
+          <div
+            style={{ position: "absolute", left: 40, bottom: 34, display: "flex", flexDirection: "column", gap: 6 }}
+          >
+            <span style={{ fontSize: 12, color: "#9C978E" }}>Prepping for</span>
+            <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 24 }}>
+              {setting ? `${setting} · ` : ""}Wedding Guest · Saturday, 7pm
+            </span>
+          </div>
+        </section>
+
+        {/* Right: prep plan */}
+        <section
+          style={{
+            flex: 1,
+            minWidth: 0,
+            padding: "48px 96px 40px 80px",
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+            overflowY: "auto",
+          }}
+        >
+          <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>Friday evening</span>
+          <h1
+            style={{
+              margin: "14px 0 0",
+              fontFamily: "var(--font-dm-serif), serif",
+              fontWeight: 400,
+              fontSize: 60,
+              lineHeight: 1,
+            }}
+          >
+            The Night Before
+          </h1>
+          <p style={{ margin: "18px 0 0", fontSize: 15, lineHeight: 1.6, color: "#9C978E", maxWidth: 460 }}>
+            {plan
+              ? `Three things tonight so tomorrow you only have to get dressed.`
+              : "Your plan is still being written. It arrives a few seconds after your looks."}
+          </p>
+
+          {plan && (
+            <ol style={{ listStyle: "none", margin: "36px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+              {plan.steps.map((step, i) => (
+                <li
+                  key={step.title}
+                  style={{
+                    background: "#141416",
+                    padding: "24px 28px",
+                    display: "flex",
+                    gap: 22,
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 36,
+                      height: 36,
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      background: "#C8A96A",
+                      color: "#0A0A0B",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-dm-serif), serif",
+                      fontSize: 18,
+                    }}
+                    aria-hidden
+                  >
+                    {i + 1}
+                  </span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <span style={{ fontSize: 17, fontWeight: 600 }}>{step.title}</span>
+                    <span style={{ fontSize: 14, lineHeight: 1.6, color: "#9C978E" }}>{step.detail}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+
+          <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 20 }}>
+            {plan && (
+              <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5, color: "#9C978E" }}>
+                {skinAnalysed
+                  ? "Tailored to a skin reading from your photo. "
+                  : "We couldn't read your skin from this photo (an angle or glasses can do that), so these are general tips. "}
+                Grooming tips only, not medical advice.
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                color: "#9C978E",
+                background: "none",
+                border: 0,
+                padding: 0,
+                fontSize: 13,
+                cursor: "pointer",
+                textAlign: "left",
+                fontFamily: "inherit",
+              }}
+            >
+              ← {backLabel}
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function WmDots({ current }: { current: number }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }} aria-label={`Step ${current} of 5`}>
+      {[1, 2, 3, 4, 5].map((n) => {
+        const done = n < current;
+        const active = n === current;
+        return (
+          <span
+            key={n}
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: done || active ? "#C8A96A" : "#3A3A3F",
+              display: "block",
+              flexShrink: 0,
+              animation: active ? "wmPulse 1.6s ease-in-out infinite" : "none",
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function PersonWithNavySvg() {
+  return (
+    <svg
+      viewBox="0 0 600 900"
+      preserveAspectRatio="xMidYMid slice"
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
+      aria-hidden
+    >
+      <rect width="600" height="900" fill="#2A2622" />
+      <path
+        d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z"
+        fill="#1A1E2B"
+      />
+      <path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#E4E0D8" />
+      <path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D" />
+      <path d="M246 452 L216 470 L250 560 L300 760 L272 600 Z" fill="#222738" />
+      <path d="M354 452 L384 470 L350 560 L300 760 L328 600 Z" fill="#222738" />
+      <ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D" />
+      <ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D" />
+      <ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F" />
+      <path
+        d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z"
+        fill="#16130F"
+      />
+    </svg>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FlowShell, RAW_IMG_PROPS } from "@/components/style/flow-shell";
+import { RAW_IMG_PROPS } from "@/components/style/flow-shell";
 import { ProductImage } from "@/components/style/product-image";
 import { RefineBar } from "@/components/style/refine-bar";
 import type { Photo } from "@/components/style/style-flow";
@@ -64,11 +65,14 @@ export function LooksStep({
   onBrowse: () => void;
   onDeletePhoto: () => void;
 }) {
-  const inCart = new Set(cart.map((l) => l.id));
+  const inCartIds = new Set(cart.map((l) => l.id));
   const cartTotal = cart.filter((l) => !isSoldOut(l)).reduce((sum, l) => sum + l.price * l.qty, 0);
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(focusLook);
+  const [tab, setTab] = useState<"look" | "additional">("look");
   const wide = useWide();
+
+  useEffect(() => { setTab("look"); }, [active]);
 
   const goTo = (i: number, behavior: ScrollBehavior = "smooth") => {
     setActive(i);
@@ -76,6 +80,549 @@ export function LooksStep({
     card?.scrollIntoView({ behavior, block: "nearest", inline: "center" });
   };
 
+  useEffect(() => {
+    if (focusLook > 0 && !wide) goTo(focusLook, "instant");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const shown = looks[Math.min(active, looks.length - 1)];
+
+  // Wide-mode derived values
+  const shownScoring = scoring && !!shown && !shown.fitCheck;
+  const shownFitScore = shown?.fitCheck?.score;
+  const scoreColor = shownFitScore != null
+    ? shownFitScore >= 8 ? "#5FB58A" : shownFitScore >= 6 ? "#C8A96A" : "#E06C5F"
+    : "#9C978E";
+  const onThem = shown ? shown.items.filter((i) => showsInRender(shown, i.slot)) : [];
+  const hasOuterwear = shown ? shown.items.some((i) => i.slot === "outerwear") : false;
+  const swappable = hasOuterwear
+    ? shown!.items.filter((i) => i.slot === "outerwear" || i.slot === "top")
+    : onThem;
+  const alongside = shown ? shown.items.filter((i) => !swappable.some((s) => s.id === i.id)) : [];
+  const shownInCart = shown
+    ? shown.items.filter((i) => showsInRender(shown, i.slot)).every((i) => inCartIds.has(i.id))
+    : false;
+  const rendering = shown ? !shown.renders.outfit && shown.renders.errors.length === 0 : false;
+
+  // ── WIDE layout ──
+  if (wide && shown) {
+    return (
+      <div
+        style={{
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          background: "#0A0A0B",
+          color: "#ECEBE8",
+          fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        }}
+      >
+        {/* ── Header ── */}
+        <header
+          style={{
+            height: 64,
+            flexShrink: 0,
+            background: "#141416",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 40px",
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-dm-serif), serif",
+              fontSize: 20,
+              letterSpacing: "0.2em",
+              color: "#ECEBE8",
+              textDecoration: "none",
+            }}
+          >
+            WINGMAN
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <WmDots current={4} />
+            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Your looks</span>
+          </div>
+        </header>
+
+        {/* ── Main ── */}
+        <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
+          {/* Left: 628px look render */}
+          <section
+            style={{
+              width: 628,
+              flexShrink: 0,
+              position: "relative",
+              overflow: "hidden",
+              background: "#141416",
+            }}
+          >
+            {shown.renders.outfit ? (
+              <Image
+                src={shown.renders.outfit}
+                alt={`You in ${shown.name}`}
+                fill
+                sizes="628px"
+                style={{ objectFit: "cover", objectPosition: "50% 20%" }}
+                {...RAW_IMG_PROPS}
+              />
+            ) : photo ? (
+              <Image
+                src={photo.url}
+                alt="Your photo"
+                fill
+                sizes="628px"
+                style={{ objectFit: "cover", objectPosition: "50% 20%", opacity: 0.4 }}
+                {...RAW_IMG_PROPS}
+              />
+            ) : (
+              <LookSvg />
+            )}
+
+            {/* Look label */}
+            <div
+              style={{ position: "absolute", top: 32, left: 36, display: "flex", flexDirection: "column", gap: 6 }}
+            >
+              <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
+                {looks.length > 1 ? `Look ${active + 1} of ${looks.length}` : "Look 1"}
+              </span>
+              <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22 }}>{shown.name}</span>
+            </div>
+
+            {/* Score box */}
+            {shown.fitCheck ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 32,
+                  right: 32,
+                  width: 88,
+                  height: 88,
+                  background: "#0A0A0B",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 2,
+                }}
+              >
+                <span
+                  style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 36, lineHeight: 1, color: scoreColor }}
+                >
+                  {shown.fitCheck.score.toFixed(1)}
+                </span>
+                <span style={{ fontSize: 11, color: "#9C978E" }}>Fit score</span>
+              </div>
+            ) : shownScoring ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 32,
+                  right: 32,
+                  width: 88,
+                  height: 88,
+                  background: "#0A0A0B",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span style={{ fontSize: 11, color: "#9C978E" }}>Scoring…</span>
+              </div>
+            ) : null}
+
+            {/* Re-rendering overlay */}
+            {rendering && (
+              <>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 160,
+                    background: "linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 36,
+                    right: 36,
+                    bottom: 28,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "#C8A96A",
+                          animation: "wmPulse 1.6s ease-in-out infinite",
+                        }}
+                      />
+                      <span style={{ fontSize: 13 }}>Trying this look on you…</span>
+                    </div>
+                    <span style={{ fontSize: 12, color: "#9C978E" }}>About 15s</span>
+                  </div>
+                  <div style={{ height: 2, background: "#3A3A3F" }}>
+                    <div style={{ height: 2, background: "#C8A96A", animation: "wmBar 14s linear infinite" }} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Error note */}
+            {!shown.renders.outfit && !rendering && (
+              <p
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  margin: 0,
+                  background: "rgba(10,10,11,0.8)",
+                  padding: "16px 36px",
+                  fontSize: 13,
+                }}
+              >
+                {shown.renders.errors.includes("QUOTA")
+                  ? "Try-ons are paused for now, so here are the pieces on their own."
+                  : "The try-on didn't work for this one; the pieces are below."}
+              </p>
+            )}
+          </section>
+
+          {/* Right: details panel */}
+          <section
+            style={{
+              flex: 1,
+              minWidth: 0,
+              background: "#141416",
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+            }}
+          >
+            {/* Look tabs */}
+            {looks.length > 1 && (
+              <div
+                role="tablist"
+                aria-label="Choose a look"
+                style={{
+                  height: 64,
+                  flexShrink: 0,
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${looks.length}, minmax(0, 1fr))`,
+                  padding: "0 40px",
+                  gap: 24,
+                }}
+              >
+                {looks.map((l, i) => {
+                  const on = active === i;
+                  const ls = l.fitCheck?.score;
+                  const lColor = ls != null
+                    ? ls >= 8 ? "#5FB58A" : ls >= 6 ? "#C8A96A" : "#E06C5F"
+                    : "#9C978E";
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      role="tab"
+                      aria-selected={on}
+                      onClick={() => setActive(i)}
+                      style={{
+                        background: "none",
+                        border: 0,
+                        padding: 0,
+                        height: 64,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 8,
+                        fontSize: 14,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        color: on ? "#ECEBE8" : "#9C978E",
+                        fontWeight: on ? 600 : 400,
+                        boxShadow: on ? "inset 0 -2px 0 #ECEBE8" : "inset 0 -2px 0 transparent",
+                      }}
+                    >
+                      <span>Look {i + 1}</span>
+                      <span style={{ fontVariantNumeric: "tabular-nums", color: on ? lColor : "#9C978E" }}>
+                        {l.fitCheck ? l.fitCheck.score.toFixed(1) : "…"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Scrollable content */}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+                padding: "28px 40px 24px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {notice && (
+                <p
+                  role="status"
+                  style={{ margin: "0 0 16px", background: "#1C1C1F", padding: "12px 16px", fontSize: 13 }}
+                >
+                  {notice}
+                </p>
+              )}
+
+              <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
+                {TIER_LABELS[shown.tier]} · {shown.items.length} {shown.items.length === 1 ? "piece" : "pieces"}
+              </span>
+              <div
+                style={{
+                  marginTop: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  gap: 16,
+                }}
+              >
+                <h1
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--font-dm-serif), serif",
+                    fontWeight: 400,
+                    fontSize: 40,
+                    lineHeight: 1.05,
+                  }}
+                >
+                  {shown.name}
+                </h1>
+                <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 26, flexShrink: 0 }}>
+                  {sgd(shown.total)}
+                </span>
+              </div>
+
+              {/* Fit Check box */}
+              <div
+                style={{
+                  marginTop: 22,
+                  background: "#1C1C1F",
+                  padding: "18px 20px",
+                  display: "flex",
+                  gap: 20,
+                  alignItems: "flex-start",
+                }}
+                aria-live="polite"
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, color: "#9C978E" }}>Fit Check</span>
+                  {shown.fitCheck ? (
+                    <span
+                      style={{
+                        fontFamily: "var(--font-dm-serif), serif",
+                        fontSize: 34,
+                        lineHeight: 1.1,
+                        color: scoreColor,
+                      }}
+                    >
+                      {shown.fitCheck.score.toFixed(1)}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 14, color: "#9C978E" }}>{shownScoring ? "…" : "—"}</span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#C9C5BD" }}>
+                    {shown.fitCheck
+                      ? shown.fitCheck.reasoning
+                      : shownScoring
+                        ? "Scoring this look…"
+                        : shown.why}
+                  </p>
+                </div>
+              </div>
+
+              {/* Sub-tabs */}
+              <div role="tablist" aria-label="Pieces" style={{ marginTop: 24, display: "flex", gap: 28 }}>
+                {(["look", "additional"] as const).map((id) => {
+                  const label = id === "look" ? "The Look" : "Additional";
+                  const on = tab === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="tab"
+                      aria-selected={on}
+                      onClick={() => setTab(id)}
+                      style={{
+                        background: "none",
+                        border: 0,
+                        padding: "0 0 8px",
+                        fontSize: 14,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        color: on ? "#ECEBE8" : "#9C978E",
+                        fontWeight: on ? 600 : 400,
+                        boxShadow: on ? "inset 0 -1px 0 #ECEBE8" : "none",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Piece list */}
+              {tab === "look" ? (
+                <ul
+                  role="tabpanel"
+                  style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}
+                >
+                  {onThem.map((item) => (
+                    <PieceRow key={item.slot} item={item} />
+                  ))}
+                </ul>
+              ) : (
+                <div role="tabpanel">
+                  <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {swappable.map((item) => (
+                      <PieceRow
+                        key={item.slot}
+                        item={item}
+                        onSwap={onSwap ? (slot) => onSwap(active, slot) : undefined}
+                        onCheaper={onSwap ? (slot) => onSwap(active, slot, true) : undefined}
+                      />
+                    ))}
+                  </ul>
+                  {alongside.length > 0 && (
+                    <>
+                      <span style={{ display: "block", marginTop: 20, fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
+                        Also in this look
+                      </span>
+                      <p style={{ margin: "4px 0 0", fontSize: 13, color: "#9C978E" }}>
+                        Picked for the outfit, not shown on you.
+                      </p>
+                      <ul style={{ listStyle: "none", margin: "10px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                        {alongside.map((item) => (
+                          <PieceRow
+                            key={item.slot}
+                            item={item}
+                            inCart={inCartIds.has(item.id)}
+                            onAdd={() => onAddPiece(item)}
+                          />
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom action bar */}
+            <div
+              style={{
+                flexShrink: 0,
+                padding: "18px 40px 16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+              }}
+            >
+              {shownInCart ? (
+                <button
+                  type="button"
+                  onClick={onViewCart}
+                  style={{
+                    background: "none",
+                    border: 0,
+                    padding: 0,
+                    color: "#ECEBE8",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 4,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    textAlign: "left",
+                  }}
+                >
+                  In your cart. View cart
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onAddToCart(shown)}
+                  style={{
+                    height: 52,
+                    background: "#C8A96A",
+                    color: "#0A0A0B",
+                    border: 0,
+                    fontSize: 15,
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  Add Look to Cart · {sgd(shown.total)}
+                </button>
+              )}
+              <div style={{ height: 1, background: "#2A2A2E" }} />
+              <nav
+                aria-label="More actions"
+                style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}
+              >
+                <button
+                  type="button"
+                  onClick={onPrep}
+                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
+                >
+                  {hasPrep ? "Your Prep Plan" : "Prep Plan (on its way)"}
+                </button>
+                <button
+                  type="button"
+                  onClick={onBrowse}
+                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
+                >
+                  Browse Every Piece
+                </button>
+                <button
+                  type="button"
+                  onClick={onRestart}
+                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
+                >
+                  Change Occasion
+                </button>
+                <button
+                  type="button"
+                  onClick={onDeletePhoto}
+                  style={{ background: "none", border: 0, padding: 0, color: "#E06C5F", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
+                >
+                  Delete My Photo
+                </button>
+              </nav>
+            </div>
+
+            {onRefine && <RefineBar onRefine={onRefine} inside />}
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  // ── MOBILE layout ──
   const sharedCardProps = (look: Look, i: number) => ({
     look,
     index: i,
@@ -85,156 +632,183 @@ export function LooksStep({
     onCompare: onCompare && (() => onCompare(i)),
     onSwap: onSwap && ((slot: LookItem["slot"]) => onSwap(i, slot)),
     onCheaper: onSwap && ((slot: LookItem["slot"]) => onSwap(i, slot, true)),
-    inCart: look.items.filter((item) => showsInRender(look, item.slot)).every((item) => inCart.has(item.id)),
-    cartIds: inCart,
+    inCart: look.items.filter((item) => showsInRender(look, item.slot)).every((item) => inCartIds.has(item.id)),
+    cartIds: inCartIds,
     onAddToCart: () => onAddToCart(look),
     onAddPiece,
     onViewCart,
   });
 
-  const shown = looks[Math.min(active, looks.length - 1)];
-
-  useEffect(() => {
-    if (focusLook > 0 && !wide) goTo(focusLook, "instant");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
-    <FlowShell
-      step={`${TIER_LABELS[tier]}${occasion ? `, ${occasion.setting}` : ""}`}
-      wide
-      back={{ label: "Back to the occasion", onClick: onRestart }}
-      progress={{ current: 3, total: 3 }}
+    <div
+      style={{
+        minHeight: "100dvh",
+        background: "#0A0A0B",
+        color: "#ECEBE8",
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        padding: "0 20px 40px",
+        boxSizing: "border-box",
+      }}
     >
-      {/* ── Header ── */}
-      <div className="max-w-xl">
-        <h1 className="mt-2 text-head">{looks.length === 1 ? "Your look" : "Your looks"}</h1>
-        <p className="mt-3">
-          {looks.length === 1 ? "One look" : `${looks.length} looks`} from real Singapore stores,
-          tried on your photo.{" "}
-          {looks.length > 1 && <span className="lg:hidden">Swipe to compare them. </span>}
-          To change a piece, open Additional.
+      {/* Mobile header */}
+      <header
+        style={{
+          height: 64,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          margin: "0 -20px",
+          padding: "0 20px",
+          background: "#141416",
+          marginBottom: 24,
+        }}
+      >
+        <Link
+          href="/"
+          style={{
+            fontFamily: "var(--font-dm-serif), serif",
+            fontSize: 18,
+            letterSpacing: "0.2em",
+            color: "#ECEBE8",
+            textDecoration: "none",
+          }}
+        >
+          WINGMAN
+        </Link>
+        <WmDots current={4} />
+      </header>
+
+      <div style={{ maxWidth: 480 }}>
+        <h1 style={{ margin: 0, fontFamily: "var(--font-dm-serif), serif", fontWeight: 400, fontSize: 40 }}>
+          {looks.length === 1 ? "Your look" : "Your looks"}
+        </h1>
+        <p style={{ marginTop: 12, fontSize: 15, color: "#9C978E" }}>
+          {looks.length === 1 ? "One look" : `${looks.length} looks`} from real Singapore stores, tried on your photo.
         </p>
         {cart.length > 0 && (
           <button
             type="button"
             onClick={onViewCart}
-            className="mt-4 flex min-h-12 w-full items-center justify-between bg-surface-raised px-4 text-left transition-colors hover:bg-surface"
+            style={{
+              marginTop: 16,
+              display: "flex",
+              minHeight: 48,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "#1C1C1F",
+              border: 0,
+              padding: "0 16px",
+              color: "#ECEBE8",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontSize: 14,
+              textAlign: "left",
+            }}
           >
             <span>
               Cart: {pieceCount(cart)} {pieceCount(cart) === 1 ? "piece" : "pieces"},{" "}
-              <span className="tabular-nums">{sgd(cartTotal)}</span>
+              <span style={{ fontVariantNumeric: "tabular-nums" }}>{sgd(cartTotal)}</span>
             </span>
-            <span className="font-medium">View cart</span>
+            <span style={{ fontWeight: 600 }}>View cart</span>
           </button>
         )}
-        {/* Notice shown in header for mobile only; wide mode puts it inside the card */}
-        {notice && !wide && (
-          <p role="status" className="mt-4 bg-surface-raised p-4">
+        {notice && (
+          <p role="status" style={{ marginTop: 16, background: "#1C1C1F", padding: 16, fontSize: 13 }}>
             {notice}
           </p>
         )}
       </div>
 
-      {/* ── WIDE (desktop): single two-column card ── */}
-      {wide && shown ? (
-        <div className="mt-6">
-          <LookCard
-            key={active}
-            {...sharedCardProps(shown, Math.min(active, looks.length - 1))}
-            wide
-            looks={looks}
-            active={Math.min(active, looks.length - 1)}
-            onChoose={(i) => setActive(i)}
-            hasPrep={hasPrep}
-            onPrep={onPrep}
-            onBrowse={onBrowse}
-            onRestart={onRestart}
-            onDeletePhoto={onDeletePhoto}
-            onRefine={onRefine}
-            notice={notice}
-          />
-        </div>
-      ) : (
-        /* ── MOBILE: swipeable carousel ── */
-        <>
-          {looks.length > 1 && (
-            <LookSwitcher
-              looks={looks}
-              photo={photo}
-              active={active}
-              onChoose={(i) => goTo(i)}
-              wide={false}
-            />
-          )}
-
-          <div
-            ref={track}
-            onScroll={(e) => {
-              const el = e.currentTarget;
-              const width =
-                (el.children[0] as HTMLElement | undefined)?.offsetWidth ?? el.clientWidth;
-              setActive(Math.round(el.scrollLeft / (width + 16)));
-            }}
-            className="no-scrollbar -mx-(--margin) mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-(--margin) px-(--margin) md:mx-0 md:px-0"
-            aria-label="Looks"
-          >
-            {looks.map((look, i) => (
-              <LookCard key={i} {...sharedCardProps(look, i)} />
-            ))}
-          </div>
-
-          {looks.length > 1 && (
-            <div
-              className="mt-4 flex items-center justify-center gap-2"
-              aria-label={`Look ${active + 1} of ${looks.length}`}
-              role="status"
-            >
-              {looks.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={`Go to look ${i + 1}`}
-                  className={cn(
-                    "rounded-full transition-all duration-300",
-                    active === i
-                      ? "size-2 bg-brass"
-                      : "size-1.5 bg-surface-raised hover:bg-muted-foreground",
-                  )}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Mobile action links */}
-          <div className="mt-10 flex max-w-xl flex-col items-start">
-            <button type="button" onClick={onPrep} className="text-link min-h-11 font-medium">
-              {hasPrep ? "Your night-before prep plan" : "Prep plan (on its way)"}
-            </button>
-            <button type="button" onClick={onBrowse} className="text-link min-h-11 font-medium">
-              Browse every piece
-            </button>
-            <button
-              type="button"
-              onClick={onRestart}
-              className="text-link min-h-11 text-muted-foreground"
-            >
-              Change the occasion or budget
-            </button>
-            <button
-              type="button"
-              onClick={onDeletePhoto}
-              className="text-link min-h-11 text-muted-foreground"
-            >
-              Delete my photo
-            </button>
-          </div>
-
-          {onRefine && <RefineBar onRefine={onRefine} />}
-        </>
+      {looks.length > 1 && (
+        <LookSwitcher looks={looks} photo={photo} active={active} onChoose={goTo} />
       )}
-    </FlowShell>
+
+      <div
+        ref={track}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const width = (el.children[0] as HTMLElement | undefined)?.offsetWidth ?? el.clientWidth;
+          setActive(Math.round(el.scrollLeft / (width + 16)));
+        }}
+        style={{
+          display: "flex",
+          gap: 16,
+          overflowX: "auto",
+          scrollSnapType: "x mandatory",
+          marginTop: 24,
+          marginLeft: -20,
+          marginRight: -20,
+          paddingLeft: 20,
+          paddingRight: 20,
+        }}
+        aria-label="Looks"
+      >
+        {looks.map((look, i) => (
+          <LookCard key={i} {...sharedCardProps(look, i)} />
+        ))}
+      </div>
+
+      {looks.length > 1 && (
+        <div
+          style={{ marginTop: 16, display: "flex", justifyContent: "center", gap: 8 }}
+          aria-label={`Look ${active + 1} of ${looks.length}`}
+          role="status"
+        >
+          {looks.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Go to look ${i + 1}`}
+              style={{
+                width: active === i ? 8 : 6,
+                height: active === i ? 8 : 6,
+                borderRadius: "50%",
+                background: active === i ? "#C8A96A" : "#3A3A3F",
+                border: 0,
+                padding: 0,
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
+        <button
+          type="button"
+          onClick={onPrep}
+          style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
+        >
+          {hasPrep ? "Your night-before prep plan" : "Prep plan (on its way)"}
+        </button>
+        <button
+          type="button"
+          onClick={onBrowse}
+          style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
+        >
+          Browse every piece
+        </button>
+        <button
+          type="button"
+          onClick={onRestart}
+          style={{ background: "none", border: 0, padding: "8px 0", color: "#9C978E", fontSize: 14, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
+        >
+          Change the occasion or budget
+        </button>
+        <button
+          type="button"
+          onClick={onDeletePhoto}
+          style={{ background: "none", border: 0, padding: "8px 0", color: "#9C978E", fontSize: 14, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
+        >
+          Delete my photo
+        </button>
+      </div>
+
+      {onRefine && <RefineBar onRefine={onRefine} />}
+    </div>
   );
 }
 
@@ -252,20 +826,7 @@ function LookCard({
   onAddToCart,
   onAddPiece,
   onViewCart,
-  wide = false,
-  // wide-mode extras
-  looks,
-  active,
-  onChoose,
-  hasPrep,
-  onPrep,
-  onBrowse,
-  onRestart,
-  onDeletePhoto,
-  onRefine,
-  notice,
 }: {
-  wide?: boolean;
   look: Look;
   index: number;
   count: number;
@@ -279,24 +840,14 @@ function LookCard({
   onAddToCart: () => void;
   onAddPiece: (item: LookItem) => void;
   onViewCart: () => void;
-  // passed only in wide mode
-  looks?: Look[];
-  active?: number;
-  onChoose?: (i: number) => void;
-  hasPrep?: boolean;
-  onPrep?: () => void;
-  onBrowse?: () => void;
-  onRestart?: () => void;
-  onDeletePhoto?: () => void;
-  onRefine?: (message: string) => void;
-  notice?: string | null;
 }) {
-  const grooming = [
-    look.renders.beard && { url: look.renders.beard, label: `Beard: ${look.beard}` },
-  ].filter(Boolean) as { url: string; label: string }[];
+  const grooming = [look.renders.beard && { url: look.renders.beard, label: `Beard: ${look.beard}` }].filter(
+    Boolean,
+  ) as { url: string; label: string }[];
 
   const rendering = !look.renders.outfit && look.renders.errors.length === 0;
   const [tab, setTab] = useState<"look" | "additional">("look");
+  const tabId = `look-${index}`;
 
   const onThem = look.items.filter((i) => showsInRender(look, i.slot));
   const hasOuterwear = look.items.some((i) => i.slot === "outerwear");
@@ -304,7 +855,6 @@ function LookCard({
     ? look.items.filter((i) => i.slot === "outerwear" || i.slot === "top")
     : onThem;
   const alongside = look.items.filter((i) => !swappable.some((s) => s.id === i.id));
-  const tabId = `look-${index}`;
 
   const scoreColor = look.fitCheck
     ? look.fitCheck.score >= 8
@@ -314,348 +864,28 @@ function LookCard({
         : "var(--danger)"
     : "var(--text-muted)";
 
-  // ── WIDE layout ──
-  if (wide) {
-    return (
-      <article
-        aria-label={`Look ${index + 1} of ${count}: ${look.name}`}
-        className="grid grid-cols-[1fr_28rem] xl:grid-cols-[1fr_32rem]"
-      >
-        {/* Left: sticky image column */}
-        <div className="sticky top-16 h-[calc(100dvh-4rem)] overflow-hidden">
-          <div className="relative h-full bg-surface-raised">
-            {look.renders.outfit ? (
-              <Image
-                src={look.renders.outfit}
-                alt={`You in ${look.name}`}
-                fill
-                sizes="60vw"
-                className="animate-in object-cover fade-in duration-500"
-                {...RAW_IMG_PROPS}
-              />
-            ) : (
-              photo && (
-                <Image
-                  src={photo.url}
-                  alt="Your photo"
-                  fill
-                  sizes="60vw"
-                  className="object-cover opacity-40"
-                  {...RAW_IMG_PROPS}
-                />
-              )
-            )}
-
-            {/* Status overlays */}
-            {rendering && (
-              <p className="absolute inset-x-0 bottom-0 bg-background/80 px-8 py-4 text-small">
-                Trying this look on you…
-              </p>
-            )}
-            {!look.renders.outfit && !rendering && (
-              <p className="absolute inset-x-0 bottom-0 bg-background/80 px-8 py-4 text-small">
-                {look.renders.errors.includes("QUOTA")
-                  ? "Try-ons are paused for now, so here are the pieces on their own."
-                  : "The try-on didn't work for this one; the pieces are below."}
-              </p>
-            )}
-
-            {/* Score ring — top-right corner */}
-            <div className="absolute top-6 right-6">
-              {look.fitCheck ? (
-                <div className="bg-background/80 p-2">
-                  <FitRing score={look.fitCheck.score} />
-                </div>
-              ) : scoring ? (
-                <div className="grid size-[5.5rem] place-items-center bg-background/80">
-                  <span className="text-small text-muted-foreground">Scoring…</span>
-                </div>
-              ) : null}
-            </div>
-
-            {/* Grooming renders — bottom-left overlay */}
-            {grooming.length > 0 && (
-              <div className="absolute bottom-0 left-0 grid grid-cols-2 gap-1 p-1">
-                {grooming.map((g) => (
-                  <figure key={g.label} className="relative">
-                    <div className="relative aspect-square w-36 overflow-hidden bg-surface-raised">
-                      <Image
-                        src={g.url}
-                        alt={g.label}
-                        fill
-                        sizes="144px"
-                        className="object-cover"
-                        {...RAW_IMG_PROPS}
-                      />
-                    </div>
-                    <figcaption className="px-2 py-1.5 text-small">{g.label}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right: scrollable details column */}
-        <div className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-surface">
-          {/* Look switcher tabs at the very top */}
-          {looks && looks.length > 1 && onChoose && active !== undefined && (
-            <div
-              role="tablist"
-              aria-label="Choose a look"
-              className="flex shrink-0 border-b"
-              style={{ borderColor: "var(--line)" }}
-            >
-              {looks.map((l, i) => {
-                const on = active === i;
-                const lColor = l.fitCheck
-                  ? l.fitCheck.score >= 8
-                    ? "var(--success)"
-                    : l.fitCheck.score >= 6
-                      ? "var(--brass)"
-                      : "var(--danger)"
-                  : "var(--text-muted)";
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    role="tab"
-                    aria-selected={on}
-                    aria-label={`Look ${i + 1}: ${l.name}${l.fitCheck ? `, scored ${l.fitCheck.score.toFixed(1)}` : ""}`}
-                    onClick={() => onChoose(i)}
-                    className={cn(
-                      "-mb-px flex min-h-12 flex-1 items-center justify-between gap-3 border-b-2 px-5 pb-3 text-left text-small transition-colors",
-                      on
-                        ? "border-brass"
-                        : "border-transparent text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <span className={cn("line-clamp-1", on ? "font-medium" : "font-normal")}>
-                      {l.name}
-                    </span>
-                    <span
-                      className="shrink-0 tabular-nums"
-                      style={{ color: on ? lColor : undefined }}
-                    >
-                      {l.fitCheck ? l.fitCheck.score.toFixed(1) : "…"}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto">
-            {notice && (
-              <p role="status" className="mx-5 mt-4 bg-surface-raised px-4 py-3 text-small">
-                {notice}
-              </p>
-            )}
-
-            {/* Look header */}
-            <div className="px-5 pt-6">
-              <h2 className="text-[min(var(--step-lead),5vw)] [overflow-wrap:break-word] font-display">
-                {look.name}
-              </h2>
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4">
-                <p className="whitespace-nowrap">
-                  <span className="tabular-nums">{sgd(look.total)}</span>
-                  <span className="text-small text-muted-foreground"> · {TIER_LABELS[look.tier]}</span>
-                </p>
-                {onCompare && (
-                  <button
-                    type="button"
-                    onClick={onCompare}
-                    className="text-link -my-3 min-h-11 text-small font-medium whitespace-nowrap"
-                  >
-                    Compare prices
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Tab selector */}
-            <div className="px-5 pt-4">
-              <div
-                role="tablist"
-                aria-label={`${look.name}: what to show`}
-                className="grid grid-cols-2 gap-1 bg-background/40 p-1"
-              >
-                {(
-                  [
-                    ["look", "The look"],
-                    ["additional", "Additional"],
-                  ] as const
-                ).map(([id, label]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="tab"
-                    id={`${tabId}-${id}-tab`}
-                    aria-selected={tab === id}
-                    aria-controls={`${tabId}-${id}`}
-                    onClick={() => setTab(id)}
-                    className={cn(
-                      "min-h-11 text-small transition-colors",
-                      tab === id ? "bg-ivory text-background" : "hover:bg-surface-raised",
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tab panels */}
-            <div className="px-5 py-5">
-              {tab === "look" ? (
-                <div role="tabpanel" id={`${tabId}-look`} aria-labelledby={`${tabId}-look-tab`}>
-                  {/* Fit Check — score is overlaid on image; show text only */}
-                  <div className="rounded-sm bg-surface-raised p-4" aria-live="polite">
-                    {look.fitCheck ? (
-                      <div>
-                        <p className="font-medium">
-                          Fit Check{" "}
-                          <span className="tabular-nums" style={{ color: scoreColor }}>
-                            {look.fitCheck.score.toFixed(1)}/10
-                          </span>
-                        </p>
-                        <p className="mt-2 text-small">{look.fitCheck.reasoning}</p>
-                      </div>
-                    ) : (
-                      <p className="text-small text-muted-foreground">
-                        {scoring ? "Scoring this look…" : "No score."}
-                      </p>
-                    )}
-                  </div>
-
-                  <p className="mt-5">{look.why}</p>
-
-                  {onThem.length > 0 && (
-                    <section className="mt-5">
-                      <h3 className="subhead text-small text-muted-foreground">In the try-on</h3>
-                      <ul className="mt-2 flex flex-col gap-3">
-                        {onThem.map((item) => (
-                          <PieceRow key={item.slot} item={item} />
-                        ))}
-                      </ul>
-                    </section>
-                  )}
-                </div>
-              ) : (
-                <div
-                  role="tabpanel"
-                  id={`${tabId}-additional`}
-                  aria-labelledby={`${tabId}-additional-tab`}
-                >
-                  <section>
-                    <h3 className="subhead">Swap or save</h3>
-                    <p className="mt-1 text-small">
-                      Swap any piece for one of six in-stock alternatives, or find cheaper ones
-                      that go with the rest of the look.
-                    </p>
-                    <ul className="mt-3 flex flex-col gap-3">
-                      {swappable.map((item) => (
-                        <PieceRow
-                          key={item.slot}
-                          item={item}
-                          onSwap={onSwap}
-                          onCheaper={onCheaper}
-                        />
-                      ))}
-                    </ul>
-                  </section>
-                  {alongside.length > 0 && (
-                    <section className="mt-5">
-                      <h3 className="subhead text-small text-muted-foreground">
-                        Also in this look
-                      </h3>
-                      <p className="mt-1 text-small text-muted-foreground">
-                        Picked for the outfit, not shown on you.
-                      </p>
-                      <ul className="mt-2 flex flex-col gap-3">
-                        {alongside.map((item) => (
-                          <PieceRow
-                            key={item.slot}
-                            item={item}
-                            inCart={cartIds.has(item.id)}
-                            onAdd={() => onAddPiece(item)}
-                          />
-                        ))}
-                      </ul>
-                    </section>
-                  )}
-                </div>
-              )}
-
-              {/* Cart button */}
-              <div className="mt-6">
-                {inCart ? (
-                  <button
-                    type="button"
-                    onClick={onViewCart}
-                    className="text-link min-h-11 font-medium"
-                  >
-                    In your cart. View cart
-                  </button>
-                ) : (
-                  <button type="button" onClick={onAddToCart} className="btn w-full">
-                    Add this look to cart
-                  </button>
-                )}
-              </div>
-
-              {/* Action links — separated from cart by a line */}
-              <div
-                className="mt-6 flex flex-col items-start border-t pt-5"
-                style={{ borderColor: "var(--line)" }}
-              >
-                <button type="button" onClick={onPrep} className="text-link min-h-11 font-medium">
-                  {hasPrep ? "Your night-before prep plan" : "Prep plan (on its way)"}
-                </button>
-                <button type="button" onClick={onBrowse} className="text-link min-h-11 font-medium">
-                  Browse every piece
-                </button>
-                <button
-                  type="button"
-                  onClick={onRestart}
-                  className="text-link min-h-11 text-muted-foreground"
-                >
-                  Change the occasion or budget
-                </button>
-                <button
-                  type="button"
-                  onClick={onDeletePhoto}
-                  className="text-link min-h-11 text-muted-foreground"
-                >
-                  Delete my photo
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Refine bar pinned to bottom of right panel */}
-          {onRefine && <RefineBar onRefine={onRefine} inside />}
-        </div>
-      </article>
-    );
-  }
-
-  // ── MOBILE layout ──
   return (
     <article
       aria-label={`Look ${index + 1} of ${count}: ${look.name}`}
-      className="relative flex w-[86%] shrink-0 snap-center flex-col overflow-hidden rounded-sm bg-surface sm:w-[24rem]"
+      style={{
+        width: "86%",
+        maxWidth: 384,
+        flexShrink: 0,
+        scrollSnapAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        background: "#141416",
+      }}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-surface-raised">
+      <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden", background: "#1C1C1F" }}>
         {look.renders.outfit ? (
           <Image
             src={look.renders.outfit}
             alt={`You in ${look.name}`}
             fill
             sizes="(min-width: 640px) 24rem, 86vw"
-            className="animate-in object-cover fade-in duration-500"
+            style={{ objectFit: "cover" }}
             {...RAW_IMG_PROPS}
           />
         ) : (
@@ -665,74 +895,58 @@ function LookCard({
               alt="Your photo"
               fill
               sizes="24rem"
-              className="object-cover opacity-40"
+              style={{ objectFit: "cover", opacity: 0.4 }}
               {...RAW_IMG_PROPS}
             />
           )
         )}
         {rendering && (
-          <p className="absolute inset-x-0 bottom-0 bg-background/80 px-4 py-3 text-small">
+          <p
+            style={{
+              position: "absolute",
+              inset: "auto 0 0",
+              margin: 0,
+              background: "rgba(10,10,11,0.8)",
+              padding: "12px 16px",
+              fontSize: 13,
+            }}
+          >
             Trying this look on you…
-          </p>
-        )}
-        {!look.renders.outfit && !rendering && (
-          <p className="absolute inset-x-0 bottom-0 bg-background/80 px-4 py-3 text-small">
-            {look.renders.errors.includes("QUOTA")
-              ? "Try-ons are paused for now, so here are the pieces on their own."
-              : "The try-on didn't work for this one; the pieces are below."}
           </p>
         )}
       </div>
 
       {grooming.length > 0 && (
-        <div className="grid grid-cols-2 gap-1 p-1">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 4, padding: 4 }}>
           {grooming.map((g) => (
-            <figure key={g.label} className="relative">
-              <div className="relative aspect-square overflow-hidden bg-surface-raised">
-                <Image
-                  src={g.url}
-                  alt={g.label}
-                  fill
-                  sizes="12rem"
-                  className="object-cover"
-                  {...RAW_IMG_PROPS}
-                />
+            <figure key={g.label} style={{ margin: 0 }}>
+              <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", background: "#1C1C1F" }}>
+                <Image src={g.url} alt={g.label} fill sizes="12rem" style={{ objectFit: "cover" }} {...RAW_IMG_PROPS} />
               </div>
-              <figcaption className="px-2 py-1.5 text-small">{g.label}</figcaption>
+              <figcaption style={{ padding: "6px 8px", fontSize: 12 }}>{g.label}</figcaption>
             </figure>
           ))}
         </div>
       )}
 
-      <div className="flex flex-1 flex-col p-5">
-        <h2 className="text-[min(var(--step-lead),5vw)] [overflow-wrap:break-word]">{look.name}</h2>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4">
-          <p className="whitespace-nowrap">
-            <span className="tabular-nums">{sgd(look.total)}</span>
-            <span className="text-small text-muted-foreground"> · {TIER_LABELS[look.tier]}</span>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: 20 }}>
+        <h2 style={{ margin: 0, fontFamily: "var(--font-dm-serif), serif", fontWeight: 400, fontSize: 24 }}>
+          {look.name}
+        </h2>
+        <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <p style={{ margin: 0, fontSize: 14, fontVariantNumeric: "tabular-nums" }}>
+            {sgd(look.total)}
+            <span style={{ color: "#9C978E" }}> · {TIER_LABELS[look.tier]}</span>
           </p>
           {onCompare && (
-            <button
-              type="button"
-              onClick={onCompare}
-              className="text-link -my-3 min-h-11 text-small font-medium whitespace-nowrap"
-            >
+            <button type="button" onClick={onCompare} style={{ background: "none", border: 0, padding: 0, color: "#ECEBE8", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}>
               Compare prices
             </button>
           )}
         </div>
 
-        <div
-          role="tablist"
-          aria-label={`${look.name}: what to show`}
-          className="mt-5 grid grid-cols-2 gap-1 bg-background/40 p-1"
-        >
-          {(
-            [
-              ["look", "The look"],
-              ["additional", "Additional"],
-            ] as const
-          ).map(([id, label]) => (
+        <div role="tablist" style={{ marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, background: "rgba(10,10,11,0.4)", padding: 4 }}>
+          {(["look", "additional"] as const).map((id) => (
             <button
               key={id}
               type="button"
@@ -741,99 +955,73 @@ function LookCard({
               aria-selected={tab === id}
               aria-controls={`${tabId}-${id}`}
               onClick={() => setTab(id)}
-              className={cn(
-                "min-h-11 transition-colors",
-                tab === id ? "bg-ivory text-background" : "hover:bg-surface-raised",
-              )}
+              style={{
+                minHeight: 44,
+                background: tab === id ? "#ECEBE8" : "none",
+                color: tab === id ? "#0A0A0B" : "#ECEBE8",
+                border: 0,
+                fontSize: 13,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
             >
-              {label}
+              {id === "look" ? "The look" : "Additional"}
             </button>
           ))}
         </div>
 
         {tab === "look" ? (
           <div role="tabpanel" id={`${tabId}-look`} aria-labelledby={`${tabId}-look-tab`}>
-            <div className="mt-5 rounded-sm bg-surface-raised p-4" aria-live="polite">
+            <div style={{ marginTop: 20, background: "#1C1C1F", padding: 16 }} aria-live="polite">
               {look.fitCheck ? (
-                <div className="flex items-start gap-4">
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
                   <FitRing score={look.fitCheck.score} />
-                  <div className="min-w-0 flex-1 pt-1">
-                    <p className="font-medium">Fit Check</p>
-                    <p className="mt-2 text-small">{look.fitCheck.reasoning}</p>
+                  <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
+                    <p style={{ margin: 0, fontWeight: 500 }}>Fit Check</p>
+                    <p style={{ margin: "8px 0 0", fontSize: 13, color: "#9C978E" }}>{look.fitCheck.reasoning}</p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <div className="grid size-20 shrink-0 place-items-center rounded-full bg-surface">
-                    <span className="text-small text-muted-foreground">…</span>
-                  </div>
-                  <p className="text-small text-muted-foreground">
-                    {scoring ? "Scoring this look…" : "No score."}
-                  </p>
-                </div>
+                <p style={{ margin: 0, fontSize: 13, color: "#9C978E" }}>{scoring ? "Scoring this look…" : "No score."}</p>
               )}
             </div>
-
-            <p className="mt-5">{look.why}</p>
-
+            <p style={{ marginTop: 20, fontSize: 14, color: "#9C978E" }}>{look.why}</p>
             {onThem.length > 0 && (
-              <section className="mt-5">
-                <h3 className="subhead text-small text-muted-foreground">In the try-on</h3>
-                <ul className="mt-2 flex flex-col gap-3">
-                  {onThem.map((item) => (
-                    <PieceRow key={item.slot} item={item} />
-                  ))}
-                </ul>
-              </section>
+              <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                {onThem.map((item) => <PieceRow key={item.slot} item={item} />)}
+              </ul>
             )}
           </div>
         ) : (
-          <div
-            role="tabpanel"
-            id={`${tabId}-additional`}
-            aria-labelledby={`${tabId}-additional-tab`}
-          >
-            <section className="mt-5">
-              <h3 className="subhead">Swap or save</h3>
-              <p className="mt-1 text-small">
-                Swap any piece for one of six in-stock alternatives, or find cheaper ones that go
-                with the rest of the look.
-              </p>
-              <ul className="mt-3 flex flex-col gap-3">
-                {swappable.map((item) => (
-                  <PieceRow key={item.slot} item={item} onSwap={onSwap} onCheaper={onCheaper} />
-                ))}
-              </ul>
-            </section>
+          <div role="tabpanel" id={`${tabId}-additional`} aria-labelledby={`${tabId}-additional-tab`}>
+            <ul style={{ listStyle: "none", margin: "20px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+              {swappable.map((item) => <PieceRow key={item.slot} item={item} onSwap={onSwap} onCheaper={onCheaper} />)}
+            </ul>
             {alongside.length > 0 && (
-              <section className="mt-5">
-                <h3 className="subhead text-small text-muted-foreground">Also in this look</h3>
-                <p className="mt-1 text-small text-muted-foreground">
-                  Picked for the outfit, not shown on you.
-                </p>
-                <ul className="mt-2 flex flex-col gap-3">
+              <>
+                <p style={{ margin: "20px 0 8px", fontSize: 12, color: "#9C978E" }}>Also in this look</p>
+                <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
                   {alongside.map((item) => (
-                    <PieceRow
-                      key={item.slot}
-                      item={item}
-                      inCart={cartIds.has(item.id)}
-                      onAdd={() => onAddPiece(item)}
-                    />
+                    <PieceRow key={item.slot} item={item} inCart={cartIds.has(item.id)} onAdd={() => onAddPiece(item)} />
                   ))}
                 </ul>
-              </section>
+              </>
             )}
           </div>
         )}
 
-        <div className="card-foot pt-5">
+        <div style={{ marginTop: "auto", paddingTop: 20 }}>
           {inCart ? (
-            <button type="button" onClick={onViewCart} className="text-link min-h-11 font-medium">
+            <button type="button" onClick={onViewCart} style={{ background: "none", border: 0, padding: 0, color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}>
               In your cart. View cart
             </button>
           ) : (
-            <button type="button" onClick={onAddToCart} className="btn w-full">
-              Add this look to cart
+            <button
+              type="button"
+              onClick={onAddToCart}
+              style={{ width: "100%", height: 48, background: "#C8A96A", color: "#0A0A0B", border: 0, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              Add to cart
             </button>
           )}
         </div>
@@ -856,26 +1044,30 @@ function PieceRow({
   onAdd?: () => void;
 }) {
   return (
-    <li className="flex items-center gap-3 bg-background/40 p-2">
-      <a href={item.url} target="_blank" rel="noopener" className="group flex min-w-0 flex-1 items-center gap-3">
-        <ProductImage src={item.image} sizes="64px" className="size-16" />
-        <span className="min-w-0 flex-1">
-          <span className="block text-small text-muted-foreground">
+    <li style={{ display: "flex", alignItems: "center", gap: 16, padding: "10px 0" }}>
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener"
+        style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "center", gap: 16, textDecoration: "none", color: "inherit" }}
+      >
+        <div style={{ width: 64, height: 64, flexShrink: 0, background: "#1C1C1F", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+          <ProductImage src={item.image} sizes="64px" className="h-full w-full object-contain" />
+        </div>
+        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+          <span style={{ fontSize: 13, color: "#9C978E" }}>
             {SLOT_LABELS[item.slot]} · {item.storeName}
           </span>
-          <span className="line-clamp-2 text-small group-hover:underline">
-            {displayName(item.name, item.storeName)}
-          </span>
-          <span className="block text-small tabular-nums">{sgd(item.price)}</span>
+          <span style={{ fontSize: 15 }}>{displayName(item.name, item.storeName)}</span>
+          <span style={{ fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{sgd(item.price)}</span>
         </span>
       </a>
       {onSwap ? (
-        <span className="flex shrink-0 flex-col gap-1">
+        <span style={{ display: "flex", flexShrink: 0, flexDirection: "column", gap: 6 }}>
           <button
             type="button"
             onClick={() => onSwap(item.slot)}
-            aria-label={`Swap the ${SLOT_LABELS[item.slot].toLowerCase()}`}
-            className="btn-quiet"
+            style={{ background: "none", border: 0, padding: 0, color: "#ECEBE8", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
           >
             Swap
           </button>
@@ -883,44 +1075,29 @@ function PieceRow({
             <button
               type="button"
               onClick={() => onCheaper(item.slot)}
-              aria-label={`Cheaper ${SLOT_LABELS[item.slot].toLowerCase()} options`}
-              className="btn-quiet"
+              style={{ background: "none", border: 0, padding: 0, color: "#9C978E", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
             >
               Cheaper
             </button>
           )}
         </span>
       ) : onAdd ? (
-        <span className="flex shrink-0 flex-col gap-1">
+        <span style={{ display: "flex", flexShrink: 0, flexDirection: "column", gap: 6 }}>
           <a
             href={item.url}
             target="_blank"
             rel="noopener"
-            aria-label={`View ${displayName(item.name, item.storeName)} at ${item.storeName}`}
-            className="btn-quiet inline-flex items-center justify-center gap-1.5"
+            style={{ color: "#9C978E", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 3 }}
           >
             View
-            <svg
-              viewBox="0 0 24 24"
-              className="size-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              aria-hidden
-            >
-              <path d="M7 17L17 7M7 7h10v10" />
-            </svg>
           </a>
           {inCart ? (
-            <button type="button" disabled className="btn-quiet">
-              In cart
-            </button>
+            <span style={{ fontSize: 13, color: "#9C978E" }}>In cart</span>
           ) : (
             <button
               type="button"
               onClick={onAdd}
-              aria-label={`Add the ${SLOT_LABELS[item.slot].toLowerCase()} to your cart`}
-              className="btn-quiet"
+              style={{ background: "none", border: 0, padding: 0, color: "#ECEBE8", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
             >
               Add
             </button>
@@ -945,7 +1122,7 @@ function FitRing({ score }: { score: number }) {
   const color = score >= 8 ? "var(--success)" : score >= 6 ? "var(--brass)" : "var(--danger)";
 
   return (
-    <div className="relative flex size-20 shrink-0 items-center justify-center" aria-hidden>
+    <div style={{ position: "relative", width: 80, height: 80, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }} aria-hidden>
       <svg width="80" height="80" viewBox="0 0 80 80" style={{ transform: "rotate(-90deg)" }}>
         <circle cx="40" cy="40" r={r} fill="none" stroke="var(--surface)" strokeWidth="5" />
         <circle
@@ -958,16 +1135,12 @@ function FitRing({ score }: { score: number }) {
           strokeLinecap="round"
           strokeDasharray={`${circ} ${circ}`}
           strokeDashoffset={offset}
-          style={{
-            transition: filled ? "stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
-          }}
+          style={{ transition: filled ? "stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1)" : "none" }}
         />
       </svg>
-      <div className="absolute flex flex-col items-center leading-none">
-        <span className="font-display text-[1.35rem]" style={{ color }}>
-          {score.toFixed(1)}
-        </span>
-        <span className="mt-0.5 text-small text-muted-foreground">/10</span>
+      <div style={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
+        <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 21, color }}>{score.toFixed(1)}</span>
+        <span style={{ marginTop: 2, fontSize: 11, color: "#9C978E" }}>/10</span>
       </div>
     </div>
   );
@@ -990,18 +1163,14 @@ function LookSwitcher({
   photo,
   active,
   onChoose,
-  wide = false,
 }: {
   looks: Look[];
   photo: Photo | null;
   active: number;
   onChoose: (index: number) => void;
-  wide?: boolean;
 }) {
-  if (wide) return null; // handled inside LookCard for wide mode
-
   return (
-    <div role="tablist" aria-label="Choose a look" className="mt-8 grid grid-cols-3 gap-1">
+    <div role="tablist" aria-label="Choose a look" style={{ marginTop: 32, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 }}>
       {looks.map((look, i) => {
         const on = active === i;
         const picture = look.renders.outfit ?? photo?.url;
@@ -1013,24 +1182,28 @@ function LookSwitcher({
             aria-selected={on}
             aria-label={`Look ${i + 1}: ${look.name}${look.fitCheck ? `, scored ${look.fitCheck.score.toFixed(1)}` : ""}`}
             onClick={() => onChoose(i)}
-            className={cn(
-              "flex min-h-11 items-center gap-2 p-1 text-left transition-colors sm:gap-3",
-              on ? "bg-ivory text-background" : "bg-surface hover:bg-surface-raised",
-            )}
+            style={{
+              display: "flex",
+              minHeight: 44,
+              alignItems: "center",
+              gap: 8,
+              padding: 4,
+              background: on ? "#ECEBE8" : "#141416",
+              color: on ? "#0A0A0B" : "#ECEBE8",
+              border: 0,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              textAlign: "left",
+            }}
           >
-            <span className="relative hidden aspect-[4/5] w-10 shrink-0 overflow-hidden bg-surface-raised sm:block lg:w-12">
-              {picture && (
-                <Image src={picture} alt="" fill sizes="48px" className="object-cover" {...RAW_IMG_PROPS} />
-              )}
+            <span style={{ position: "relative", width: 40, height: 50, flexShrink: 0, overflow: "hidden", background: "#1C1C1F", display: "none" }}>
+              {picture && <Image src={picture} alt="" fill sizes="48px" style={{ objectFit: "cover" }} {...RAW_IMG_PROPS} />}
             </span>
-            <span className="min-w-0 flex-1 py-1 pl-1 sm:pl-0">
-              <span className="line-clamp-1 text-small">{look.name}</span>
-              <span
-                className={cn(
-                  "block text-small tabular-nums",
-                  !on && "text-muted-foreground",
-                )}
-              >
+            <span style={{ flex: 1, minWidth: 0, padding: "4px 4px 4px 8px" }}>
+              <span style={{ display: "block", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {look.name}
+              </span>
+              <span style={{ display: "block", fontSize: 12, fontVariantNumeric: "tabular-nums", color: on ? "#666" : "#9C978E" }}>
                 {look.fitCheck ? `${look.fitCheck.score.toFixed(1)} of 10` : "Scoring…"}
               </span>
             </span>
@@ -1038,5 +1211,59 @@ function LookSwitcher({
         );
       })}
     </div>
+  );
+}
+
+function WmDots({ current }: { current: number }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }} aria-label={`Step ${current} of 5`}>
+      {[1, 2, 3, 4, 5].map((n) => {
+        const done = n < current;
+        const active = n === current;
+        return (
+          <span
+            key={n}
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: done || active ? "#C8A96A" : "#3A3A3F",
+              display: "block",
+              flexShrink: 0,
+              animation: active ? "wmPulse 1.6s ease-in-out infinite" : "none",
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function LookSvg() {
+  return (
+    <svg
+      viewBox="0 0 600 900"
+      preserveAspectRatio="xMidYMid slice"
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
+      aria-hidden
+    >
+      <rect width="600" height="900" fill="#26231F" />
+      <path
+        d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z"
+        fill="#1A1E2B"
+      />
+      <path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#E4E0D8" />
+      <path d="M292 496 L308 496 L314 520 L318 690 L300 716 L282 690 L286 520 Z" fill="#4A3526" />
+      <path d="M246 452 L216 470 L250 560 L230 580 L300 760 L272 600 Z" fill="#222738" />
+      <path d="M354 452 L384 470 L350 560 L370 580 L300 760 L328 600 Z" fill="#222738" />
+      <path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D" />
+      <ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D" />
+      <ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D" />
+      <ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F" />
+      <path
+        d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z"
+        fill="#16130F"
+      />
+    </svg>
   );
 }

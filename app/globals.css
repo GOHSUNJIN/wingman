@@ -11,6 +11,8 @@
   --color-brass: var(--brass);
   --color-ivory: var(--text);
   --color-danger: var(--danger);
+  --color-muted: var(--muted);
+  --color-text-soft: var(--text-soft);
   /* The light ground behind store product photos, close to their own backgrounds */
   --color-product: var(--product);
 
@@ -35,6 +37,8 @@
   --animate-nudge: nudge 2.4s cubic-bezier(0.76, 0, 0.24, 1) 0.6s 2;
   --animate-scan: scan 2.4s cubic-bezier(0.76, 0, 0.24, 1) infinite;
   --animate-step-enter: step-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-marq: wmMarq 40s linear infinite;
+  --animate-wm-pulse: wmPulse 1.6s ease-in-out infinite;
 }
 
 /* Loading: a band of brass light passes over the photo */
@@ -76,6 +80,11 @@
   --product: #d9d7d2;
   --success: #5fb58a;
   --danger: #e06c5f;
+  --muted: #9C978E;
+  --text-soft: #C9C5BD;
+  --raised-2: #26262A;
+  --dot-off: #3A3A3F;
+  --line-strong: #2A2A2E;
 
   /* Tier accent: budget warm amber, mid reuses brass, luxury cool silver */
   --tier-budget: #c4875a;
@@ -102,6 +111,35 @@
   --t-press: 140ms;
   --t-hover: 180ms;
   --t-reveal: 800ms;
+}
+
+@keyframes wmMarq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes wmIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes wmPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+@keyframes wmScan {
+  0% { top: -120px; }
+  100% { top: calc(100% + 120px); }
+}
+@keyframes wmBreath {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@keyframes wmBar {
+  0% { width: 8%; }
+  100% { width: 92%; }
+}
+@keyframes wmReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
 }
 
 @layer base {
