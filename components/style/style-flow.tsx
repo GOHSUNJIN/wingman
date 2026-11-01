@@ -266,7 +266,9 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
     try {
       const res = await fetch(endpoint, { method: "POST", body: form, signal: controller.signal });
       if (!res.ok || !res.body) {
-        return onFail("UNKNOWN", await errorFrom(res, "Something went wrong while styling. Please try again."));
+        const msg = await errorFrom(res, "Something went wrong while styling. Please try again.");
+        console.error(`[wingman/style] HTTP ${res.status}`, msg);
+        return onFail("UNKNOWN", msg);
       }
       let failed = false;
       await readEvents<StyleEvent>(res.body, (event) => {
@@ -335,6 +337,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
             break;
           case "error":
             failed = true;
+            console.error("[wingman/style] error event", event.code, event.message);
             onFail(event.code, event.message);
             break;
         }
@@ -411,6 +414,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
       const res = await fetch("/api/compare", { method: "POST", body: form, signal: controller.signal });
       if (!res.ok || !res.body) {
         const message = await errorFrom(res, "We couldn't compare prices for this look.");
+        console.error(`[wingman/compare] HTTP ${res.status}`, message);
         return update((s) => ({ ...s, status: "error", error: message }));
       }
       await readEvents<CompareEvent>(res.body, (event) => {
@@ -428,6 +432,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
             update((s) => ({ ...s, status: "done" }));
             break;
           case "error":
+            console.error("[wingman/compare] error event", event.message);
             update((s) => ({ ...s, status: "error", error: event.message }));
             break;
         }
@@ -483,7 +488,11 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
         body: JSON.stringify({ ...lookRef(look), slot, cheaper }),
         signal: controller.signal,
       });
-      if (!res.ok) throw new Error(await errorFrom(res, "We couldn't load alternatives. Please try again."));
+      if (!res.ok) {
+        const msg = await errorFrom(res, "We couldn't load alternatives. Please try again.");
+        console.error(`[wingman/swap-options] HTTP ${res.status}`, msg);
+        throw new Error(msg);
+      }
       const { options } = (await res.json()) as { options: LookItem[] };
       setSwapOptions((prev) => ({ ...prev, [key]: { status: "done", options } }));
     } catch (err) {
@@ -545,11 +554,15 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
     };
     try {
       const res = await fetch("/api/swap", { method: "POST", body: form, signal: controller.signal });
-      if (!res.ok || !res.body) return fail(await errorFrom(res, "That swap didn't work. Please try again."));
+      if (!res.ok || !res.body) {
+        const msg = await errorFrom(res, "That swap didn't work. Please try again.");
+        console.error(`[wingman/swap] HTTP ${res.status}`, msg);
+        return fail(msg);
+      }
       await readEvents<SwapEvent>(res.body, (event) => {
         if (event.type === "render") patch((l) => ({ ...l, renders: { ...l.renders, [event.kind]: event.url } }));
         else if (event.type === "fitcheck") patch((l) => ({ ...l, fitCheck: event.check }));
-        else if (event.type === "error") fail(event.message);
+        else if (event.type === "error") { console.error("[wingman/swap] error event", event.message); fail(event.message); }
       });
     } catch (err) {
       if (controller.signal.aborted) return;
