@@ -1,11 +1,65 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useId, useRef, useState } from "react";
-import { FlowShell, RAW_IMG_PROPS } from "@/components/style/flow-shell";
+import { RAW_IMG_PROPS } from "@/components/style/flow-shell";
 import type { Photo } from "@/components/style/style-flow";
 import { downscalePhoto } from "@/lib/photo/downscale";
 import type { PhotoCheck } from "@/lib/photo/problems";
+
+// ── Design tokens (inline — shared AppHeader to be extracted in Step 3) ──────
+const S = "#141416";     // surface
+const B = "#0A0A0B";     // bg
+const T = "#ECEBE8";     // text
+const M = "#9C978E";     // muted
+const G = "#C8A96A";     // gold
+
+const TIPS = [
+  {
+    title: "Even Lighting",
+    subtitle: "Face a window, not a lamp",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={T} strokeWidth="1.25" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+    ),
+  },
+  {
+    title: "Waist Up",
+    subtitle: "Shoulders and torso in frame",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={T} strokeWidth="1.25" aria-hidden="true">
+        <circle cx="12" cy="6" r="3" />
+        <path d="M5 22v-7a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v7" />
+        <path d="M3 22h18" strokeDasharray="2 2" />
+      </svg>
+    ),
+  },
+  {
+    title: "Face the Camera",
+    subtitle: "Straight on, arms relaxed",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={T} strokeWidth="1.25" aria-hidden="true">
+        <path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4" />
+        <circle cx="12" cy="11" r="3.5" />
+        <path d="M7.5 18a4.5 4.5 0 0 1 9 0" />
+      </svg>
+    ),
+  },
+  {
+    title: "Glasses Are Fine",
+    subtitle: "Wear what you'll wear on the day",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={T} strokeWidth="1.25" aria-hidden="true">
+        <circle cx="6.5" cy="14" r="3.5" />
+        <circle cx="17.5" cy="14" r="3.5" />
+        <path d="M10 14h4M3 13l2-6M21 13l-2-6" />
+      </svg>
+    ),
+  },
+] as const;
 
 export function PhotoStep({
   photo,
@@ -16,10 +70,10 @@ export function PhotoStep({
   photo: Photo | null;
   onPhoto: (photo: Photo) => void;
   onNext: () => void;
-  /** Shown after "Delete my photo". */
   notice?: string | null;
 }) {
   const inputId = useId();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -70,184 +124,505 @@ export function PhotoStep({
   const hard = photo?.check?.problems.find((p) => !p.soft);
   const soft = photo?.check?.problems.filter((p) => p.soft) ?? [];
   const shown = hard ? [hard] : soft;
+  const canProceed = photo && !checking && !hard;
 
   return (
-    <FlowShell step="Photo" wide back={{ label: "Back to the home page", href: "/" }} progress={{ current: 1, total: 3 }}>
-      {/* Full-width two-column grid on desktop */}
-      <div className="lg:-mx-(--margin) lg:mt-0 lg:grid lg:grid-cols-[1fr_1fr]">
+    <div
+      style={{
+        height: "100dvh",
+        background: B,
+        color: T,
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <header
+        style={{
+          height: "64px",
+          flexShrink: 0,
+          background: S,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 40px",
+        }}
+      >
+        <Link
+          href="/"
+          style={{
+            fontFamily: "var(--font-dm-serif), Georgia, serif",
+            fontSize: "20px",
+            letterSpacing: "0.2em",
+            color: T,
+            textDecoration: "none",
+          }}
+        >
+          WINGMAN
+        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            aria-label="Step 1 of 5"
+            role="status"
+          >
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span
+                key={i}
+                aria-hidden="true"
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: i === 0 ? G : "#3A3A3F",
+                  animation: i === 0 ? "wmPulse 1.6s ease-in-out infinite" : "none",
+                }}
+              />
+            ))}
+          </div>
+          <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+            01 · Your photo
+          </span>
+        </div>
+      </header>
 
-        {/* ── LEFT: Upload zone ── */}
-        <label
-          htmlFor={inputId}
-          className="relative block aspect-[4/5] w-full cursor-pointer overflow-hidden bg-surface transition-colors hover:bg-surface-raised focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brass lg:aspect-auto lg:h-[calc(100dvh-4rem)]"
+      {/* ── Main ───────────────────────────────────────────────────────────── */}
+      <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
+
+        {/* ── LEFT: Photo panel ─────────────────────────────────────────── */}
+        <section
+          aria-label="Photo upload"
+          style={{
+            width: "628px",
+            flexShrink: 0,
+            position: "relative",
+            background: S,
+            display: "flex",
+          }}
         >
           {photo ? (
-            <Image
-              src={photo.url}
-              alt="Your photo"
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover object-top"
-              {...RAW_IMG_PROPS}
-            />
-          ) : (
-            <span className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8 text-center">
-              <span
-                className="absolute inset-6 rounded-sm"
-                style={{ border: "1px dashed var(--line)" }}
-                aria-hidden
+            /* ── Uploaded state ── */
+            <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+              <Image
+                src={photo.url}
+                alt="Your uploaded selfie"
+                fill
+                sizes="628px"
+                className="object-cover object-top"
+                {...RAW_IMG_PROPS}
               />
-              <span className="relative flex flex-col items-center gap-3">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-10 text-brass"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.4}
-                  aria-hidden
+
+              {/* Checking overlay */}
+              {checking && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(10,10,11,0.35)",
+                    display: "flex",
+                    alignItems: "flex-end",
+                    padding: "0 40px 36px",
+                  }}
                 >
-                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
-                  <path d="M16 8l-4-4-4 4" />
-                  <path d="M12 4v12" />
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: G,
+                        animation: "wmPulse 1.6s ease-in-out infinite",
+                      }}
+                    />
+                    <span style={{ fontSize: "13px" }}>Checking your photo…</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom scrim */}
+              {!checking && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: "180px",
+                    background: "linear-gradient(to top, rgba(10,10,11,0.85), rgba(10,10,11,0))",
+                  }}
+                />
+              )}
+
+              {/* Bottom info bar */}
+              {!checking && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "40px",
+                    right: "40px",
+                    bottom: "32px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+                      Uploaded
+                    </span>
+                    <span style={{ fontSize: "14px" }}>Your photo</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    style={{
+                      background: "none",
+                      border: 0,
+                      padding: 0,
+                      fontSize: "14px",
+                      color: T,
+                      textDecoration: "underline",
+                      textUnderlineOffset: "4px",
+                      textDecorationThickness: "1px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Replace Photo
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* ── Empty state ── */
+            <div style={{ flex: 1, padding: "48px", display: "flex" }}>
+              <label
+                htmlFor={inputId}
+                style={{
+                  flex: 1,
+                  background: B,
+                  border: "1px dashed #5A5650",
+                  color: T,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "20px",
+                  cursor: "pointer",
+                  transition: "background 180ms ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = S)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = B)}
+              >
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={T}
+                  strokeWidth="1.25"
+                  aria-hidden="true"
+                >
+                  <path d="M12 16V4" />
+                  <path d="M7 9l5-5 5 5" />
+                  <path d="M4 16v4h16v-4" />
                 </svg>
-                <span className="text-lead">
-                  {busy ? "Reading your photo…" : "Upload your photo"}
+                <span
+                  style={{
+                    fontFamily: "var(--font-dm-serif), Georgia, serif",
+                    fontSize: "32px",
+                  }}
+                >
+                  {busy ? "Reading…" : "Upload Your Photo"}
                 </span>
-                <span className="text-small text-muted-foreground">
-                  Waist up, facing the camera
+                <span style={{ fontSize: "14px", color: M }}>
+                  Drag a selfie here, or click to choose. JPG or PNG, up to 15 MB.
                 </span>
-              </span>
-            </span>
+              </label>
+            </div>
           )}
-          {/* Checking overlay on the image */}
-          {photo && checking && (
-            <p className="absolute inset-x-0 bottom-0 bg-background/80 px-6 py-4 text-small">
-              Checking your photo works for a try-on…
-            </p>
-          )}
-          <input
-            id={inputId}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={(e) => {
-              void choose(e.target.files?.[0]);
-              e.target.value = "";
+        </section>
+
+        {/* ── RIGHT: Content panel ──────────────────────────────────────── */}
+        <section
+          style={{
+            flex: 1,
+            minWidth: 0,
+            padding: "72px 96px 40px",
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+            Step one
+          </span>
+          <h1
+            style={{
+              margin: "16px 0 0",
+              fontFamily: "var(--font-dm-serif), Georgia, serif",
+              fontWeight: 400,
+              fontSize: "64px",
+              lineHeight: 1,
             }}
-          />
-        </label>
+          >
+            Your Photo
+          </h1>
 
-        {/* ── RIGHT: Content panel ── */}
-        <div className="flex flex-col gap-6 py-8 lg:h-[calc(100dvh-4rem)] lg:overflow-y-auto lg:px-12 lg:py-10">
-
-          {/* Heading */}
-          <div>
-            <h1 className="text-head">Your photo</h1>
-            {notice && (
-              <p role="status" className="mt-4 bg-surface p-3">
-                {notice}
-              </p>
-            )}
-            <p className="mt-4 max-w-[36ch]">
-              One photo, waist up, facing the camera in good light. Glasses are fine. Wingman
-              tries the shirt or jacket on you; trousers, shoes and watches come as picks beside
-              it.
+          {/* Notice (after deleting photo) */}
+          {notice && (
+            <p
+              role="status"
+              style={{
+                margin: "16px 0 0",
+                padding: "12px 16px",
+                background: S,
+                fontSize: "14px",
+                color: M,
+              }}
+            >
+              {notice}
             </p>
+          )}
+
+          <p
+            style={{
+              margin: "20px 0 0",
+              fontSize: "16px",
+              lineHeight: 1.6,
+              color: M,
+              maxWidth: "440px",
+            }}
+          >
+            Every look is tried on this picture. A clear, honest selfie gets you a try-on you can
+            trust.
+          </p>
+
+          {/* Tips + example figure */}
+          <div
+            style={{
+              marginTop: "40px",
+              display: "flex",
+              gap: "32px",
+              alignItems: "flex-start",
+            }}
+          >
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: "22px",
+                flex: 1,
+              }}
+            >
+              {TIPS.map((tip) => (
+                <li
+                  key={tip.title}
+                  style={{ display: "flex", alignItems: "center", gap: "16px" }}
+                >
+                  {tip.icon}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <span style={{ fontSize: "15px", fontWeight: 500 }}>{tip.title}</span>
+                    <span style={{ fontSize: "13px", color: M }}>{tip.subtitle}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Example figure */}
+            <figure
+              style={{
+                margin: 0,
+                width: "112px",
+                flexShrink: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <div
+                style={{
+                  width: "112px",
+                  height: "148px",
+                  position: "relative",
+                  overflow: "hidden",
+                  background: "#1C1C1F",
+                }}
+              >
+                {/* TODO: replace with a clean example selfie image */}
+                <Image
+                  src="/home/before.jpg"
+                  alt="Example: waist-up, front-facing, evenly lit selfie"
+                  fill
+                  sizes="112px"
+                  className="object-cover object-[50%_20%]"
+                />
+              </div>
+              <figcaption
+                style={{
+                  fontSize: "12px",
+                  letterSpacing: "0.02em",
+                  color: M,
+                }}
+              >
+                Like this
+              </figcaption>
+            </figure>
           </div>
 
-          {/* Example photo — shown on desktop, hidden on mobile */}
-          <figure className="hidden lg:block">
-            <div className="relative aspect-[4/5] w-28 overflow-hidden bg-surface">
-              <Image
-                src="/home/before.jpg"
-                alt="Example: waist up, facing the camera"
-                fill
-                sizes="112px"
-                className="object-cover object-[50%_25%]"
-              />
-            </div>
-            <figcaption className="mt-2 text-small text-muted-foreground">Like this</figcaption>
-          </figure>
-
-          {/* Tips */}
-          <section aria-labelledby="photo-tips">
-            <h2 id="photo-tips" className="subhead">
-              What works best
-            </h2>
-            <ul className="mt-3 flex list-disc flex-col gap-2 pl-5 marker:text-muted-foreground">
-              <li>Stand facing a window or a lamp, so your face is evenly lit.</li>
-              <li>Waist up, with your head, shoulders and chest in the frame.</li>
-              <li>Just you, looking straight at the camera.</li>
-              <li>Glasses are fine. Hats, masks and hands over your face get in the way.</li>
-            </ul>
-          </section>
-
-          {/* Problems */}
+          {/* Problems / alerts */}
           {problem && (
-            <p role="alert" className="text-danger">
+            <p role="alert" style={{ margin: "24px 0 0", fontSize: "14px", color: "#E06C5F" }}>
               {problem}
             </p>
           )}
           {photo?.zoomed && !checking && !hard && (
-            <p role="status">
+            <p role="status" style={{ margin: "16px 0 0", fontSize: "14px", color: M }}>
               You were a little far from the camera, so we zoomed in to waist up.
             </p>
           )}
           {photo && !checking && shown.length > 0 && (
-            <div role="alert" className="bg-surface p-4">
+            <div
+              role="alert"
+              style={{
+                margin: "24px 0 0",
+                padding: "16px 20px",
+                background: S,
+              }}
+            >
               {shown.map((p) => (
-                <div key={p.code} className="not-first:mt-4">
-                  <p className="text-lead">{p.message}</p>
-                  <p className="mt-1">{p.tip}</p>
+                <div key={p.code} style={{ marginTop: p === shown[0] ? 0 : "16px" }}>
+                  <p style={{ margin: 0, fontSize: "15px", fontWeight: 500 }}>{p.message}</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "14px", color: M }}>{p.tip}</p>
                 </div>
               ))}
               {!hard && (
-                <p className="mt-4 text-muted-foreground">
+                <p style={{ margin: "12px 0 0", fontSize: "13px", color: M }}>
                   It may still work, so you can use it anyway.
                 </p>
               )}
             </div>
           )}
 
-          {/* Action buttons */}
-          {photo && !checking && (
-            <div className="flex flex-col gap-2">
-              {shown.length > 0 ? (
-                <label htmlFor={inputId} className="btn w-full cursor-pointer">
-                  Choose a different photo
-                </label>
-              ) : (
-                <button type="button" onClick={onNext} className="btn w-full">
-                  Use this photo
-                </button>
-              )}
-              {shown.length > 0 && !hard && (
-                <button
-                  type="button"
-                  onClick={onNext}
-                  className="text-link flex min-h-11 items-center justify-center"
-                >
-                  Use it anyway
-                </button>
-              )}
-              {shown.length === 0 && (
-                <label
-                  htmlFor={inputId}
-                  className="text-link flex min-h-11 cursor-pointer items-center justify-center text-muted-foreground"
-                >
-                  Choose a different photo
-                </label>
-              )}
-            </div>
-          )}
+          {/* ── Bottom actions ── */}
+          <div
+            style={{
+              marginTop: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: "28px",
+            }}
+          >
+            {photo && !checking && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {shown.length > 0 ? (
+                  /* Hard block or soft warn: replace first, bypass available */
+                  <>
+                    <label
+                      htmlFor={inputId}
+                      style={{
+                        height: "56px",
+                        background: G,
+                        color: B,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "15px",
+                        fontWeight: 600,
+                        letterSpacing: "0.04em",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Choose a Different Photo
+                    </label>
+                    {!hard && (
+                      <button
+                        type="button"
+                        onClick={onNext}
+                        style={{
+                          background: "none",
+                          border: 0,
+                          padding: 0,
+                          fontSize: "14px",
+                          color: M,
+                          textDecoration: "underline",
+                          textUnderlineOffset: "4px",
+                          textDecorationThickness: "1px",
+                          cursor: "pointer",
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        Use it anyway
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  /* Good photo: proceed */
+                  <>
+                    <button
+                      type="button"
+                      onClick={onNext}
+                      style={{
+                        height: "56px",
+                        background: G,
+                        color: B,
+                        border: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "15px",
+                        fontWeight: 600,
+                        letterSpacing: "0.04em",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Use This Photo
+                    </button>
+                    <label
+                      htmlFor={inputId}
+                      style={{
+                        alignSelf: "flex-start",
+                        fontSize: "14px",
+                        color: M,
+                        textDecoration: "underline",
+                        textUnderlineOffset: "4px",
+                        textDecorationThickness: "1px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Choose a different photo
+                    </label>
+                  </>
+                )}
+              </div>
+            )}
 
-          {/* Privacy note — pushed to bottom on desktop */}
-          <p className="mt-auto text-small text-muted-foreground">
-            Only used to style you. Try-ons are deleted after 24 hours.
-          </p>
-        </div>
-      </div>
-    </FlowShell>
+            <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: M }}>
+              Your photo is only used to render your try-ons. Delete it any time from your looks.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      {/* ── Hidden file input ─────────────────────────────────────────────── */}
+      <input
+        ref={fileRef}
+        id={inputId}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={(e) => {
+          void choose(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
+    </div>
   );
 }
 
