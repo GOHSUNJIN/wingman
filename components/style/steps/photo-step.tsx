@@ -351,10 +351,11 @@ export function PhotoStep({
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "72px 96px 40px",
+            padding: "48px 72px 40px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
+            overflowY: "auto",
           }}
         >
           <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>

@@ -102,7 +102,7 @@ export function HeroWindow({ before, after, alt }: Props) {
         {/* Text sits above the picture and leaves before the opening reaches it */}
         <div className="hero__text pointer-events-none absolute inset-0 px-(--margin)">
           <header className="pointer-events-auto flex h-16 items-center justify-between pt-[env(safe-area-inset-top)] md:h-20">
-            <span className="font-display text-lead tracking-[-0.01em]">Wingman</span>
+            <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: "20px", letterSpacing: "0.2em", color: "#ECEBE8" }}>WINGMAN</span>
             <nav aria-label="Main" className="flex gap-6 text-small">
               <a href="#looks" className="text-link hidden min-h-11 items-center md:inline-flex">
                 The looks

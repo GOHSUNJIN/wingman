@@ -31,7 +31,7 @@ export function SiteFooter() {
         <span
           style={{
             fontFamily: "var(--font-dm-serif), Georgia, serif",
-            fontSize: "18px",
+            fontSize: "20px",
             letterSpacing: "0.2em",
             color: "#ECEBE8",
           }}

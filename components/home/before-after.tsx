@@ -2,100 +2,177 @@ import Image from "next/image";
 
 export function BeforeAfter() {
   return (
-    <section aria-labelledby="ba-heading" style={{ background: "#1C1A17" }}>
+    <section
+      aria-labelledby="tryon-heading"
+      style={{
+        background: "#0F0F11",
+        overflow: "hidden",
+        display: "flex",
+        minHeight: "680px",
+      }}
+    >
+      {/* Render — bleeds to the left viewport edge, no margin */}
       <div
         style={{
-          maxWidth: "1280px",
-          margin: "0 auto",
-          padding: "120px 24px",
-          boxSizing: "border-box",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "64px",
-          alignItems: "center",
+          flex: "0 0 clamp(320px, 44vw, 560px)",
+          position: "relative",
+          overflow: "hidden",
+          borderRight: "2px solid #C8A96A",
         }}
       >
-        {/* Photos side-by-side */}
+        <Image
+          src="/home/wedding.jpg"
+          alt="Ballroom Navy look rendered on a selfie"
+          fill
+          priority
+          sizes="(min-width: 1024px) 44vw, 90vw"
+          style={{ objectFit: "cover", objectPosition: "50% 15%" }}
+          unoptimized
+        />
+
+        {/* Scan line */}
         <div
+          aria-hidden="true"
           style={{
-            flex: "1 1 520px",
-            minWidth: 0,
+            position: "absolute",
+            left: 0,
+            right: 0,
+            height: 100,
             display: "flex",
-            gap: "16px",
-            alignItems: "flex-end",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            animation: "wmScan 4.5s cubic-bezier(0.45, 0, 0.55, 1) infinite",
           }}
         >
-          {/* Before */}
-          <figure style={{ flex: 1, margin: "0 0 48px", display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
-              <Image
-                src="/home/before.jpg"
-                alt="Before: the plain selfie you upload"
-                fill
-                sizes="(min-width: 1024px) 25vw, 45vw"
-                style={{ objectFit: "cover", objectPosition: "50% 20%" }}
-                unoptimized
-              />
-            </div>
-            <figcaption style={{ fontSize: "13px", color: "#9C978E" }}>Before · your selfie</figcaption>
-          </figure>
-
-          {/* After (larger) */}
-          <figure style={{ flex: 1.25, margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
-              <Image
-                src="/home/wedding.jpg"
-                alt="After: Ballroom Navy look tried on the selfie"
-                fill
-                sizes="(min-width: 1024px) 31vw, 55vw"
-                style={{ objectFit: "cover", objectPosition: "50% 20%" }}
-                unoptimized
-              />
-              {/* Scan line */}
-              <div
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  height: 120,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  animation: "wmScan 5s cubic-bezier(0.45, 0, 0.55, 1) infinite",
-                }}
-              >
-                <div style={{ flex: 1, background: "rgba(200,169,106,0.07)" }} />
-                <div style={{ height: 2, background: "#C8A96A" }} />
-              </div>
-            </div>
-            <figcaption style={{ fontSize: "13px", color: "#9C978E" }}>After · Ballroom Navy, on you</figcaption>
-          </figure>
+          <div style={{ flex: 1, background: "rgba(200,169,106,0.06)" }} />
+          <div style={{ height: 2, background: "#C8A96A" }} />
         </div>
 
-        {/* Copy */}
-        <div style={{ flex: "1 1 380px", minWidth: 0, display: "flex", flexDirection: "column" }}>
-          <span style={{ fontSize: "13px", color: "#9C978E" }}>The try-on</span>
-          <h2
-            id="ba-heading"
+        {/* Bottom scrim */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 180,
+            background: "linear-gradient(to top, rgba(15,15,17,0.88), transparent)",
+          }}
+        />
+
+        {/* Look label */}
+        <div
+          style={{
+            position: "absolute",
+            left: 32,
+            bottom: 32,
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+          }}
+        >
+          <span style={{ fontSize: 12, color: "#9C978E", letterSpacing: "0.02em" }}>
+            Rendered look
+          </span>
+          <span
             style={{
-              margin: "16px 0 0",
               fontFamily: "var(--font-dm-serif), Georgia, serif",
-              fontWeight: 400,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1,
+              fontSize: 20,
+              color: "#ECEBE8",
             }}
           >
-            You&apos;re the Model in{" "}
-            <span style={{ fontStyle: "italic", color: "#C8A96A" }}>Every Shot.</span>
-          </h2>
-          <p style={{ margin: "24px 0 0", fontSize: "17px", lineHeight: 1.65, color: "#9C978E" }}>
-            No mannequins, no guessing from a flat lay. You judge the colours against your own skin and the cut
-            against your own frame, before a single dollar moves.
-          </p>
-          <p style={{ margin: "20px 0 0", fontSize: "17px", lineHeight: 1.65, color: "#9C978E" }}>
-            And the night before, Wingman sends a short prep plan, so the day itself is just getting dressed.
-          </p>
+            Ballroom Navy
+          </span>
+        </div>
+      </div>
+
+      {/* Copy — right side */}
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "80px clamp(40px, 7vw, 120px) 80px clamp(40px, 5vw, 96px)",
+          boxSizing: "border-box",
+        }}
+      >
+        <h2
+          id="tryon-heading"
+          style={{
+            margin: 0,
+            fontFamily: "var(--font-dm-serif), Georgia, serif",
+            fontWeight: 400,
+            fontSize: "clamp(44px, 4.5vw, 68px)",
+            lineHeight: 1.05,
+            color: "#ECEBE8",
+          }}
+        >
+          On you.
+          <br />
+          Not a mannequin.
+        </h2>
+
+        <div
+          aria-hidden="true"
+          style={{ width: 52, height: 2, background: "#C8A96A", margin: "32px 0" }}
+        />
+
+        <p
+          style={{
+            margin: 0,
+            fontSize: 17,
+            lineHeight: 1.65,
+            color: "#9C978E",
+            maxWidth: 420,
+          }}
+        >
+          Every look is rendered onto your photo before you decide. Judge the colours against your
+          own skin and the cut against your own frame, before a single dollar moves.
+        </p>
+        <p
+          style={{
+            margin: "20px 0 0",
+            fontSize: 17,
+            lineHeight: 1.65,
+            color: "#9C978E",
+            maxWidth: 420,
+          }}
+        >
+          The night before, a short grooming prep plan. So the day itself is just getting dressed.
+        </p>
+
+        {/* Proof row */}
+        <div
+          style={{
+            marginTop: 52,
+            display: "flex",
+            gap: 40,
+            flexWrap: "wrap",
+          }}
+        >
+          {[
+            ["2–3", "looks per occasion"],
+            ["15+", "Singapore stores"],
+            ["0", "payment to Wingman"],
+          ].map(([num, label]) => (
+            <div key={num + label} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-dm-serif), Georgia, serif",
+                  fontSize: 36,
+                  lineHeight: 1,
+                  color: "#ECEBE8",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {num}
+              </span>
+              <span style={{ fontSize: 13, color: "#9C978E" }}>{label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
