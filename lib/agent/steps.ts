@@ -7,7 +7,6 @@ import { tierPoolLines, type TierPool } from "@/lib/agent/pick/match";
 import { SLOTS } from "@/lib/agent/slots";
 import type { Tier } from "@/lib/catalog/types";
 import { generateStructured } from "@/lib/llm/client";
-import { BEARD_STYLES } from "./grooming";
 import {
   FitCheckSchema,
   LookPicksSchema,
@@ -78,11 +77,9 @@ export async function refineOccasion(args: {
       "the new one (\"no white sneakers\", \"shoes under S$150\"). setting stays unless he changes the place. " +
       "First decide the verdict. reject (and leave the brief unchanged) when the request: is not about his outfit for this " +
       "event (questions, chit-chat, gibberish); asks to change his body, face, skin, hair colour or height; asks for something " +
-      "Wingman doesn't sell (it only picks tops, jackets, trousers, shoes and watches: no hats, bags, glasses, ties, jewellery " +
+      "Wingman doesn't sell (it only picks tops and jackets: no trousers, shoes, watches, hats, bags, ties, jewellery " +
       "or womenswear); or is insulting or unsafe. Otherwise apply. reply is one short, friendly sentence in second person: " +
-      "for reject, why not and one example of what he can ask instead; for apply, what you changed. Wingman's try-on only " +
-      "draws the shirt or jacket on his photo, so when the request is only about trousers, shoes or a watch, apply it and " +
-      "say the new pieces show in each look's list rather than on him.",
+      "for reject, why not and one example of what he can ask instead; for apply, what you changed.",
     content: [
       {
         type: "text",
@@ -129,11 +126,9 @@ export async function selectLooks(args: {
     system:
       "You are Wingman, a menswear stylist in Singapore. Build up to 3 distinct, coherent outfits for this man and this " +
       "occasion, using only the product ids listed. Only include looks you would stand behind: if the candidates only " +
-      "support one or two strong looks, return one or two rather than padding with a weak one or repeating a piece: every look uses a different top and a different outerwear piece. Each look needs a top, a bottom and shoes; " +
-      "outerwear and a watch are optional (use null). Add a watch only when it lifts the look and keeps the total sensible " +
-      "for the budget tier; the clothes come first. Prefer one or two stores per look so checkout stays simple. " +
+      "support one or two strong looks, return one or two rather than padding with a weak one or repeating a piece: every look uses a different top and a different outerwear piece. Each look needs a top; " +
+      "outerwear is optional (use null). Prefer one or two stores per look so checkout stays simple. " +
       "Choose colours that flatter the skin tone and colouring you see in his photo. The photo may show glasses; ignore them. " +
-      `beard is one of [${BEARD_STYLES.join(", ")}] or null to keep his current beard; only change it when it clearly helps. ` +
       "name is 2 to 4 words and describes only what the try-on shows on him: the outerwear when the look has one, " +
       "otherwise the top. A shirt under a jacket is hidden in the try-on, so never name the look after it. why is one sentence on why the look works for him and the occasion. Singapore is hot and humid.",
     content: [

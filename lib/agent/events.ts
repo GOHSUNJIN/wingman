@@ -6,7 +6,7 @@ import type { Slot } from "@/lib/agent/slots";
 import type { Tier } from "@/lib/catalog/types";
 import type { ParsedOccasion, PrepPlan } from "./schemas";
 
-export type RenderKind = "outfit" | "hair" | "beard";
+export type RenderKind = "outfit" | "hair";
 
 export type LookItem = {
   slot: Slot;
@@ -29,11 +29,9 @@ export type Look = {
   why: string;
   items: LookItem[];
   hair: string | null;
-  beard: string | null;
   renders: {
     outfit?: string;
     hair?: string;
-    beard?: string;
     errors: string[];
     /** Images that failed this run, with the error code; cleared when one is tried again. */
     failed?: Partial<Record<RenderKind, string>>;
@@ -93,7 +91,7 @@ export type TierVersion = {
 /** Streamed by /api/compare, one JSON object per line. */
 export type CompareEvent =
   | { type: "versions"; versions: TierVersion[] }
-  | { type: "render"; tier: Tier; kind: Exclude<RenderKind, "beard">; url: string }
+  | { type: "render"; tier: Tier; kind: RenderKind; url: string }
   | { type: "fitcheck"; tier: Tier; check: NonNullable<Look["fitCheck"]> }
   | { type: "done" }
   | { type: "error"; code: string; message: string };

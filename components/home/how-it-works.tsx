@@ -2,12 +2,12 @@ const STEPS = [
   {
     num: "1",
     heading: "Upload One Selfie",
-    body: "Waist up, even light, facing the camera. It's the only photo Wingman needs, and you can delete it any time.",
+    body: "Waist up, even light, facing the camera. It's the only photo Wingman needs and you can delete it any time.",
   },
   {
     num: "2",
     heading: "Describe the Night",
-    body: "Pick the occasion, tell it about the venue and dress code in your own words, and set a budget.",
+    body: "Pick the occasion, tell it about the venue and dress code in your own words and set a budget.",
   },
   {
     num: "3",
@@ -257,7 +257,7 @@ export function HowItWorks() {
           boxSizing: "border-box",
         }}
       >
-        <span style={{ fontSize: "13px", color: "#9C978E" }}>How it works</span>
+        <span style={{ fontSize: "15px", color: "#9C978E", textTransform: "uppercase", letterSpacing: "0.08em" }}>How it works</span>
         <h2
           id="how-heading"
           style={{

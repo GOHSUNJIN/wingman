@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BEARD_STYLES, BEARD_TEMPLATES, HAIR_STYLES, HAIR_TEMPLATES } from "@/lib/agent/grooming";
+import { HAIR_STYLES, HAIR_TEMPLATES } from "@/lib/agent/grooming";
 import {
   FitCheckSchema,
   LookPicksSchema,
@@ -12,16 +12,12 @@ import {
   SwapOptionsRequestSchema,
   TierPicksSchema,
 } from "@/lib/agent/schemas";
-import beardTemplates from "../../../fixtures/youcam/beard-templates.json";
 import hairTemplates from "../../../fixtures/youcam/hair-templates.json";
 
 const look = {
   name: "Rooftop easy",
   top: "a",
   outerwear: null,
-  bottom: "b",
-  shoes: "c",
-  watch: null,
   beard: null,
   why: "Works.",
 };
@@ -76,7 +72,7 @@ describe("Price Compare schemas", () => {
   });
 
   it("takes one or two tier versions", () => {
-    const version = { tier: "budget", top: "a", outerwear: null, bottom: "b", shoes: "c", watch: null, note: "Cheaper." };
+    const version = { tier: "budget", top: "a", outerwear: null, note: "Cheaper." };
     expect(TierPicksSchema.safeParse({ versions: [version, { ...version, tier: "luxury" }] }).success).toBe(true);
     expect(TierPicksSchema.safeParse({ versions: [] }).success).toBe(false);
     expect(TierPicksSchema.safeParse({ versions: [{ ...version, tier: "cheap" }] }).success).toBe(false);
@@ -106,23 +102,21 @@ describe("Refine and swap schemas", () => {
   });
 
   it("needs a known slot to swap", () => {
-    const look = { name: "Rooftop easy", tier: "mid", items: [{ slot: "shoes", id: "a" }], hair: null, occasion };
-    expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "shoes" }).success).toBe(true);
+    const look = { name: "Rooftop easy", tier: "mid", items: [{ slot: "top", id: "a" }], hair: null, occasion };
+    expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "top" }).success).toBe(true);
     expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "hat" }).success).toBe(false);
   });
 
   it("takes an optional cheaper flag", () => {
-    const look = { name: "Rooftop easy", tier: "mid", items: [{ slot: "shoes", id: "a" }], hair: null, occasion };
-    expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "shoes", cheaper: true }).success).toBe(true);
-    expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "shoes", cheaper: "yes" }).success).toBe(false);
+    const look = { name: "Rooftop easy", tier: "mid", items: [{ slot: "top", id: "a" }], hair: null, occasion };
+    expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "top", cheaper: true }).success).toBe(true);
+    expect(SwapOptionsRequestSchema.safeParse({ ...look, slot: "top", cheaper: "yes" }).success).toBe(false);
   });
 });
 
 describe("grooming templates", () => {
   it("only offers template ids that exist in YouCam's listings", () => {
     const hairIds = new Set(hairTemplates.map((t) => t.id));
-    const beardIds = new Set(beardTemplates.map((t) => t.id));
     for (const style of HAIR_STYLES) expect(hairIds.has(HAIR_TEMPLATES[style])).toBe(true);
-    for (const style of BEARD_STYLES) expect(beardIds.has(BEARD_TEMPLATES[style])).toBe(true);
   });
 });

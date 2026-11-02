@@ -3,8 +3,7 @@ export type Box = { x: number; y: number; width: number; height: number };
 /**
  * Crop boxes around a face for each YouCam API's framing rules:
  * - hair: head and shoulders (hair VTO errors without shoulders), 4:5
- * - face: face fills ~2/3 of the width (skin analysis wants 60-80%; beard needs
- *   face > 256px after resizing to < 1024px), 4:5
+ * - face: face fills ~2/3 of the width (skin analysis wants 60-80% of the width, face > 256px), 4:5
  * Boxes are clamped to the image and shifted rather than shrunk where possible.
  */
 export function cropBoxes(face: Box, imageWidth: number, imageHeight: number) {
@@ -46,7 +45,7 @@ export function zoomBox(face: Box, imageWidth: number, imageHeight: number, minF
     imageHeight,
   );
   // Nearly the whole photo: zooming wouldn't gain anything
-  return box.width * box.height < imageWidth * imageHeight * 0.8 ? box : null;
+  return box.width * box.height < imageWidth * imageHeight * 0.95 ? box : null;
 }
 
 /** Clamp a box to the image, shifting it inward before shrinking it. */

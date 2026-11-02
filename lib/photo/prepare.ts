@@ -21,7 +21,7 @@ export type PreparedPhoto = {
   full: Buffer;
   /** Head and shoulders, long side <= 1024: hair try-on. */
   headShoulders: Buffer;
-  /** Close face, levelled, long side 1000: beard try-on and skin analysis. */
+  /** Close face, levelled, long side 1000: skin analysis. */
   closeFace: Buffer;
 };
 
@@ -190,8 +190,8 @@ export async function preparePhoto(input: Buffer, locate: FaceLocator = locateFa
     size: { width, height },
     full: await sharp(normalised).resize(2048, 2048, { fit: "inside", withoutEnlargement: true }).jpeg({ quality: 92 }).toBuffer(),
     headShoulders: await cropTo(normalised, boxes.hair, 1024),
-    // Always 1000px long side (4:5 → 800px short side): beard needs < 1024 with face > 256px,
-    // skin analysis needs short side >= 480 with the face at 60-80% of the width.
+    // Always 1000px long side (4:5 → 800px short side): skin analysis needs short side >= 480
+    // with the face at 60-80% of the width.
     closeFace: await levelledCrop(normalised, boxes.face, face.roll, 1000),
   };
 }

@@ -82,8 +82,8 @@ async function main() {
       const sizes = item.sizes.map((s) => s.size).join(" ");
       console.info(`  ${item.slot.padEnd(9)} S$${item.price.toFixed(2).padStart(8)}  ${item.name} (${item.storeName}) [${sizes}]`);
     }
-    console.info(`  hair: ${look.hair ?? "keep"}  beard: ${look.beard ?? "keep"}`);
-    console.info(`  renders: outfit ${short(look.renders.outfit)} | hair ${short(look.renders.hair)} | beard ${short(look.renders.beard)}`);
+    console.info(`  hair: ${look.hair ?? "keep"}`);
+    console.info(`  renders: outfit ${short(look.renders.outfit)} | hair ${short(look.renders.hair)}`);
     if (look.renders.errors.length) console.info(`  render errors: ${look.renders.errors.join(", ")}`);
     console.info(`  Fit Check: ${look.fitCheck?.reasoning ?? "none"}\n`);
   }

@@ -4,12 +4,11 @@
  */
 import type { Look, RenderKind } from "./events";
 
-/** The images a look gets: the outfit when it has a top or jacket, then hair and beard when picked. */
-export function expectedKinds(look: Pick<Look, "items" | "hair" | "beard">): RenderKind[] {
+/** The images a look gets: the outfit when it has a top or jacket, then hair when picked. */
+export function expectedKinds(look: Pick<Look, "items" | "hair">): RenderKind[] {
   const kinds: RenderKind[] = [];
   if (look.items.some((i) => i.slot === "top" || i.slot === "outerwear")) kinds.push("outfit");
   if (look.hair) kinds.push("hair");
-  if (look.beard) kinds.push("beard");
   return kinds;
 }
 

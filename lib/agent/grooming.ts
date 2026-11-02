@@ -15,14 +15,4 @@ export const HAIR_TEMPLATES: Record<string, string> = {
   "Dark Brown Flow": "male_dark_brown_flow",
 };
 
-export const BEARD_TEMPLATES: Record<string, string> = {
-  Shaved: "all_shaved",
-  Circle: "all_circle",
-  Goatee: "all_goatee",
-  Anchor: "all_anchor",
-  Garibaldi: "all_garibaldi",
-  Bandholz: "all_bandholz",
-};
-
 export const HAIR_STYLES = Object.keys(HAIR_TEMPLATES);
-export const BEARD_STYLES = Object.keys(BEARD_TEMPLATES);

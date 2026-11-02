@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const SUB_SCORES = [
@@ -24,7 +25,7 @@ const NOTES = [
   },
 ] as const;
 
-const CIRC = 2 * Math.PI * 33; // ≈ 207.3 — circumference for r=33
+const CIRC = 2 * Math.PI * 33; // approx 207.3, circumference for r=33
 
 function scoreColor(v: number) {
   if (v >= 8) return "#5FB58A";
@@ -70,7 +71,7 @@ function RingGauge({ label, value, filled }: { label: string; value: number; fil
           {value.toFixed(1)}
         </span>
       </div>
-      <span style={{ fontSize: "12px", color: "#9C978E" }}>{label}</span>
+      <span style={{ fontSize: "13px", color: "#9C978E" }}>{label}</span>
     </div>
   );
 }
@@ -116,7 +117,7 @@ export function FitCheck() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: "13px", color: "#9C978E" }}>Fit Check</span>
+            <span style={{ fontSize: "15px", color: "#9C978E", textTransform: "uppercase", letterSpacing: "0.08em" }}>Fit Check</span>
             <h2
               id="fit-heading"
               style={{
@@ -156,30 +157,14 @@ export function FitCheck() {
             }}
           >
             <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
-              {/* TODO: replace with real Ballroom Navy try-on render */}
-              <svg
-                viewBox="0 0 600 900"
-                preserveAspectRatio="xMidYMid slice"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
-                role="img"
-                aria-label="Ballroom Navy try-on with 3 numbered notes (placeholder)"
-              >
-                <rect width="600" height="900" fill="#4A4238" />
-                <path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill="#1A1E2B" />
-                <path d="M150 600 L138 900" stroke="#0A0A0B" strokeOpacity="0.35" strokeWidth="5" />
-                <path d="M450 600 L462 900" stroke="#0A0A0B" strokeOpacity="0.35" strokeWidth="5" />
-                <path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill="#E4E0D8" />
-                <path d="M292 496 L308 496 L314 520 L318 690 L300 716 L282 690 L286 520 Z" fill="#6B4A32" />
-                <path d="M246 452 L216 470 L250 560 L230 580 L300 760 L272 600 Z" fill="#222738" />
-                <path d="M354 452 L384 470 L350 560 L370 580 L300 760 L328 600 Z" fill="#222738" />
-                <path d="M392 604 L434 598 L432 612 L394 616 Z" fill="#E4E0D8" />
-                <path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D" />
-                <ellipse cx="222" cy="300" rx="12" ry="24" fill="#3E342D" />
-                <ellipse cx="378" cy="300" rx="12" ry="24" fill="#3E342D" />
-                <ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F" />
-                <path d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z" fill="#16130F" />
-                <path d="M160 486 Q90 512 66 620" stroke="#FFFFFF" strokeOpacity="0.14" strokeWidth="3" fill="none" />
-              </svg>
+              <Image
+                src="/home/fit-check-render.jpg"
+                alt="Navy blazer try-on render with fit annotations"
+                fill
+                sizes="(max-width: 768px) 100vw, 40vw"
+                style={{ objectFit: "cover", objectPosition: "50% 8%", transform: "scale(1.2)", transformOrigin: "50% 15%" }}
+                unoptimized
+              />
 
               {/* Numbered pins */}
               {[
@@ -261,7 +246,7 @@ export function FitCheck() {
               }}
             >
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <span style={{ fontSize: "13px", color: "#9C978E" }}>Wedding guest · Overall</span>
+                <span style={{ fontSize: "14px", color: "#9C978E" }}>Wedding guest · Overall</span>
                 <span
                   style={{
                     fontFamily: "var(--font-dm-serif), Georgia, serif",

@@ -22,15 +22,11 @@ export type ParsedOccasion = z.infer<typeof ParsedOccasionSchema> & {
   maxBudget?: number;
 };
 
-/** One look as Claude picks it: product ids from the candidate list, grooming by template title. */
+/** One look as Claude picks it: product ids from the candidate list. */
 const LookPickSchema = z.object({
   name: z.string(),
   top: z.string(),
   outerwear: z.string().nullable(),
-  bottom: z.string(),
-  shoes: z.string(),
-  watch: z.string().nullable(),
-  beard: z.string().nullable(),
   why: z.string(),
 });
 export type LookPick = z.infer<typeof LookPickSchema>;
@@ -42,9 +38,6 @@ const TierPickSchema = z.object({
   tier: z.enum(TIERS),
   top: z.string().nullable(),
   outerwear: z.string().nullable(),
-  bottom: z.string().nullable(),
-  shoes: z.string().nullable(),
-  watch: z.string().nullable(),
   /** One short sentence on what changes at this price (fabric, make, details). */
   note: z.string(),
 });
@@ -52,7 +45,7 @@ export type TierPick = z.infer<typeof TierPickSchema>;
 
 export const TierPicksSchema = z.object({ versions: z.array(TierPickSchema).min(1).max(2) });
 
-const SlotSchema = z.enum(["top", "outerwear", "bottom", "shoes", "watch"]);
+const SlotSchema = z.enum(["top", "outerwear"]);
 
 /** The parsed occasion as the client holds it; a budget cap may be set by refine. */
 const ClientOccasionSchema = ParsedOccasionSchema.extend({ maxBudget: z.number().positive().nullish() });
@@ -68,10 +61,8 @@ export const fromClient = (occasion: z.infer<typeof ClientOccasionSchema>, tier:
 const LookRefSchema = z.object({
   name: z.string().max(80),
   tier: z.enum(TIERS),
-  items: z.array(z.object({ slot: SlotSchema, id: z.string().max(200) })).min(1).max(5),
+  items: z.array(z.object({ slot: SlotSchema, id: z.string().max(200) })).min(1).max(2),
   hair: z.string().nullable(),
-  /** Sent only to redo a failed beard render; swaps leave it out. */
-  beard: z.string().nullable().optional(),
   occasion: ClientOccasionSchema,
 });
 
@@ -118,7 +109,7 @@ export const RefinedOccasionSchema = ParsedOccasionSchema.omit({ occasion: true,
 
 /** Query string of GET /api/browse; empty values mean "any". */
 export const BrowseQuerySchema = z.object({
-  category: z.enum(["top", "outerwear", "bottom", "shoes", "watch"]).default("top"),
+  category: z.enum(["top", "outerwear"]).default("top"),
   tier: z.enum(TIERS).optional(),
   price: z.enum(["under-100", "100-250", "250-500", "over-500"]).optional(),
   colour: z.string().max(40).optional(),

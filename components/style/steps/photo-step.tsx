@@ -8,7 +8,7 @@ import type { Photo } from "@/components/style/style-flow";
 import { downscalePhoto } from "@/lib/photo/downscale";
 import type { PhotoCheck } from "@/lib/photo/problems";
 
-// ── Design tokens (inline — shared AppHeader to be extracted in Step 3) ──────
+// Design tokens (inline, shared with AppHeader)
 const S = "#141416";     // surface
 const B = "#0A0A0B";     // bg
 const T = "#ECEBE8";     // text
@@ -210,7 +210,7 @@ export function PhotoStep({
                 alt="Your uploaded selfie"
                 fill
                 sizes="628px"
-                className="object-cover object-top"
+                style={{ objectFit: "cover", objectPosition: "50% 20%" }}
                 {...RAW_IMG_PROPS}
               />
 
@@ -351,11 +351,11 @@ export function PhotoStep({
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "48px 72px 40px",
+            padding: "32px 64px 28px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
-            overflowY: "auto",
+            overflow: "hidden",
           }}
         >
           <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
@@ -363,10 +363,10 @@ export function PhotoStep({
           </span>
           <h1
             style={{
-              margin: "16px 0 0",
+              margin: "12px 0 0",
               fontFamily: "var(--font-dm-serif), Georgia, serif",
               fontWeight: 400,
-              fontSize: "64px",
+              fontSize: "52px",
               lineHeight: 1,
               textTransform: "uppercase" as const,
               letterSpacing: "0.02em",
@@ -380,10 +380,10 @@ export function PhotoStep({
             <p
               role="status"
               style={{
-                margin: "16px 0 0",
-                padding: "12px 16px",
+                margin: "12px 0 0",
+                padding: "10px 14px",
                 background: S,
-                fontSize: "14px",
+                fontSize: "13px",
                 color: M,
               }}
             >
@@ -393,9 +393,9 @@ export function PhotoStep({
 
           <p
             style={{
-              margin: "20px 0 0",
-              fontSize: "16px",
-              lineHeight: 1.6,
+              margin: "12px 0 0",
+              fontSize: "15px",
+              lineHeight: 1.55,
               color: M,
               maxWidth: "440px",
             }}
@@ -407,9 +407,9 @@ export function PhotoStep({
           {/* Tips + example figure */}
           <div
             style={{
-              marginTop: "40px",
+              marginTop: "20px",
               display: "flex",
-              gap: "32px",
+              gap: "28px",
               alignItems: "flex-start",
             }}
           >
@@ -420,19 +420,19 @@ export function PhotoStep({
                 padding: 0,
                 display: "flex",
                 flexDirection: "column",
-                gap: "22px",
+                gap: "14px",
                 flex: 1,
               }}
             >
               {TIPS.map((tip) => (
                 <li
                   key={tip.title}
-                  style={{ display: "flex", alignItems: "center", gap: "16px" }}
+                  style={{ display: "flex", alignItems: "center", gap: "14px" }}
                 >
                   {tip.icon}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                    <span style={{ fontSize: "15px", fontWeight: 500 }}>{tip.title}</span>
-                    <span style={{ fontSize: "13px", color: M }}>{tip.subtitle}</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                    <span style={{ fontSize: "14px", fontWeight: 500 }}>{tip.title}</span>
+                    <span style={{ fontSize: "12px", color: M }}>{tip.subtitle}</span>
                   </div>
                 </li>
               ))}
@@ -442,34 +442,33 @@ export function PhotoStep({
             <figure
               style={{
                 margin: 0,
-                width: "112px",
+                width: "96px",
                 flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
-                gap: "10px",
+                gap: "8px",
               }}
             >
               <div
                 style={{
-                  width: "112px",
-                  height: "148px",
+                  width: "96px",
+                  height: "128px",
                   position: "relative",
                   overflow: "hidden",
                   background: "#1C1C1F",
                 }}
               >
-                {/* TODO: replace with a clean example selfie image */}
                 <Image
                   src="/home/before.jpg"
                   alt="Example: waist-up, front-facing, evenly lit selfie"
                   fill
-                  sizes="112px"
+                  sizes="96px"
                   className="object-cover object-[50%_20%]"
                 />
               </div>
               <figcaption
                 style={{
-                  fontSize: "12px",
+                  fontSize: "11px",
                   letterSpacing: "0.02em",
                   color: M,
                 }}
@@ -519,7 +518,7 @@ export function PhotoStep({
               marginTop: "auto",
               display: "flex",
               flexDirection: "column",
-              gap: "28px",
+              gap: "20px",
             }}
           >
             {photo && !checking && (

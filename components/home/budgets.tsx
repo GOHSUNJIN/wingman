@@ -13,7 +13,7 @@ export function Budgets() {
         </h2>
         <p data-reveal style={{ "--d": "80ms" } as React.CSSProperties} className="max-w-[40ch] md:col-span-4 md:col-start-9">
           Like a look but not its price? Wingman rebuilds it from cheaper or dearer stores, keeping the colour and the
-          cut, and tries each version on you.
+          cut and tries each version on you.
         </p>
       </div>
 

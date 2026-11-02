@@ -115,19 +115,6 @@ export class YouCamClient {
     });
   }
 
-  tryOnBeard(args: { photo: Buffer; selfieHash: string; templateId: string; fixture?: string }) {
-    const params = { template_id: args.templateId };
-    return this.run({
-      api: "beard",
-      selfieHash: args.selfieHash,
-      params,
-      src: args.photo,
-      units: YOUCAM_APIS.beard.units,
-      body: (src_file_id) => ({ src_file_id, template_id: args.templateId }),
-      fixture: args.fixture,
-    });
-  }
-
   /** SD skin analysis on the close face crop. */
   analyzeSkin(args: { photo: Buffer; selfieHash: string; concerns?: SdConcern[] }) {
     const concerns = [...(args.concerns ?? DEFAULT_SKIN_CONCERNS)].sort();
@@ -142,7 +129,7 @@ export class YouCamClient {
     });
   }
 
-  /** Preset hair or beard templates (free; no units). */
+  /** Preset hair templates (free; no units). */
   async listTemplates(kind: keyof typeof TEMPLATE_PATHS): Promise<Template[]> {
     if (this.deps.mock) {
       const fx = await loadFixture(`${kind}-templates`, 0);

@@ -61,7 +61,7 @@ export function Lookbook() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: "13px", color: "#9C978E" }}>One brief, three answers</span>
+            <span style={{ fontSize: "15px", color: "#9C978E", textTransform: "uppercase", letterSpacing: "0.08em" }}>One brief, three answers</span>
             <h2
               style={{
                 margin: "16px 0 0",
@@ -123,7 +123,7 @@ export function Lookbook() {
                   style={{
                     objectFit: "cover",
                     objectPosition: "50% 8%",
-                    transform: "scale(1.18)",
+                    transform: "scale(1.32)",
                     transformOrigin: "50% 15%",
                   }}
                   unoptimized

@@ -63,11 +63,31 @@ export async function measurePhoto(normalised: Buffer, width: number, height: nu
 
 /** Where to crop a photo taken from too far away, as fractions of its size; null when it's close enough. */
 export function zoomFrom(metrics: PhotoMetrics, vision: PhotoVision | null): Box | null {
-  if (!vision || vision.people !== 1 || !vision.face_visible || vision.face_cut_off) return null;
+  if (!vision || vision.people !== 1) return null;
   const { width, height } = metrics;
-  const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
-  const box = zoomBox(face, width, height, SHARP_FACE_PX);
-  return box && { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
+
+  // Normal path: face clearly detected and not cut off by the edge.
+  if (vision.face_visible && !vision.face_cut_off) {
+    const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
+    const box = zoomBox(face, width, height, SHARP_FACE_PX);
+    return box && { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
+  }
+
+  // Face covered or obscured (mirror selfie with phone in front, hand blocking, etc.):
+  // Claude often still reports plausible face coordinates even when face_visible is false.
+  // Use them to drive the waist-up crop if they look reasonable.
+  const hasFaceHint = vision.face_width > 0.04 && vision.face_height > 0.04 && !vision.face_cut_off;
+  if (hasFaceHint) {
+    const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
+    const box = zoomBox(face, width, height, SHARP_FACE_PX);
+    if (box) return { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
+  }
+
+  // Last resort: person present but face undetectable. If the photo is much taller than 4:5
+  // the person is likely standing far away in a full-body shot. Take a top-centre waist-up crop.
+  const targetH = width * 1.25;
+  if (targetH >= height * 0.9) return null;
+  return { x: 0, y: 0, width: 1, height: targetH / height };
 }
 
 /** Problems found, hard ones first. `vision` is null when the Claude check couldn't run. */

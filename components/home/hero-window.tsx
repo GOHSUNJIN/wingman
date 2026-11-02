@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const OCCASIONS = ["First Date", "Interview", "Wedding Guest", "CNY", "Company D&D", "Night Out"] as const;
+const OCCASIONS = ["First Date", "Interview", "Wedding Guest", "CNY", "Company D&D"] as const;
 
 export function HeroWindow() {
   return (
@@ -35,8 +35,10 @@ export function HeroWindow() {
         .hero-cta:hover { background:#D6BA80 }
         .hero-see { color:#ECEBE8; text-decoration:underline; text-underline-offset:5px; text-decoration-thickness:1px }
         .hero-see:hover { color:#C8A96A }
-        .look-side { transition: transform .5s cubic-bezier(.2,.7,.2,1) }
-        .look-side:hover { transform: translateY(-6px) }
+        .look-side-l { transform: rotate(-4deg); transform-origin: bottom center; transition: transform .5s cubic-bezier(.2,.7,.2,1) }
+        .look-side-l:hover { transform: rotate(0deg) translateY(-6px) }
+        .look-side-r { transform: rotate(3deg); transform-origin: bottom center; transition: transform .5s cubic-bezier(.2,.7,.2,1) }
+        .look-side-r:hover { transform: rotate(0deg) translateY(-6px) }
         .look-center:hover .look-center-img { transform: scale(1.03) }
         .look-center-img { transition: transform .6s cubic-bezier(.2,.7,.2,1) }
       `}</style>
@@ -70,7 +72,19 @@ export function HeroWindow() {
         <nav aria-label="Main" style={{ display: "flex", alignItems: "center", gap: 32, fontSize: 14, flexWrap: "wrap" }}>
           <a href="#looks" className="hero-nav-link">The Looks</a>
           <a href="#how" className="hero-nav-link">How It Works</a>
+          <a href="/catalog" className="hero-nav-link">Catalog</a>
           <Link href="/style" className="hero-see">Style Me</Link>
+          <Link
+            href="/style"
+            aria-label="Cart"
+            style={{ color: "#9C978E", display: "flex", alignItems: "center" }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden>
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+          </Link>
         </nav>
       </header>
 
@@ -172,87 +186,49 @@ export function HeroWindow() {
             aspectRatio: "6 / 5",
           }}
         >
-          {/* Dashed gold arc */}
-          <svg
-            className="wm-r0"
-            aria-hidden
-            viewBox="0 0 600 500"
-            preserveAspectRatio="none"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}
-          >
-            <path
-              className="wm-dash"
-              d="M78 380 C 110 320, 150 300, 190 290"
-              stroke="#C8A96A"
-              strokeWidth="1.5"
-              strokeDasharray="6 6"
-              fill="none"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
-
-          {/* Left card — Navy Classic */}
+          {/* Left card: Navy Classic */}
           <figure
-            className="wm-r2 look-side"
-            style={{ position: "absolute", left: 0, top: "10%", width: "33%", margin: 0 }}
+            className="wm-r2 look-side-l"
+            style={{ position: "absolute", left: 0, top: "16%", width: "29%", margin: 0 }}
           >
             <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
               <Image
-                src="/home/lookbook-3.jpg"
-                alt="Navy Classic look — Colony Clothing Ring Jacket navy blazer"
+                src="/home/hero-3.jpg"
+                alt="Navy Classic look, Colony Clothing Ring Jacket navy blazer"
                 fill
-                sizes="25vw"
+                sizes="22vw"
                 style={{ objectFit: "cover", objectPosition: "50% 8%", transform: "scale(1.15)", transformOrigin: "50% 15%" }}
                 unoptimized
               />
             </div>
-            <figcaption style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 13 }}>
+            <figcaption style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 14 }}>
               <span>Navy Classic</span>
-              <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 17 }}>7.8</span>
+              <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 16 }}>7.8</span>
             </figcaption>
           </figure>
 
-          {/* Right card — Velvet Midnight */}
-          <figure
-            className="wm-r3 look-side"
-            style={{ position: "absolute", right: 0, top: "2%", width: "33%", margin: 0 }}
-          >
-            <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
-              <Image
-                src="/home/lookbook-1.jpg"
-                alt="Velvet Midnight look — Kevin Seah deep red velvet jacket"
-                fill
-                sizes="25vw"
-                style={{ objectFit: "cover", objectPosition: "50% 8%", transform: "scale(1.15)", transformOrigin: "50% 15%" }}
-                unoptimized
-              />
-            </div>
-            <figcaption style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 13 }}>
-              <span>Velvet Midnight</span>
-              <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 17 }}>8.7</span>
-            </figcaption>
-          </figure>
-
-          {/* Center card — Warm Pinstripe (featured) */}
+          {/* Center card: Warm Pinstripe (featured) */}
           <figure
             className="wm-r1 look-center"
             style={{
               position: "absolute",
-              left: "26%",
-              top: "6%",
-              width: "48%",
+              left: "31%",
+              top: "0%",
+              width: "40%",
               margin: 0,
               background: "#0A0A0B",
-              padding: "0 10px 10px",
+              padding: "0 8px 8px",
               zIndex: 1,
+              outline: "2px solid #C8A96A",
+              outlineOffset: "4px",
             }}
           >
             <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
               <Image
-                src="/home/lookbook-2.jpg"
-                alt="Warm Pinstripe look — The Jacket Maker brown double-breasted suit"
+                src="/home/hero-2.jpg"
+                alt="Warm Pinstripe look, The Jacket Maker brown double-breasted suit"
                 fill
-                sizes="35vw"
+                sizes="32vw"
                 className="look-center-img"
                 style={{ objectFit: "cover", objectPosition: "50% 8%", transform: "scale(1.15)", transformOrigin: "50% 15%" }}
                 unoptimized
@@ -263,8 +239,8 @@ export function HeroWindow() {
                   position: "absolute",
                   top: 14,
                   right: 14,
-                  width: 72,
-                  height: 72,
+                  width: 64,
+                  height: 64,
                   background: "#0A0A0B",
                   display: "flex",
                   flexDirection: "column",
@@ -273,7 +249,7 @@ export function HeroWindow() {
                   gap: 2,
                 }}
               >
-                <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 30, lineHeight: 1, color: "#C8A96A" }}>8.3</span>
+                <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 26, lineHeight: 1, color: "#C8A96A" }}>8.3</span>
                 <span style={{ fontSize: 10, color: "#9C978E" }}>Fit score</span>
               </div>
               <span
@@ -291,19 +267,40 @@ export function HeroWindow() {
                 Top pick
               </span>
             </div>
-            <figcaption style={{ paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <figcaption style={{ paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 22 }}>Warm Pinstripe</span>
-                <span style={{ fontSize: 12, color: "#9C978E" }}>The Jacket Maker</span>
+                <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 20 }}>Warm Pinstripe</span>
+                <span style={{ fontSize: 13, color: "#9C978E" }}>The Jacket Maker</span>
               </div>
-              <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 20 }}>S$3,079</span>
+              <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 18 }}>S$3,079</span>
+            </figcaption>
+          </figure>
+
+          {/* Right card: Velvet Midnight */}
+          <figure
+            className="wm-r3 look-side-r"
+            style={{ position: "absolute", right: 0, top: "8%", width: "26%", margin: 0 }}
+          >
+            <div style={{ position: "relative", aspectRatio: "3 / 4", overflow: "hidden" }}>
+              <Image
+                src="/home/hero-1.jpg"
+                alt="Velvet Midnight look, Kevin Seah deep red velvet jacket"
+                fill
+                sizes="20vw"
+                style={{ objectFit: "cover", objectPosition: "50% 8%", transform: "scale(1.15)", transformOrigin: "50% 15%" }}
+                unoptimized
+              />
+            </div>
+            <figcaption style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 14 }}>
+              <span>Velvet Midnight</span>
+              <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 16 }}>8.7</span>
             </figcaption>
           </figure>
 
           {/* Selfie card */}
           <figure
             className="wm-r0"
-            style={{ position: "absolute", left: "2%", bottom: 0, width: "17%", margin: 0, display: "flex", flexDirection: "column", gap: 8 }}
+            style={{ position: "absolute", left: "2%", bottom: 0, width: "16%", margin: 0, display: "flex", flexDirection: "column", gap: 8 }}
           >
             <div
               style={{
@@ -315,16 +312,35 @@ export function HeroWindow() {
               }}
             >
               <Image
-                src="/home/selfie-placeholder.jpg"
-                alt="Your selfie — the starting photo"
+                src="/home/hero-selfie.jpg"
+                alt="Your selfie, the starting photo"
                 fill
-                sizes="12vw"
+                sizes="11vw"
                 style={{ objectFit: "cover", objectPosition: "50% 8%", transform: "scale(1.15)", transformOrigin: "50% 15%" }}
                 unoptimized
               />
             </div>
-            <figcaption style={{ fontSize: 12, color: "#C8A96A" }}>Your one selfie</figcaption>
+            <figcaption style={{ fontSize: 12, color: "#C8A96A" }}>Original Image</figcaption>
           </figure>
+
+          {/* Dashed gold arc, rendered last so it paints above cards */}
+          <svg
+            className="wm-r0"
+            aria-hidden
+            viewBox="0 0 600 500"
+            preserveAspectRatio="none"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}
+          >
+            <path
+              className="wm-dash"
+              d="M78 380 C 110 320, 150 300, 190 290"
+              stroke="#C8A96A"
+              strokeWidth="1.5"
+              strokeDasharray="6 6"
+              fill="none"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
         </div>
       </div>
     </section>

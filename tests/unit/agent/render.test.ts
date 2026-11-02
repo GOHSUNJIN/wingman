@@ -4,7 +4,7 @@ import { YouCamError } from "@/lib/youcam/errors";
 const fail = (code: "QUOTA" | "NO_FACE") => async () => {
   throw new YouCamError(code, code);
 };
-const yc = { tryOnClothes: vi.fn(), tryOnHair: vi.fn(), tryOnBeard: vi.fn() };
+const yc = { tryOnClothes: vi.fn(), tryOnHair: vi.fn() };
 vi.mock("@/lib/youcam", () => ({ youcam: () => yc, renderUrl: async () => "url" }));
 
 const { renderLook } = await import("@/lib/agent/render");
@@ -18,13 +18,13 @@ describe("renderLook", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     yc.tryOnClothes.mockImplementation(fail("QUOTA"));
     yc.tryOnHair.mockImplementation(fail("QUOTA"));
-    const out = await renderLook({ photo, items, hair: "Curtain", beard: null });
+    const out = await renderLook({ photo, items, hair: "Curtain" });
     expect(out.outfit).toBeUndefined();
     expect(out.errors).toContain("QUOTA");
   });
 
   it("still stops the run for a photo without a usable face", async () => {
     yc.tryOnClothes.mockImplementation(fail("NO_FACE"));
-    await expect(renderLook({ photo, items, hair: null, beard: null })).rejects.toMatchObject({ code: "NO_FACE" });
+    await expect(renderLook({ photo, items, hair: null })).rejects.toMatchObject({ code: "NO_FACE" });
   });
 });

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { sgd } from "@/lib/utils/format";
 import { IN_STOCK_PIECES, STORES } from "./looks-data";
@@ -16,7 +17,7 @@ type FeaturedRow = {
 async function fetchFeatured(): Promise<FeaturedRow[]> {
   try {
     const db = supabaseAdmin();
-    const categories = ["top", "outerwear", "bottom", "shoes", "watch"] as const;
+    const categories = ["top", "outerwear"] as const;
     const results = await Promise.all(
       categories.map((cat) =>
         db
@@ -74,11 +75,32 @@ export async function PiecesGrid() {
               for Sale.
             </h2>
           </div>
-          <p style={{ margin: 0, fontSize: "16px", lineHeight: 1.6, color: "#9C978E", maxWidth: "380px" }}>
-            Looks are built from {STORES.length} Singapore menswear stores with{" "}
-            {IN_STOCK_PIECES.toLocaleString("en-SG")} pieces in stock. Your cart splits by store
-            and you check out on each store&apos;s own site.
-          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px", alignItems: "flex-start" }}>
+            <p style={{ margin: 0, fontSize: "16px", lineHeight: 1.6, color: "#9C978E", maxWidth: "380px" }}>
+              Looks are built from {STORES.length} Singapore menswear stores with{" "}
+              {IN_STOCK_PIECES.toLocaleString("en-SG")} pieces in stock. Your cart splits by store
+              and you check out on each store&apos;s own site.
+            </p>
+            <Link
+              href="/catalog"
+              style={{
+                background: "#1C1C1F",
+                color: "#ECEBE8",
+                padding: "14px 28px",
+                fontSize: "15px",
+                fontWeight: 500,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              View Catalog
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
+                <path d="M5 12h14m-6-6 6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
         {featured.length > 0 && (

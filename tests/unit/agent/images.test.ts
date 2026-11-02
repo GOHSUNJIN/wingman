@@ -9,9 +9,8 @@ const look = (over: Partial<Look> = {}): Look => ({
   name: "Look",
   tier: "mid",
   why: "",
-  items: [item("top"), item("bottom")],
+  items: [item("top")],
   hair: "Curtain",
-  beard: null,
   renders: { errors: [] },
   fitCheck: null,
   total: 2,
@@ -19,10 +18,10 @@ const look = (over: Partial<Look> = {}): Look => ({
 });
 
 describe("expectedKinds", () => {
-  it("waits for the outfit, then hair and beard only when picked", () => {
+  it("waits for the outfit, then hair only when picked", () => {
     expect(expectedKinds(look())).toEqual(["outfit", "hair"]);
-    expect(expectedKinds(look({ hair: null, beard: "Goatee" }))).toEqual(["outfit", "beard"]);
-    expect(expectedKinds(look({ items: [item("shoes")], hair: null }))).toEqual([]);
+    expect(expectedKinds(look({ hair: null }))).toEqual(["outfit"]);
+    expect(expectedKinds(look({ items: [], hair: null }))).toEqual([]);
   });
 });
 
@@ -31,10 +30,10 @@ describe("imageStatus", () => {
     const status = imageStatus([
       look({ renders: { outfit: "a", hair: "b", errors: [] } }),
       look({ renders: { outfit: "c", errors: [], failed: { hair: "TIMEOUT" } } }),
-      look({ beard: "Goatee" }),
+      look(),
     ]);
     expect(status).toEqual({
-      total: 7,
+      total: 6,
       ready: 3,
       failed: [{ look: 1, kind: "hair", code: "TIMEOUT" }],
       outOfUnits: false,

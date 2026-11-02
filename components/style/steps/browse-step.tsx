@@ -30,9 +30,6 @@ const SORTS: Record<BrowseFilters["sort"], { label: string; next: BrowseFilters[
 const CATEGORIES: { value: LookItem["slot"]; label: string }[] = [
   { value: "top", label: "Tops" },
   { value: "outerwear", label: "Layers" },
-  { value: "bottom", label: "Trousers" },
-  { value: "shoes", label: "Shoes" },
-  { value: "watch", label: "Watches" },
 ];
 
 const PRICES = [
@@ -44,9 +41,6 @@ const PRICES = [
 const SLOT_NAMES: Record<LookItem["slot"], string> = {
   top: "Tops",
   outerwear: "Layers",
-  bottom: "Trousers",
-  shoes: "Shoes",
-  watch: "Watches",
 };
 
 /** The whole in-stock catalog with filters. */
@@ -179,7 +173,7 @@ export function BrowseStep({
             <span
               style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 30, lineHeight: 1 }}
             >
-              {status === "done" && page ? page.total : "—"}
+              {status === "done" && page ? page.total : "..."}
             </span>
             <span style={{ fontSize: 12, color: "#9C978E" }}>
               {status === "done" && page
@@ -352,7 +346,7 @@ export function BrowseStep({
           {page && page.total === 0 && status === "done" && (
             <div style={{ marginTop: 32 }}>
               <p style={{ fontSize: 14, color: "#9C978E" }}>
-                Nothing matches all of those. Try a wider price range or another colour, or clear the filters.
+                Nothing matches all of those. Try a wider price range or another colour or clear the filters.
               </p>
               <button
                 type="button"

@@ -17,7 +17,9 @@ async function events(res: Response) {
 }
 
 const jpeg = (bytes = 10) => new File([new Uint8Array(bytes)], "photo.jpg", { type: "image/jpeg" });
-const post = (form: FormData) => new Request("http://x/api/test", { method: "POST", body: form });
+let ipCounter = 0;
+const post = (form: FormData) =>
+  new Request("http://x/api/test", { method: "POST", body: form, headers: { "x-forwarded-for": `10.0.0.${++ipCounter}` } });
 
 describe("eventStream", () => {
   it("streams each event as one JSON line", async () => {

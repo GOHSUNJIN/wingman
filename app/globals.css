@@ -149,6 +149,10 @@
   html {
     @apply font-sans;
     -webkit-tap-highlight-color: transparent;
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
   }
   body {
     @apply bg-background text-foreground antialiased;

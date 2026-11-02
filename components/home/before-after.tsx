@@ -11,7 +11,30 @@ export function BeforeAfter() {
         minHeight: "680px",
       }}
     >
-      {/* Render — bleeds to the left viewport edge, no margin */}
+      <style>{`
+        @keyframes baClip {
+          0%     { clip-path: inset(0 0 100% 0); }
+          38%    { clip-path: inset(0 0 0% 0);   }
+          50%    { clip-path: inset(0 0 0% 0);   }
+          88%    { clip-path: inset(100% 0 0 0); }
+          88.01% { clip-path: inset(0 0 100% 0); }
+          100%   { clip-path: inset(0 0 100% 0); }
+        }
+        @keyframes baScan {
+          0%     { top: -2%;  opacity: 1; }
+          38%    { top: 102%; opacity: 1; }
+          38.01% { top: -2%;  opacity: 0; }
+          49.99% { top: -2%;  opacity: 0; }
+          50%    { top: -2%;  opacity: 1; }
+          88%    { top: 102%; opacity: 1; }
+          88.01% { top: -2%;  opacity: 0; }
+          100%   { top: -2%;  opacity: 0; }
+        }
+        .ba-clip  { animation: baClip 11s ease-in-out infinite; }
+        .ba-scan  { animation: baScan 11s ease-in-out infinite; }
+      `}</style>
+
+      {/* Photo panel (bleeds left) */}
       <div
         style={{
           flex: "0 0 clamp(320px, 44vw, 560px)",
@@ -20,31 +43,38 @@ export function BeforeAfter() {
           borderRight: "2px solid #C8A96A",
         }}
       >
+        {/* Before */}
         <Image
-          src="/home/wedding.jpg"
-          alt="Ballroom Navy look rendered on a selfie"
+          src="/home/model-before.jpg"
+          alt="Before - plain selfie"
           fill
-          priority
           sizes="(min-width: 1024px) 44vw, 90vw"
           style={{ objectFit: "cover", objectPosition: "50% 15%" }}
           unoptimized
         />
 
+        {/* After - animated reveal */}
+        <div
+          className="ba-clip"
+          style={{ position: "absolute", inset: 0, overflow: "hidden" }}
+        >
+          <Image
+            src="/home/hero-2.jpg"
+            alt="After - Warm Pinstripe rendered look"
+            fill
+            sizes="(min-width: 1024px) 44vw, 90vw"
+            style={{ objectFit: "cover", objectPosition: "50% 15%" }}
+            unoptimized
+          />
+        </div>
+
         {/* Scan line */}
         <div
+          className="ba-scan"
           aria-hidden="true"
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            height: 100,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            animation: "wmScan 4.5s cubic-bezier(0.45, 0, 0.55, 1) infinite",
-          }}
+          style={{ position: "absolute", left: 0, right: 0, zIndex: 2, pointerEvents: "none" }}
         >
-          <div style={{ flex: 1, background: "rgba(200,169,106,0.06)" }} />
+          <div style={{ height: 100, background: "rgba(200,169,106,0.06)" }} />
           <div style={{ height: 2, background: "#C8A96A" }} />
         </div>
 
@@ -53,11 +83,10 @@ export function BeforeAfter() {
           aria-hidden="true"
           style={{
             position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
+            left: 0, right: 0, bottom: 0,
             height: 180,
             background: "linear-gradient(to top, rgba(15,15,17,0.88), transparent)",
+            zIndex: 3,
           }}
         />
 
@@ -70,9 +99,10 @@ export function BeforeAfter() {
             display: "flex",
             flexDirection: "column",
             gap: 5,
+            zIndex: 4,
           }}
         >
-          <span style={{ fontSize: 12, color: "#9C978E", letterSpacing: "0.02em" }}>
+          <span style={{ fontSize: 14, color: "#9C978E", letterSpacing: "0.02em" }}>
             Rendered look
           </span>
           <span
@@ -82,12 +112,12 @@ export function BeforeAfter() {
               color: "#ECEBE8",
             }}
           >
-            Ballroom Navy
+            Warm Pinstripe
           </span>
         </div>
       </div>
 
-      {/* Copy — right side */}
+      {/* Copy, right side */}
       <div
         style={{
           flex: 1,
@@ -170,7 +200,7 @@ export function BeforeAfter() {
               >
                 {num}
               </span>
-              <span style={{ fontSize: 13, color: "#9C978E" }}>{label}</span>
+              <span style={{ fontSize: 14, color: "#9C978E" }}>{label}</span>
             </div>
           ))}
         </div>

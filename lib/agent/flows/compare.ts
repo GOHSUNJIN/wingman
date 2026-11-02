@@ -84,10 +84,7 @@ export async function runCompare(photoBytes: Buffer, req: CompareRequest, emit: 
         photo,
         items,
         hair: req.hair,
-        beard: null,
-        onRender: (kind, url) => {
-          if (kind !== "beard") emit({ type: "render", tier: version.tier, kind, url });
-        },
+        onRender: (kind, url) => emit({ type: "render", tier: version.tier, kind, url }),
       });
       const params = { ids: itemIds(items), hair: req.hair, occasion: occasion.occasion, mock: !renders.outfitImage };
       const [check] = await memo({ selfieHash: photo.hash, api: "fit-check", params }, () =>

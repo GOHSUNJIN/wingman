@@ -38,14 +38,13 @@ All at 390px, from a local run with live YouCam renders. Retake with `npm run sc
 | API | What it does in Wingman | Units per call |
 |---|---|---|
 | AI Clothes Virtual Try-On (v3, `garment_category: auto`) | Puts each look's top or jacket on your photo. Also renders every tier in Price Compare and re-renders after a swap. | 2 |
-| AI Beard Style Generator | Adds an optional beard style to the look | 2 |
 | AI Skin Analysis (SD concerns) | Reads your skin so the night-before prep plan is about you, not generic tips | 9 for 4 concerns |
 
-Bottoms, shoes and watches appear as product cards rather than renders: a waist-up selfie hides legs and feet, and YouCam's watch try-on needs a separate photo of the back of the hand.
+The catalog contains tops and outerwear only. Trousers, shoes and watches are not in the catalog: a waist-up selfie hides legs and feet and YouCam's watch try-on needs a separate photo of the back of the hand.
 
-Each API needs different framing, so Wingman takes one photo and the server prepares it: the full photo for clothes and a close face crop for beard and skin analysis. Claude finds the face so the crops land in the right place. Location data is stripped before anything leaves the server.
+Each API needs different framing, so Wingman takes one photo and the server prepares it: the full photo for clothes and a close face crop for skin analysis. Claude finds the face so the crop lands in the right place. Location data is stripped before anything leaves the server.
 
-**Keeping units safe:** every live call reserves its units in Supabase first, and Wingman refuses any call that would pass `YOUCAM_UNIT_LIMIT` (700). Failed tasks release their units. Results are cached by photo, product, API and settings, so a repeat costs nothing; swapping trousers or shoes re-uses the cached render. Building the whole app has used 70 units.
+**Keeping units safe:** every live call reserves its units in Supabase first, and Wingman refuses any call that would pass `YOUCAM_UNIT_LIMIT` (700). Failed tasks release their units. Results are cached by photo, product, API and settings, so a repeat costs nothing; swapping a top re-uses the cached render. Building the whole app has used 70 units.
 
 ## How the agent works
 
@@ -56,7 +55,7 @@ flowchart TD
     C --> D[YouCam Skin Analysis<br/>in the background, never blocks]
     B --> E[Candidate pool<br/>in-stock products in the tier,<br/>from 17 Shopify stores]
     E --> F[Claude picks 2 to 3 looks<br/>ids and budget checked, one retry]
-    F --> G[YouCam renders each look<br/>clothes, then beard]
+    F --> G[YouCam renders each look<br/>clothes try-on per top and jacket]
     G --> H[Claude Fit Check<br/>score out of 10 + reason]
     D --> I[Claude prep plan<br/>3 grooming steps, no medical claims]
     H --> P[Looks scoring under 6 dropped]
@@ -88,7 +87,7 @@ flowchart TD
 | Images | sharp |
 | Validation | Zod on every API input and every Claude output |
 | Products and checkout | Shopify `products.json` feeds and cart permalinks |
-| Tests | Vitest (212 unit tests) and Playwright (smoke) |
+| Tests | Vitest (224 unit tests) and Playwright (smoke) |
 | Deploy | Vercel |
 
 ## Setup
@@ -114,7 +113,7 @@ cp .env.example .env.local
 | `SUPABASE_ANON_KEY` | Same page (optional; all database access is server-side) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Same page (keep this secret) |
 | `MOCK_YOUCAM` | `true` serves saved YouCam responses from `fixtures/youcam/` (zero units). `false` for live renders |
-| `MOCK_YOUCAM_FAIL` | Mock mode only: comma-separated APIs (`clothes`, `hair`, `beard`) whose first call per image fails, to see the retry screen |
+| `MOCK_YOUCAM_FAIL` | Mock mode only: comma-separated APIs (`clothes`, `hair`) whose first call per image fails, to see the retry screen |
 | `YOUCAM_UNIT_LIMIT` | Hard cap on YouCam units (default 700) |
 
 **3. Database migration.** In the Supabase SQL Editor, run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql), then [`0002_catalog_tags.sql`](supabase/migrations/0002_catalog_tags.sql). They create the tables (see [Database](#database)), the unit-reserve function and two private storage buckets.
@@ -153,7 +152,7 @@ Open http://localhost:3000 at phone width and tap **Start with a photo**. `fixtu
 | `npm run stores:check` | Verifies every store in `fixtures/stores.json` (products feed, Shopify fingerprint, cart link). Failing stores move to `fixtures/stores-removed.json`. |
 | `npm run catalog:fetch` | Builds the catalog: fetches feeds, keeps menswear, tags with Claude, converts to SGD, picks try-on images and colours, assigns relative tiers, writes to Supabase. Resumable. `--store <domain>` for one store, `--dry-run` to skip writes. |
 | `npm run photo:check` | Checks a photo before spending YouCam units: finds the face and writes the crops each API would get. |
-| `npm run style:demo` | Calls `POST /api/style` with the demo photo and prints the looks, Fit Checks and prep plan. Start `npm run dev` first; `MOCK_YOUCAM` decides mock or live renders. Flags: `--tier`, `--occasion`, `--max-budget`, `--photo`, `--url`, `--compare` to also price-compare the first look, `--refine "more casual"` to refine the looks, `--swap shoes` to swap a piece of the first look. |
+| `npm run style:demo` | Calls `POST /api/style` with the demo photo and prints the looks, Fit Checks and prep plan. Start `npm run dev` first; `MOCK_YOUCAM` decides mock or live renders. Flags: `--tier`, `--occasion`, `--max-budget`, `--photo`, `--url`, `--compare` to also price-compare the first look, `--refine "more casual"` to refine the looks, `--swap top` to swap a piece of the first look. |
 | `npm run screenshots` | Captures every screen at 390px into `docs/screenshots/`. Start `npm run dev` first; with `MOCK_YOUCAM=true` every try-on is the saved sample. |
 | `npm run youcam:smoke` | One real call per YouCam API on `fixtures/selfies/demo.jpg`. Saves responses for mock mode and prints units used. A second run costs zero units. |
 
@@ -177,7 +176,7 @@ lib/
     flows/                     Route entry points: style.ts (style + refine), compare.ts, swap.ts
     pick/                      candidates.ts builds the per-slot pool; match.ts ranks tier stand-ins
     steps.ts                   Claude calls: occasion, look selection, Fit Check, prep plan, refine
-    render.ts, grooming.ts     YouCam renders per look; hair and beard choices
+    render.ts, grooming.ts     YouCam renders per look; hair style choices
     events.ts, schemas.ts      Streamed event types (shared with the browser); Zod schemas for input and Claude output
   api/stream.ts                Shared route plumbing: multipart photo + JSON in, newline-delimited JSON out
   catalog/
@@ -231,7 +230,7 @@ All tables have row-level security on and no policies, so only the server's serv
 
 **Known limits**
 
-- Only the top layer is rendered. Trousers, shoes and watches are product cards (a waist-up selfie hides them, and watch try-on needs a hand photo).
+- Only tops and jackets are rendered. The catalog contains tops and outerwear only; trousers, shoes and watches were removed since a waist-up selfie hides legs and feet, and the watch try-on needs a hand photo.
 - 17 stores and about 5,000 products. Shoes and budget-tier pieces are the thinnest categories.
 - Prices are converted to SGD with fixed rates in [`lib/catalog/pipeline/fx.ts`](lib/catalog/pipeline/fx.ts). A store that charges in USD shows its own price at checkout.
 - Stock and prices are as fresh as the last `npm run catalog:fetch`.

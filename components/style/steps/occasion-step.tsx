@@ -118,11 +118,11 @@ export function OccasionStep(props: {
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "44px 96px 40px 88px",
+            padding: "28px 72px 28px 72px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
-            overflowY: "auto",
+            overflow: "hidden",
           }}
         >
           <button
@@ -144,10 +144,10 @@ export function OccasionStep(props: {
           </button>
           <h1
             style={{
-              margin: "20px 0 0",
+              margin: "14px 0 0",
               fontFamily: "var(--font-dm-serif), serif",
               fontWeight: 400,
-              fontSize: 60,
+              fontSize: 52,
               lineHeight: 1,
               textTransform: "uppercase" as const,
               letterSpacing: "0.02em",
@@ -164,9 +164,9 @@ export function OccasionStep(props: {
             style={{ flex: 1, display: "flex", flexDirection: "column" }}
           >
             {/* Occasion chips */}
-            <div style={{ marginTop: 36, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 10 }}>
               <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>What&apos;s on</span>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {OCCASION_CHOICES.map((o) => {
                   const on = props.occasionId === o.id;
                   return (
@@ -176,10 +176,10 @@ export function OccasionStep(props: {
                       aria-pressed={on}
                       onClick={() => props.onOccasion(o.id)}
                       style={{
-                        height: 44,
-                        padding: "0 20px",
+                        height: 38,
+                        padding: "0 16px",
                         border: 0,
-                        fontSize: 14,
+                        fontSize: 13,
                         cursor: "pointer",
                         background: on ? "#ECEBE8" : "#1C1C1F",
                         color: on ? "#0A0A0B" : "#ECEBE8",
@@ -195,7 +195,7 @@ export function OccasionStep(props: {
             </div>
 
             {/* Free-text */}
-            <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
               <label
                 htmlFor={textId}
                 style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}
@@ -206,18 +206,18 @@ export function OccasionStep(props: {
                 id={textId}
                 value={props.sentence}
                 onChange={(e) => props.onSentence(e.target.value)}
-                rows={4}
+                rows={3}
                 maxLength={300}
-                placeholder="Where, when, and anything you want or want to avoid"
+                placeholder="Where, when and anything you want or want to avoid"
                 style={{
-                  height: 132,
+                  height: 96,
                   resize: "none",
                   background: "#141416",
                   color: "#ECEBE8",
                   border: 0,
-                  padding: "18px 20px",
-                  fontSize: 16,
-                  lineHeight: 1.6,
+                  padding: "14px 16px",
+                  fontSize: 15,
+                  lineHeight: 1.55,
                   boxSizing: "border-box",
                   fontFamily: "inherit",
                 }}
@@ -225,7 +225,7 @@ export function OccasionStep(props: {
             </div>
 
             {/* Budget tiers */}
-            <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
               <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
                 Budget for the whole look
               </span>
@@ -233,7 +233,7 @@ export function OccasionStep(props: {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                  gap: 12,
+                  gap: 8,
                 }}
               >
                 {(["budget", "mid", "luxury"] as const).map((t) => {
@@ -246,10 +246,10 @@ export function OccasionStep(props: {
                       onClick={() => props.onTier(t)}
                       style={{
                         textAlign: "left",
-                        padding: 20,
+                        padding: 14,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 8,
+                        gap: 5,
                         cursor: "pointer",
                         color: "#ECEBE8",
                         boxSizing: "border-box",
@@ -258,11 +258,11 @@ export function OccasionStep(props: {
                         fontFamily: "inherit",
                       }}
                     >
-                      <span style={{ fontSize: 15, fontWeight: 600 }}>{TIER_LABELS[t]}</span>
-                      <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 26 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{TIER_LABELS[t]}</span>
+                      <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22 }}>
                         {TIER_RANGES[t]}
                       </span>
-                      <span style={{ fontSize: 13, color: "#9C978E" }}>{TIER_NOTES[t]}</span>
+                      <span style={{ fontSize: 12, color: "#9C978E" }}>{TIER_NOTES[t]}</span>
                     </button>
                   );
                 })}
@@ -274,7 +274,7 @@ export function OccasionStep(props: {
               disabled={!ready}
               style={{
                 marginTop: "auto",
-                height: 56,
+                height: 52,
                 background: "#C8A96A",
                 color: "#0A0A0B",
                 border: 0,

@@ -14,9 +14,6 @@ export type SwapOptionsState = { status: "loading" | "done" | "error"; options: 
 const SLOT_NAMES: Record<LookItem["slot"], string> = {
   top: "top",
   outerwear: "layer",
-  bottom: "trousers",
-  shoes: "shoes",
-  watch: "watch",
 };
 
 function priceDiff(next: number, current: number) {
@@ -184,11 +181,11 @@ export function SwapStep({
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "40px 80px 40px 72px",
+            padding: "32px 64px 32px 56px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
-            overflowY: "auto",
+            overflow: "hidden",
           }}
         >
           <button
@@ -210,10 +207,10 @@ export function SwapStep({
           </button>
           <h1
             style={{
-              margin: "18px 0 0",
+              margin: "14px 0 0",
               fontFamily: "var(--font-dm-serif), serif",
               fontWeight: 400,
-              fontSize: 52,
+              fontSize: 44,
               lineHeight: 1,
               textTransform: "uppercase" as const,
               letterSpacing: "0.02em",

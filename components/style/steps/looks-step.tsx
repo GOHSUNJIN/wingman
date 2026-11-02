@@ -19,9 +19,6 @@ import { sgd } from "@/lib/utils/format";
 const SLOT_LABELS: Record<LookItem["slot"], string> = {
   top: "Top",
   outerwear: "Layer",
-  bottom: "Bottom",
-  shoes: "Shoes",
-  watch: "Watch",
 };
 
 export function LooksStep({
@@ -143,6 +140,7 @@ export function LooksStep({
             WINGMAN
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <CartIcon count={cart.length} onClick={onViewCart} />
             <WmDots current={4} />
             <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Your looks</span>
           </div>
@@ -181,6 +179,20 @@ export function LooksStep({
             ) : (
               <LookSvg />
             )}
+
+            {/* Top scrim for label legibility */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 160,
+                background: "linear-gradient(to bottom, rgba(10,10,11,0.72) 0%, rgba(10,10,11,0) 100%)",
+                pointerEvents: "none",
+              }}
+            />
 
             {/* Look label */}
             <div
@@ -371,8 +383,8 @@ export function LooksStep({
               style={{
                 flex: 1,
                 minHeight: 0,
-                overflowY: "auto",
-                padding: "28px 40px 24px",
+                overflow: "hidden",
+                padding: "20px 40px 16px",
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -403,7 +415,7 @@ export function LooksStep({
                     margin: 0,
                     fontFamily: "var(--font-dm-serif), serif",
                     fontWeight: 400,
-                    fontSize: 40,
+                    fontSize: 34,
                     lineHeight: 1.05,
                     textTransform: "uppercase" as const,
                     letterSpacing: "0.02em",
@@ -411,7 +423,7 @@ export function LooksStep({
                 >
                   {shown.name}
                 </h1>
-                <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 26, flexShrink: 0 }}>
+                <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22, flexShrink: 0 }}>
                   {sgd(shown.total)}
                 </span>
               </div>
@@ -419,22 +431,22 @@ export function LooksStep({
               {/* Fit Check box */}
               <div
                 style={{
-                  marginTop: 22,
+                  marginTop: 14,
                   background: "#1C1C1F",
-                  padding: "18px 20px",
+                  padding: "12px 16px",
                   display: "flex",
-                  gap: 20,
+                  gap: 16,
                   alignItems: "flex-start",
                 }}
                 aria-live="polite"
               >
                 <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
-                  <span style={{ fontSize: 12, color: "#9C978E" }}>Fit Check</span>
+                  <span style={{ fontSize: 11, color: "#9C978E" }}>Fit Check</span>
                   {shown.fitCheck ? (
                     <span
                       style={{
                         fontFamily: "var(--font-dm-serif), serif",
-                        fontSize: 34,
+                        fontSize: 28,
                         lineHeight: 1.1,
                         color: scoreColor,
                       }}
@@ -442,11 +454,11 @@ export function LooksStep({
                       {shown.fitCheck.score.toFixed(1)}
                     </span>
                   ) : (
-                    <span style={{ fontSize: 14, color: "#9C978E" }}>{shownScoring ? "…" : "—"}</span>
+                    <span style={{ fontSize: 14, color: "#9C978E" }}>{shownScoring ? "…" : ""}</span>
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#C9C5BD" }}>
+                  <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "#C9C5BD" }}>
                     {shown.fitCheck
                       ? shown.fitCheck.reasoning
                       : shownScoring
@@ -457,7 +469,7 @@ export function LooksStep({
               </div>
 
               {/* Sub-tabs */}
-              <div role="tablist" aria-label="Pieces" style={{ marginTop: 24, display: "flex", gap: 28 }}>
+              <div role="tablist" aria-label="Pieces" style={{ marginTop: 16, display: "flex", gap: 24 }}>
                 {(["look", "additional"] as const).map((id) => {
                   const label = id === "look" ? "The Look" : "Additional";
                   const on = tab === id;
@@ -586,20 +598,12 @@ export function LooksStep({
                 aria-label="More actions"
                 style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}
               >
-                <button
-                  type="button"
-                  onClick={onPrep}
-                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
-                >
-                  {hasPrep ? "Your Prep Plan" : "Prep Plan (on its way)"}
-                </button>
-                <button
-                  type="button"
-                  onClick={onBrowse}
-                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
+                <Link
+                  href="/catalog"
+                  style={{ color: "#9C978E", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4 }}
                 >
                   Browse Every Piece
-                </button>
+                </Link>
                 <button
                   type="button"
                   onClick={onRestart}
@@ -677,7 +681,10 @@ export function LooksStep({
         >
           WINGMAN
         </Link>
-        <WmDots current={4} />
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <CartIcon count={cart.length} onClick={onViewCart} />
+          <WmDots current={4} />
+        </div>
       </header>
 
       <div style={{ maxWidth: 480 }}>
@@ -781,13 +788,6 @@ export function LooksStep({
       <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
         <button
           type="button"
-          onClick={onPrep}
-          style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
-        >
-          {hasPrep ? "Your night-before prep plan" : "Prep plan (on its way)"}
-        </button>
-        <button
-          type="button"
           onClick={onBrowse}
           style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
         >
@@ -843,10 +843,6 @@ function LookCard({
   onAddPiece: (item: LookItem) => void;
   onViewCart: () => void;
 }) {
-  const grooming = [look.renders.beard && { url: look.renders.beard, label: `Beard: ${look.beard}` }].filter(
-    Boolean,
-  ) as { url: string; label: string }[];
-
   const rendering = !look.renders.outfit && look.renders.errors.length === 0;
   const [tab, setTab] = useState<"look" | "additional">("look");
   const tabId = `look-${index}`;
@@ -917,19 +913,6 @@ function LookCard({
           </p>
         )}
       </div>
-
-      {grooming.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 4, padding: 4 }}>
-          {grooming.map((g) => (
-            <figure key={g.label} style={{ margin: 0 }}>
-              <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", background: "#1C1C1F" }}>
-                <Image src={g.url} alt={g.label} fill sizes="12rem" style={{ objectFit: "cover" }} {...RAW_IMG_PROPS} />
-              </div>
-              <figcaption style={{ padding: "6px 8px", fontSize: 12 }}>{g.label}</figcaption>
-            </figure>
-          ))}
-        </div>
-      )}
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: 20 }}>
         <h2 style={{ margin: 0, fontFamily: "var(--font-dm-serif), serif", fontWeight: 400, fontSize: 24 }}>
@@ -1046,22 +1029,22 @@ function PieceRow({
   onAdd?: () => void;
 }) {
   return (
-    <li style={{ display: "flex", alignItems: "center", gap: 16, padding: "10px 0" }}>
+    <li style={{ display: "flex", alignItems: "center", gap: 12, padding: "6px 0" }}>
       <a
         href={item.url}
         target="_blank"
         rel="noopener"
-        style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "center", gap: 16, textDecoration: "none", color: "inherit" }}
+        style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "center", gap: 12, textDecoration: "none", color: "inherit" }}
       >
-        <div style={{ width: 64, height: 64, flexShrink: 0, background: "#1C1C1F", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          <ProductImage src={item.image} sizes="64px" className="h-full w-full object-contain" />
+        <div style={{ width: 72, height: 72, flexShrink: 0, background: "#F5F4F2", overflow: "hidden", position: "relative" }}>
+          <Image src={item.image} alt={item.name} fill sizes="72px" style={{ objectFit: "cover", objectPosition: "50% 20%" }} unoptimized />
         </div>
-        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
-          <span style={{ fontSize: 13, color: "#9C978E" }}>
+        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+          <span style={{ fontSize: 12, color: "#9C978E" }}>
             {SLOT_LABELS[item.slot]} · {item.storeName}
           </span>
-          <span style={{ fontSize: 15 }}>{displayName(item.name, item.storeName)}</span>
-          <span style={{ fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{sgd(item.price)}</span>
+          <span style={{ fontSize: 14 }}>{displayName(item.name, item.storeName)}</span>
+          <span style={{ fontSize: 14, fontVariantNumeric: "tabular-nums" }}>{sgd(item.price)}</span>
         </span>
       </a>
       {onSwap ? (
@@ -1213,6 +1196,58 @@ function LookSwitcher({
         );
       })}
     </div>
+  );
+}
+
+function CartIcon({ count, onClick }: { count: number; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={count > 0 ? `Cart: ${count} ${count === 1 ? "item" : "items"}` : "Cart"}
+      style={{
+        background: "none",
+        border: 0,
+        padding: 4,
+        cursor: "pointer",
+        position: "relative",
+        color: count > 0 ? "#C8A96A" : "#9C978E",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "color 180ms ease",
+      }}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden>
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+      {count > 0 && (
+        <span
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            minWidth: 15,
+            height: 15,
+            background: "#C8A96A",
+            color: "#0A0A0B",
+            borderRadius: "50%",
+            fontSize: 9,
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontVariantNumeric: "tabular-nums",
+            lineHeight: 1,
+            padding: "0 2px",
+          }}
+        >
+          {count > 99 ? "99" : count}
+        </span>
+      )}
+    </button>
   );
 }
 

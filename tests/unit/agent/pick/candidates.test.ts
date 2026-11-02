@@ -33,9 +33,7 @@ const catalog: Product[] = [
   product("t3", { formality: "formal" }),
   product("t-oos", { variants: [{ id: 2, size: "M", available: false }] }),
   product("t-pricey", { price: 900 }),
-  product("b1", { category: "bottom", price: 80 }),
-  product("s1", { category: "shoes", price: 150 }),
-  product("w1", { category: "watch", price: 250 }),
+  product("o1", { category: "outerwear", price: 200 }),
 ];
 
 const opts = { occasion: "date" as const, formality: "smart-casual" as const, seed: "photo" };
@@ -44,15 +42,11 @@ const pick = (overrides: Partial<LookPick> = {}): LookPick => ({
   name: "Rooftop easy",
   top: "t1",
   outerwear: null,
-  bottom: "b1",
-  shoes: "s1",
-  watch: null,
-  beard: null,
   why: "Works.",
   ...overrides,
 });
 
-const rules = { beard: ["Circle"] };
+const rules = {};
 
 describe("allowedFormalities", () => {
   it("lets smart-casual borrow from both sides, the ends from their neighbour only", () => {
@@ -74,9 +68,9 @@ describe("buildPool", () => {
   });
 
   it("caps each piece at its share of the budget so a full look can still fit", () => {
-    // Tops may take 45% of the budget: S$100 fits S$250 (112.50) but not S$200 (90)
-    expect(buildPool(catalog, { ...opts, maxBudget: 250 }).top.map((p) => p.id)).toContain("t1");
-    expect(buildPool(catalog, { ...opts, maxBudget: 200 }).top.map((p) => p.id)).not.toContain("t1");
+    // Tops may take 65% of the budget: S$100 fits S$155 (100.75) but not S$100 (65)
+    expect(buildPool(catalog, { ...opts, maxBudget: 155 }).top.map((p) => p.id)).toContain("t1");
+    expect(buildPool(catalog, { ...opts, maxBudget: 100 }).top.map((p) => p.id)).not.toContain("t1");
   });
 
   it("drops formality levels too far from the occasion", () => {
@@ -91,10 +85,10 @@ describe("buildPool", () => {
     expect(a).toHaveLength(30);
   });
 
-  it("lists every slot in the prompt, marking empty ones", () => {
+  it("lists every slot in the prompt, including outerwear", () => {
     const text = poolLines(buildPool(catalog, opts));
     expect(text).toContain("## top\nt1 | Item t1 | navy | smart-casual | S$100 | DUXTON");
-    expect(text).toContain("## outerwear\n(none)");
+    expect(text).toContain("## outerwear\no1 | Item o1 | navy | smart-casual | S$200 | DUXTON");
   });
 });
 
@@ -102,27 +96,22 @@ describe("pickErrors", () => {
   const pool = buildPool(catalog, opts);
 
   it("accepts a valid pick", () => {
-    expect(pickErrors([pick(), pick({ top: "t2", watch: "w1", beard: "Circle" })], pool, rules)).toEqual([]);
+    expect(pickErrors([pick(), pick({ top: "t2", outerwear: "o1" })], pool, rules)).toEqual([]);
   });
 
   it("rejects ids that are not candidates, or in the wrong slot", () => {
-    const errors = pickErrors([pick({ top: "t-oos", shoes: "b1" })], pool, rules);
-    expect(errors).toHaveLength(2);
+    const errors = pickErrors([pick({ top: "t-oos" })], pool, rules);
+    expect(errors).toHaveLength(1);
     expect(errors[0]).toMatch(/"t-oos" is not in the top list/);
-    expect(errors[1]).toMatch(/"b1" is not in the shoes list/);
   });
 
-  it("requires top, bottom and shoes", () => {
-    expect(pickErrors([pick({ bottom: "" })], pool, rules)).toEqual(['Look 1 ("Rooftop easy"): bottom is required.']);
-  });
-
-  it("rejects grooming styles outside the allowed list", () => {
-    expect(pickErrors([pick({ beard: "Walrus" })], pool, rules)).toHaveLength(1);
+  it("requires top", () => {
+    expect(pickErrors([pick({ top: "" })], pool, rules)).toEqual(['Look 1 ("Rooftop easy"): top is required.']);
   });
 
   it("rejects looks over maxBudget and repeated tops", () => {
-    const errors = pickErrors([pick({ watch: "w1" }), pick()], pool, { ...rules, maxBudget: 400 });
-    expect(errors).toContain('Look 1 ("Rooftop easy"): total S$580.00 is over the S$400 budget.');
+    const errors = pickErrors([pick({ outerwear: "o1" }), pick()], pool, { ...rules, maxBudget: 50 });
+    expect(errors).toContain('Look 1 ("Rooftop easy"): total S$300.00 is over the S$50 budget.');
     expect(errors).toContain("Each look needs a different top.");
   });
 
@@ -132,7 +121,7 @@ describe("pickErrors", () => {
   });
 
   it("totals a look from its products", () => {
-    expect(lookTotal(lookItems(pick({ watch: "w1" }), pool))).toBe(580);
+    expect(lookTotal(lookItems(pick({ outerwear: "o1" }), pool))).toBe(300);
   });
 });
 

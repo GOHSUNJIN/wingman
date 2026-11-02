@@ -173,10 +173,11 @@ export function LoadingStep({
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "52px 96px 40px 88px",
+            padding: "36px 72px 32px 64px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           {occasion && (
@@ -187,10 +188,10 @@ export function LoadingStep({
 
           <h1
             style={{
-              margin: "14px 0 0",
+              margin: "10px 0 0",
               fontFamily: "var(--font-dm-serif), serif",
               fontWeight: 400,
-              fontSize: 60,
+              fontSize: 52,
               lineHeight: 1,
               textTransform: "uppercase" as const,
               letterSpacing: "0.02em",
@@ -200,10 +201,10 @@ export function LoadingStep({
             {headline}
           </h1>
 
-          <p style={{ margin: "14px 0 0", fontSize: 14, color: "#9C978E" }}>
+          <p style={{ margin: "10px 0 0", fontSize: 14, color: "#9C978E" }}>
             {stuck
               ? status.outOfUnits
-                ? "Try-ons are paused for now — pieces and prices are all there."
+                ? "Try-ons are paused for now. Pieces and prices are all there."
                 : `${status.failed.length === 1 ? "One try-on" : `${status.failed.length} try-ons`} didn't work.`
               : refining
                 ? `Re-picking every look for "${refining}".`
@@ -254,10 +255,10 @@ export function LoadingStep({
           {looks.length > 0 && (
             <div
               style={{
-                marginTop: 28,
+                marginTop: 20,
                 display: "grid",
                 gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: 16,
+                gap: 12,
               }}
             >
               {looks.map((look, li) =>
@@ -280,7 +281,7 @@ export function LoadingStep({
                     >
                       <div
                         style={{
-                          height: 260,
+                          height: 180,
                           position: "relative",
                           overflow: "hidden",
                           background: ready ? "#1C1C1F" : rendering ? "#1C1C1F" : "#141416",
@@ -347,10 +348,10 @@ export function LoadingStep({
           {/* Pipeline + "What Wingman heard" */}
           <div
             style={{
-              marginTop: 44,
+              marginTop: 28,
               display: "grid",
               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: 64,
+              gap: 40,
             }}
           >
             {/* Timeline */}

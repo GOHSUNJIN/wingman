@@ -2,7 +2,6 @@ import "server-only";
 
 import { AgentError } from "@/lib/agent/errors";
 import type { Look, LookItem, StyleEvent, StyleResult } from "@/lib/agent/events";
-import { BEARD_STYLES } from "@/lib/agent/grooming";
 import { memo } from "@/lib/agent/memo";
 import { PRESET_OCCASIONS } from "@/lib/agent/preset-occasions";
 import { allowedFormalities, buildPool, distinctLooks, lookItems, lookTotal, pickErrors, type LookItems } from "@/lib/agent/pick/candidates";
@@ -104,7 +103,7 @@ async function buildLooks(args: {
   });
   emit({ type: "progress", step: "picking", detail: `${products.length} in-stock pieces` });
   const pool = buildPool(products, { ...occasion, seed: photo.hash });
-  const rules = { maxBudget: occasion.maxBudget, beard: BEARD_STYLES };
+  const rules = { maxBudget: occasion.maxBudget };
   const select = (errors?: string[]) =>
     selectLooks({ occasion, sentence: args.sentence, pool, face: photo.closeFace, refine: args.refine, errors });
   // Same photo, brief and candidates: the same looks, without asking Claude again. A catalog
@@ -139,9 +138,7 @@ async function buildLooks(args: {
     tier: TIERS[Math.max(...Object.values(itemsByLook[i]).map((p) => TIERS.indexOf(p!.tier)))],
     why: pick.why,
     items: SLOTS.flatMap((slot) => (itemsByLook[i][slot] ? [toItem(slot, itemsByLook[i][slot]!)] : [])),
-    // No hairstyle suggestions: the hair try-on is no longer offered
     hair: null,
-    beard: pick.beard,
     renders: { errors: [] },
     fitCheck: null,
     total: lookTotal(itemsByLook[i]),
@@ -156,13 +153,12 @@ async function buildLooks(args: {
         photo,
         items: itemsByLook[i],
         hair: null,
-        beard: pick.beard,
         onRender: (kind, url) => emit({ type: "render", look: i, kind, url }),
         onFail: (kind, code) => emit({ type: "renderFailed", look: i, kind, code }),
       }),
     ),
   );
-  renders.forEach(({ outfit, hair, beard, errors }, i) => (looks[i].renders = { outfit, hair, beard, errors }));
+  renders.forEach(({ outfit, hair, errors }, i) => (looks[i].renders = { outfit, hair, errors }));
   lap("rendered");
 
   // 5. Fit Check on the renders

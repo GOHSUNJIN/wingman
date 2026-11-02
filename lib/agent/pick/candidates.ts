@@ -5,16 +5,14 @@ import type { Formality, Occasion, Product } from "@/lib/catalog/types";
 import { sha256 } from "@/lib/utils/hash";
 
 // Tops get the largest pool (30) because they drive colour and formality choices for the whole look.
-// Outerwear and watches are optional slots with a narrower catalog, so 12 is enough.
-// Shoes and bottoms sit at 20: varied enough to avoid repeats across 2-3 looks, small enough to
-// keep the prompt under the token budget. Raise these if the catalog grows beyond ~5,000 products.
-const POOL_SIZE: Record<Slot, number> = { top: 30, outerwear: 12, bottom: 20, shoes: 20, watch: 12 };
+// Outerwear is optional with a narrower catalog, so 12 is enough.
+const POOL_SIZE: Record<Slot, number> = { top: 30, outerwear: 12 };
 
 /**
  * Largest share of a look's budget one piece may take, so the pool can still make a
  * full look under the cap. The shares overlap on purpose; the total is checked after.
  */
-const BUDGET_SHARE: Record<Slot, number> = { top: 0.45, outerwear: 0.5, bottom: 0.4, shoes: 0.5, watch: 0.4 };
+const BUDGET_SHARE: Record<Slot, number> = { top: 0.65, outerwear: 0.75 };
 
 /** Formality levels a look may borrow from, nearest first. */
 export function allowedFormalities(target: Formality): Formality[] {
@@ -90,21 +88,19 @@ export const lookTotal = (items: LookItems) =>
 export function pickErrors(
   picks: LookPick[],
   pool: Pool,
-  opts: { maxBudget?: number; beard: string[] },
+  opts: { maxBudget?: number },
 ): string[] {
   const errors: string[] = [];
   picks.forEach((pick, i) => {
     const label = `Look ${i + 1} ("${pick.name}")`;
     for (const slot of SLOTS) {
       const id = pick[slot];
-      const required = slot === "top" || slot === "bottom" || slot === "shoes";
       if (!id) {
-        if (required) errors.push(`${label}: ${slot} is required.`);
+        if (slot === "top") errors.push(`${label}: top is required.`);
         continue;
       }
       if (!pool[slot].some((p) => p.id === id)) errors.push(`${label}: "${id}" is not in the ${slot} list.`);
     }
-    if (pick.beard && !opts.beard.includes(pick.beard)) errors.push(`${label}: beard "${pick.beard}" is not an allowed style.`);
     const total = lookTotal(lookItems(pick, pool));
     if (opts.maxBudget != null && total > opts.maxBudget) {
       errors.push(`${label}: total S$${total.toFixed(2)} is over the S$${opts.maxBudget} budget.`);

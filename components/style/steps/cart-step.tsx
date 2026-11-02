@@ -122,7 +122,7 @@ export function CartStep({
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            {lines.length > 0 ? sgd(total) : "—"}
+            {lines.length > 0 ? sgd(total) : "S$0"}
           </span>
           <span style={{ marginTop: 20, fontSize: 16 }}>
             {count} {count === 1 ? "piece" : "pieces"} · {stores.length}{" "}
@@ -227,16 +227,16 @@ export function CartStep({
           </div>
         </section>
 
-        {/* Right: scrollable cart (60%) */}
+        {/* Right: cart */}
         <section
           style={{
             flex: 1,
-            overflowY: "auto",
-            padding: "40px 80px 48px 72px",
+            overflow: "hidden",
+            padding: "32px 64px 36px 56px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
-            gap: 36,
+            gap: 24,
           }}
         >
           <h1
@@ -244,7 +244,7 @@ export function CartStep({
               margin: 0,
               fontFamily: "var(--font-dm-serif), serif",
               fontWeight: 400,
-              fontSize: 44,
+              fontSize: 36,
               lineHeight: 1,
               textTransform: "uppercase" as const,
               letterSpacing: "0.02em",
@@ -255,7 +255,7 @@ export function CartStep({
 
           {lines.length === 0 && (
             <p style={{ fontSize: 15, color: "#9C978E", marginTop: -20 }}>
-              Your cart is empty. Add a whole look, or single pieces while you browse.
+              Your cart is empty. Add a whole look or single pieces while you browse.
             </p>
           )}
 

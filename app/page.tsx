@@ -1,6 +1,5 @@
 import { BeforeAfter } from "@/components/home/before-after";
 import { FinalCta } from "@/components/home/final-cta";
-import { FitCheck } from "@/components/home/fit-check";
 import { HeroWindow } from "@/components/home/hero-window";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Lookbook } from "@/components/home/lookbook";
@@ -16,7 +15,6 @@ export default function Home() {
         <HeroWindow />
         <OccasionMarquee />
         <Lookbook />
-        <FitCheck />
         <HowItWorks />
         <BeforeAfter />
         <PiecesGrid />

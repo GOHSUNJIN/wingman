@@ -7,8 +7,6 @@ export const YOUCAM_APIS = {
   clothes: { path: "/s2s/v2.0/task/cloth-v3", units: 2, output: "image" },
   // AI Hairstyle Generator, preset template mode. 1 unit (v2.1 transfer costs 2).
   hair: { path: "/s2s/v2.0/task/hair-style", units: 1, output: "image" },
-  // AI Beard Style Generator. 2 units.
-  beard: { path: "/s2s/v2.0/task/beard-style", units: 2, output: "image" },
   // AI Skin Analysis, SD concerns only. Units depend on concern count (see skinUnits).
   skin: { path: "/s2s/v2.0/task/skin-analysis", units: 9, output: "json" },
 } as const;
@@ -17,7 +15,6 @@ export type YouCamApi = keyof typeof YOUCAM_APIS;
 
 export const TEMPLATE_PATHS = {
   hair: "/s2s/v2.0/task/template/hair-style",
-  beard: "/s2s/v2.0/task/template/beard-style",
 } as const;
 
 /** SD concern names from the skin analysis reference. Never mix with hd_* concerns. */

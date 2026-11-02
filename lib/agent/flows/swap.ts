@@ -111,8 +111,6 @@ export async function runSwap(photoBytes: Buffer, req: SwapRequest, emit: (event
     photo,
     items,
     hair: req.hair,
-    // A swap keeps the beard render it had; a retry of failed images sends the beard to redo
-    beard: req.beard ?? null,
     onRender: (kind, url) => emit({ type: "render", kind, url }),
     onFail: (kind, code) => emit({ type: "renderFailed", kind, code }),
   });

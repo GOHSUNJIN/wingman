@@ -6,30 +6,24 @@ import { headShouldersFrom, type PreparedPhoto } from "@/lib/photo/prepare";
 import { renderUrl, youcam } from "@/lib/youcam";
 import { YouCamError, type YouCamErrorCode } from "@/lib/youcam/errors";
 import type { RenderKind } from "./events";
-import { BEARD_TEMPLATES, HAIR_TEMPLATES } from "./grooming";
+import { HAIR_TEMPLATES } from "./grooming";
 
 type LookRenders = {
   /** Clothes try-on on the whole photo. */
   outfit?: string;
   /** Hair try-on chained on the outfit render (head and shoulders). */
   hair?: string;
-  /** Beard try-on on the close face crop, shown beside the others. */
-  beard?: string;
   /** Raw outfit image, for the Fit Check. */
   outfitImage?: Buffer;
   errors: YouCamErrorCode[];
 };
 
-/**
- * Step 4: clothes try-on with the outer layer, then hair on that render, then beard.
- * Watches, bottoms and shoes are product cards only (see docs: YouCam framing limits).
- */
+/** Step 4: clothes try-on with the outer layer, then hair on that render. */
 export async function renderLook(args: {
   photo: PreparedPhoto;
   items: LookItems;
   hair: string | null;
-  beard: string | null;
-  /** Called as each render lands, so the client can show the outfit before hair and beard finish. */
+  /** Called as each render lands, so the client can show the outfit before hair finishes. */
   onRender?: (kind: RenderKind, url: string) => void;
   /** Called when a render fails, so the client can offer to try it again. */
   onFail?: (kind: RenderKind, code: YouCamErrorCode) => void;
@@ -53,14 +47,6 @@ export async function renderLook(args: {
       return undefined;
     }
   };
-
-  const beard = args.beard
-    ? attempt("beard", () =>
-        yc.tryOnBeard({ photo: photo.closeFace, selfieHash: photo.hash, templateId: BEARD_TEMPLATES[args.beard!] }),
-      )
-    : undefined;
-  // Marks the beard promise handled if clothes throws first; it is still awaited below.
-  beard?.catch(() => undefined);
 
   const clothes = garment
     ? await attempt("outfit", () =>
@@ -96,9 +82,5 @@ export async function renderLook(args: {
     if (out.hair) args.onRender?.("hair", out.hair);
   }
 
-  const beardResult = await beard;
-  if (beardResult) out.beard = await renderUrl(beardResult);
-  if (beardResult && !out.beard) args.onFail?.("beard", "UNKNOWN");
-  if (out.beard) args.onRender?.("beard", out.beard);
   return out;
 }

@@ -1,10 +1,10 @@
 /**
- * One real call each for clothes VTO, skin analysis, hair VTO (plus hair on the
- * clothes render, to test chaining) and beard VTO on fixtures/selfies/demo.jpg.
+ * One real call each for clothes VTO, skin analysis and hair VTO (plus hair on the
+ * clothes render, to test chaining) on fixtures/selfies/demo.jpg.
  * Saves raw responses and images to fixtures/youcam/ for MOCK_YOUCAM mode.
  * A second run is served from the render cache and costs zero units.
  *
- *   npm run youcam:smoke [-- --garment <url> --product-id <id> --hair-template <id> --beard-template <id>]
+ *   npm run youcam:smoke [-- --garment <url> --product-id <id> --hair-template <id>]
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -30,7 +30,6 @@ const { values: args } = parseArgs({
     garment: { type: "string", default: DEFAULT_GARMENT },
     "product-id": { type: "string", default: DEFAULT_PRODUCT_ID },
     "hair-template": { type: "string" },
-    "beard-template": { type: "string" },
   },
 });
 
@@ -129,19 +128,6 @@ async function main() {
         );
         if (chained) await save("hair-chained", chained);
       }
-    }
-  }
-
-  const beardTemplates = await step("list beard templates", () => yc.listTemplates("beard"));
-  if (beardTemplates) {
-    await writeFile(path.join(FIXTURE_DIR, "beard-templates.json"), JSON.stringify(beardTemplates, null, 2));
-    const t = pickTemplate(beardTemplates, /^Circle$/, args["beard-template"]);
-    if (t) {
-      console.info(`Beard template: ${t.title} (${t.id})`);
-      const beard = await step("beard VTO", () =>
-        yc.tryOnBeard({ photo: photo.closeFace, selfieHash: photo.hash, templateId: t.id }),
-      );
-      if (beard) await save("beard", beard);
     }
   }
 

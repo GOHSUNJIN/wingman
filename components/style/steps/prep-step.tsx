@@ -153,20 +153,20 @@ export function PrepStep({
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "48px 96px 40px 80px",
+            padding: "36px 72px 32px 64px",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
-            overflowY: "auto",
+            overflow: "hidden",
           }}
         >
           <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>Friday evening</span>
           <h1
             style={{
-              margin: "14px 0 0",
+              margin: "12px 0 0",
               fontFamily: "var(--font-dm-serif), serif",
               fontWeight: 400,
-              fontSize: 60,
+              fontSize: 52,
               lineHeight: 1,
               textTransform: "uppercase" as const,
               letterSpacing: "0.02em",
@@ -174,29 +174,29 @@ export function PrepStep({
           >
             The Night Before
           </h1>
-          <p style={{ margin: "18px 0 0", fontSize: 15, lineHeight: 1.6, color: "#9C978E", maxWidth: 460 }}>
+          <p style={{ margin: "14px 0 0", fontSize: 14, lineHeight: 1.55, color: "#9C978E", maxWidth: 460 }}>
             {plan
               ? `Three things tonight so tomorrow you only have to get dressed.`
               : "Your plan is still being written. It arrives a few seconds after your looks."}
           </p>
 
           {plan && (
-            <ol style={{ listStyle: "none", margin: "36px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+            <ol style={{ listStyle: "none", margin: "24px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
               {plan.steps.map((step, i) => (
                 <li
                   key={step.title}
                   style={{
                     background: "#141416",
-                    padding: "24px 28px",
+                    padding: "16px 20px",
                     display: "flex",
-                    gap: 22,
+                    gap: 18,
                     alignItems: "flex-start",
                   }}
                 >
                   <span
                     style={{
-                      width: 36,
-                      height: 36,
+                      width: 30,
+                      height: 30,
                       flexShrink: 0,
                       borderRadius: "50%",
                       background: "#C8A96A",
@@ -205,15 +205,15 @@ export function PrepStep({
                       alignItems: "center",
                       justifyContent: "center",
                       fontFamily: "var(--font-dm-serif), serif",
-                      fontSize: 18,
+                      fontSize: 16,
                     }}
                     aria-hidden
                   >
                     {i + 1}
                   </span>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    <span style={{ fontSize: 17, fontWeight: 600 }}>{step.title}</span>
-                    <span style={{ fontSize: 14, lineHeight: 1.6, color: "#9C978E" }}>{step.detail}</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>{step.title}</span>
+                    <span style={{ fontSize: 13, lineHeight: 1.55, color: "#9C978E" }}>{step.detail}</span>
                   </div>
                 </li>
               ))}

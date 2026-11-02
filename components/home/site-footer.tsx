@@ -4,9 +4,9 @@ import Link from "next/link";
 
 const NAV = [
   { label: "How It Works", href: "#how" },
-  { label: "Stores", href: "#pieces" },
-  { label: "Privacy", href: "#privacy" },
-  { label: "Contact", href: "#" },
+  { label: "Catalog", href: "/catalog" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function SiteFooter() {

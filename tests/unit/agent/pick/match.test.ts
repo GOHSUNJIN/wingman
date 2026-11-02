@@ -30,8 +30,7 @@ function product(id: string, overrides: Partial<Product> = {}): Product {
 
 const look: LookItems = {
   top: product("top-mid", { name: "Napoli Linen Shirt", colour: "white" }),
-  bottom: product("bottom-mid", { category: "bottom", name: "Khaki Chinos", colour: "khaki" }),
-  shoes: product("shoes-mid", { category: "shoes", name: "Chestnut Penny Loafer", colour: "brown" }),
+  outerwear: product("out-mid", { category: "outerwear", name: "Linen Blazer", colour: "white" }),
 };
 
 const catalog: Product[] = [
@@ -39,19 +38,14 @@ const catalog: Product[] = [
   product("t-linen", { tier: "budget", name: "Linen Shirts", colour: "white" }),
   product("t-oos", { tier: "budget", name: "Linen Shirt", colour: "white", variants: [{ id: 2, size: "M", available: false }] }),
   product("t-lux", { tier: "luxury", name: "Linen Shirt", colour: "white" }),
-  product("b-chino", { tier: "budget", category: "bottom", name: "Chino Trousers", colour: "light khaki" }),
-  product("b-jean", { tier: "budget", category: "bottom", name: "Selvedge Jeans", colour: "indigo" }),
-  product("s-loafer", { tier: "budget", category: "shoes", name: "Penny Loafers", colour: "brown" }),
-  product("w-watch", { tier: "budget", category: "watch", name: "Field Watch", colour: "black" }),
+  product("o-blazer", { tier: "budget", category: "outerwear", name: "Cotton Blazer", colour: "white" }),
+  product("o-linen", { tier: "budget", category: "outerwear", name: "Linen Jacket", colour: "light beige" }),
 ];
 
 const pick = (overrides: Partial<TierPick> = {}): TierPick => ({
   tier: "budget",
   top: "t-linen",
-  outerwear: null,
-  bottom: "b-chino",
-  shoes: "s-loafer",
-  watch: null,
+  outerwear: "o-blazer",
   note: "Cheaper cloth.",
   ...overrides,
 });
@@ -74,12 +68,11 @@ describe("tierPool", () => {
   it("only offers in-stock pieces from the target tier, in the look's slots", () => {
     expect(pool.top?.map((p) => p.id)).not.toContain("t-oos");
     expect(pool.top?.map((p) => p.id)).not.toContain("t-lux");
-    expect(pool.watch).toBeUndefined();
   });
 
   it("ranks the same colour and cut first", () => {
     expect(pool.top?.[0].id).toBe("t-linen");
-    expect(pool.bottom?.[0].id).toBe("b-chino");
+    expect(pool.outerwear?.[0].id).toBe("o-blazer");
   });
 });
 
@@ -92,8 +85,7 @@ describe("tierPickErrors", () => {
 
   it("flags unknown ids, missing slots and slots the look doesn't have", () => {
     expect(tierPickErrors(pick({ top: "t-lux" }), pool)).toEqual(['budget: "t-lux" is not in the budget top list.']);
-    expect(tierPickErrors(pick({ shoes: null }), pool)).toEqual(["budget: shoes is required."]);
-    expect(tierPickErrors(pick({ watch: "w-watch" }), pool)).toEqual(["budget: the look has no watch, so watch must be null."]);
+    expect(tierPickErrors(pick({ outerwear: null }), pool)).toEqual(["budget: outerwear is required."]);
   });
 });
 
@@ -101,13 +93,13 @@ describe("resolveTier", () => {
   const pool = tierPool(look, catalog, "budget", "photo");
 
   it("uses valid picks and falls back to the closest candidate for invalid ones", () => {
-    const items = resolveTier(look, pool, pick({ bottom: "b-jean", top: "nope" }));
+    const items = resolveTier(look, pool, pick({ outerwear: "o-linen", top: "nope" }));
     expect(items.top?.id).toBe("t-linen");
-    expect(items.bottom?.id).toBe("b-jean");
+    expect(items.outerwear?.id).toBe("o-linen");
   });
 
   it("keeps the original piece when the tier has nothing in that category", () => {
     const items = resolveTier(look, tierPool(look, [], "luxury", "photo"));
-    expect(items.shoes?.id).toBe("shoes-mid");
+    expect(items.outerwear?.id).toBe("out-mid");
   });
 });

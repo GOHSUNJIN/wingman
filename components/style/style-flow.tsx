@@ -531,7 +531,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
       items,
       total: roundTotal(items),
       fitCheck: null,
-      renders: showsInRender({ ...before, items }, slot) ? { beard: before.renders.beard, errors: [] } : before.renders,
+      renders: showsInRender({ ...before, items }, slot) ? { errors: [] } : before.renders,
     };
     setLooks((prev) => prev.map((l, i) => (i === index ? swapped : l)));
     // The comparison was for the old pieces
@@ -587,7 +587,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
       const controller = sideController();
       const form = new FormData();
       form.set("photo", photo.blob, "photo.jpg");
-      form.set("look", JSON.stringify({ ...lookRef(look), beard: look.renders.failed?.beard ? look.beard : null }));
+      form.set("look", JSON.stringify(lookRef(look)));
       const failAll = (code: string) =>
         patch((l) => ({
           ...l,
