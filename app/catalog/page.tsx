@@ -19,6 +19,7 @@ async function fetchAll(): Promise<CatalogProduct[]> {
       .from("products")
       .select("id, name, store_name, price, category, tier, image, url")
       .eq("in_stock", true)
+      .in("category", ["top", "outerwear"])
       .not("image", "is", null)
       .order("store_name", { ascending: true });
     if (error || !data) return [];
