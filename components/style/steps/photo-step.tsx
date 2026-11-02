@@ -214,17 +214,17 @@ export function PhotoStep({
                 }
               `}</style>
 
-              {/* Image — starts at top of frame, pans to face when check returns faceY */}
+              {/* Image — contain (full body visible) until faceY known, then cover panned to face */}
               <Image
                 src={photo.url}
                 alt="Your uploaded selfie"
                 fill
                 sizes="628px"
                 style={{
-                  objectFit: "cover",
+                  objectFit: photo.check?.faceY != null ? "cover" : "contain",
                   objectPosition: photo.check?.faceY != null
                     ? `50% ${Math.round(photo.check.faceY * 100)}%`
-                    : "50% 35%",
+                    : "center",
                   transitionProperty: "object-position",
                   transitionDuration: "1.4s",
                   transitionTimingFunction: "cubic-bezier(0.2, 0.7, 0.2, 1)",
