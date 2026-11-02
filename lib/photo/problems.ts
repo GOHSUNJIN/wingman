@@ -81,4 +81,6 @@ export type PhotoCheck = {
   ok: boolean;
   problems: PhotoProblem[];
   zoom?: { x: number; y: number; width: number; height: number };
+  /** Face centre as a fraction from the top of the image (0 = top, 1 = bottom). Used to set objectPosition in the preview. */
+  faceY?: number;
 };

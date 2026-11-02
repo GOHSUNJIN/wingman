@@ -210,7 +210,13 @@ export function PhotoStep({
                 alt="Your uploaded selfie"
                 fill
                 sizes="628px"
-                style={{ objectFit: "cover", objectPosition: "50% 20%" }}
+                style={{
+                  objectFit: "cover",
+                  objectPosition: photo.check?.faceY != null
+                    ? `50% ${Math.round(photo.check.faceY * 100)}%`
+                    : "50% 30%",
+                  transition: "object-position 0.4s ease",
+                }}
                 {...RAW_IMG_PROPS}
               />
 

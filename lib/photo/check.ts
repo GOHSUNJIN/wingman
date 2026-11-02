@@ -169,5 +169,8 @@ export async function checkPhoto(input: Buffer): Promise<PhotoCheck> {
     }),
   ]);
   const problems = problemsFrom(metrics, vision);
-  return { ok: problems.every((p) => p.soft), problems, zoom: zoomFrom(metrics, vision) ?? undefined };
+  const faceY = vision && vision.people === 1 && vision.face_visible
+    ? vision.face_top + vision.face_height / 2
+    : undefined;
+  return { ok: problems.every((p) => p.soft), problems, zoom: zoomFrom(metrics, vision) ?? undefined, faceY };
 }

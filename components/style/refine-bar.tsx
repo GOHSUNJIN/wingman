@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const SUGGESTIONS = ["More casual", "Dressier", "Under S$500"];
+const SUGGESTIONS = ["Something more relaxed", "Make it smarter", "Cheaper alternatives"];
 
 /**
  * Chat bar under the looks. Two modes:
