@@ -4,7 +4,7 @@
 
 Built for the **YouCam API Skin AI & eCommerce VTO Hackathon** (Perfect Corp, Devpost).
 
-**Live demo:** https://wingman-eight-beta.vercel.app
+**Live demo:** https://wingman-1608.vercel.app
 
 ---
 
@@ -12,7 +12,7 @@ Wingman is an AI occasion stylist for men. Give it a selfie and one sentence abo
 
 ## Try it in 60 seconds
 
-1. Open https://wingman-eight-beta.vercel.app on your phone or laptop.
+1. Open https://wingman-1608.vercel.app on your phone or laptop.
 2. Tap **Start with a photo** and upload a waist-up, front-facing selfie. Glasses are fine.
 3. Keep the prefilled brief, pick **Mid-range** and tap **Style me**. Each try-on fills in on the loading screen, and your looks open once every one is ready, in about a minute.
 

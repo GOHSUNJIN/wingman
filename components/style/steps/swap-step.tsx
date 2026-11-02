@@ -42,6 +42,7 @@ export function SwapStep({
   const current = look.items.find((i) => i.slot === slot)!;
   const name = SLOT_NAMES[slot];
   const [picked, setPicked] = useState<string | null>(null);
+  const [focused, setFocused] = useState<string | null>(null);
   const showsInTryOn = showsInRender(look, slot);
   const rendering = !!picked && showsInTryOn;
 
@@ -286,8 +287,10 @@ export function SwapStep({
                     <button
                       key={option.id}
                       type="button"
-                      aria-pressed={on}
+                      aria-pressed={on || focused === option.id}
                       onClick={() => {
+                        if (focused !== option.id) { setFocused(option.id); return; }
+                        setFocused(null);
                         setPicked(option.id);
                         onPick(option);
                       }}
@@ -311,8 +314,8 @@ export function SwapStep({
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          background: on ? "#26262A" : "#141416",
-                          outline: on ? "1px solid #ECEBE8" : "none",
+                          background: (on || focused === option.id) ? "#26262A" : "#141416",
+                          outline: (on || focused === option.id) ? "1px solid #ECEBE8" : "none",
                           outlineOffset: -1,
                         }}
                       >
@@ -332,6 +335,23 @@ export function SwapStep({
                           >
                             Trying on
                           </span>
+                        )}
+                        {focused === option.id && !on && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              display: "flex",
+                              alignItems: "flex-end",
+                              justifyContent: "center",
+                              paddingBottom: 10,
+                              background: "rgba(10,10,11,0.5)",
+                            }}
+                          >
+                            <span style={{ background: "#C8A96A", color: "#0A0A0B", fontSize: 12, fontWeight: 700, padding: "6px 14px" }}>
+                              Try this on
+                            </span>
+                          </div>
                         )}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>

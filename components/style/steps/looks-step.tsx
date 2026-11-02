@@ -66,7 +66,15 @@ export function LooksStep({
   const cartTotal = cart.filter((l) => !isSoldOut(l)).reduce((sum, l) => sum + l.price * l.qty, 0);
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(focusLook);
+  const [fullscreen, setFullscreen] = useState(false);
   const wide = useWide();
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fullscreen]);
 
   const goTo = (i: number, behavior: ScrollBehavior = "smooth") => {
     setActive(i);
@@ -156,14 +164,21 @@ export function LooksStep({
             }}
           >
             {shown.renders.outfit ? (
-              <Image
-                src={shown.renders.outfit}
-                alt={`You in ${shown.name}`}
-                fill
-                sizes="628px"
-                style={{ objectFit: "contain" }}
-                {...RAW_IMG_PROPS}
-              />
+              <button
+                type="button"
+                onClick={() => setFullscreen(true)}
+                aria-label="View render fullscreen"
+                style={{ position: "absolute", inset: 0, background: "none", border: 0, padding: 0, cursor: "zoom-in", width: "100%", height: "100%" }}
+              >
+                <Image
+                  src={shown.renders.outfit}
+                  alt={`You in ${shown.name}`}
+                  fill
+                  sizes="628px"
+                  style={{ objectFit: "contain" }}
+                  {...RAW_IMG_PROPS}
+                />
+              </button>
             ) : photo ? (
               <Image
                 src={photo.url}
@@ -396,7 +411,7 @@ export function LooksStep({
               )}
 
               <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
-                {TIER_LABELS[shown.tier]} · {shown.items.length} {shown.items.length === 1 ? "piece" : "pieces"}
+                {TIER_LABELS[shown.tier]} · {shown.items[0] ? SLOT_LABELS[shown.items[0].slot].toLowerCase() : "piece"}
               </span>
               <div
                 style={{
@@ -579,6 +594,33 @@ export function LooksStep({
             {onRefine && <RefineBar onRefine={onRefine} inside />}
           </section>
         </main>
+
+        {fullscreen && shown.renders.outfit && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Render fullscreen"
+            onClick={() => setFullscreen(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.95)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "zoom-out" }}
+          >
+            <Image
+              src={shown.renders.outfit}
+              alt={`You in ${shown.name}`}
+              fill
+              sizes="100vw"
+              style={{ objectFit: "contain" }}
+              {...RAW_IMG_PROPS}
+            />
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}
+              aria-label="Close fullscreen"
+              style={{ position: "absolute", top: 24, right: 24, background: "none", border: 0, color: "#ECEBE8", fontSize: 24, cursor: "pointer", fontFamily: "inherit", lineHeight: 1, padding: 8, zIndex: 1 }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </div>
     );
   }

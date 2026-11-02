@@ -503,26 +503,32 @@ export function CartStep({
                       {sgd(group.subtotal)}
                     </span>
                   </div>
-                  <a
-                    href={group.checkoutUrl ?? "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      height: 48,
-                      padding: "0 24px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      background: "#C8A96A",
-                      color: "#0A0A0B",
-                      textDecoration: "none",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      fontFamily: "inherit",
-                    }}
-                  >
-                    Check Out at {group.store} ↗
-                  </a>
+                  {group.checkoutUrl ? (
+                    <a
+                      href={group.checkoutUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        height: 48,
+                        padding: "0 24px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        background: "#C8A96A",
+                        color: "#0A0A0B",
+                        textDecoration: "none",
+                        fontSize: 14,
+                        fontWeight: 600,
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      Check Out at {group.store} ↗
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: 13, color: "#9C978E" }}>
+                      Pick a size for each piece first
+                    </span>
+                  )}
                 </div>
               </section>
             );

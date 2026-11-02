@@ -26,6 +26,7 @@ import type { ParsedOccasion, PrepPlan } from "@/lib/agent/schemas";
 import { imageStatus } from "@/lib/agent/images";
 import { SLOTS } from "@/lib/agent/slots";
 import { isOneSize, MAX_QTY, type CartLine } from "@/lib/cart";
+import { displayName } from "@/lib/catalog/names";
 import type { Occasion, Tier } from "@/lib/catalog/types";
 import { OCCASION_CHOICES } from "@/lib/occasions";
 import type { PhotoCheck } from "@/lib/photo/problems";
@@ -82,6 +83,44 @@ type Saved = {
   focusLook: number;
 };
 
+const SESSION_KEY = "wingman_session";
+
+type PersistedSession = {
+  occasionId: Occasion;
+  sentence: string;
+  tier: Tier;
+  looks: Look[];
+  parsed: ParsedOccasion | null;
+  cart: CartLine[];
+  prep: { plan: PrepPlan; skinAnalysed: boolean } | null;
+};
+
+function loadPersistedSession(): Saved | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as PersistedSession;
+    if (!p.looks?.length) return null;
+    return {
+      phase: "looks",
+      photo: null,
+      occasionId: p.occasionId,
+      sentence: p.sentence,
+      tier: p.tier,
+      looks: p.looks,
+      parsed: p.parsed,
+      compares: {},
+      swapOptions: {},
+      cart: p.cart ?? [],
+      prep: p.prep ?? null,
+      browseFilters: { category: "top", sort: "featured" },
+      focusLook: 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Held in memory only, for moves within the site (to the home page and back). Nothing is
  * written to the browser's storage, so a refresh or a new tab starts over and the photo is
@@ -91,17 +130,19 @@ let saved: Saved | null = null;
 
 /** Where a visitor coming back lands: the screen they left, unless they picked an occasion on the way in. */
 function arrival(initialOccasion: Occasion | undefined): Saved | null {
-  if (!saved) return null;
+  const base = saved ?? loadPersistedSession();
+  if (!base) return null;
+  saved = base;
   const choice = OCCASION_CHOICES.find((o) => o.id === initialOccasion);
   if (choice) {
-    return { ...saved, occasionId: choice.id, sentence: choice.example, phase: saved.photo ? "occasion" : "photo" };
+    return { ...base, occasionId: choice.id, sentence: choice.example, phase: base.photo ? "occasion" : "photo" };
   }
   // Requests in flight were cancelled on the way out: drop what they'd started so it reloads
   const settledOnly = <T extends { status: string }>(map: Record<string, T>) =>
     Object.fromEntries(Object.entries(map).filter(([, v]) => v.status !== "loading"));
-  const interrupted = ["loading", "error", "compare", "swap"].includes(saved.phase);
-  const phase = interrupted ? (saved.looks.length ? "looks" : saved.photo ? "occasion" : "photo") : saved.phase;
-  return { ...saved, phase, compares: settledOnly(saved.compares), swapOptions: settledOnly(saved.swapOptions) };
+  const interrupted = ["loading", "error", "compare", "swap"].includes(base.phase);
+  const phase = interrupted ? (base.looks.length ? "looks" : base.photo ? "occasion" : "photo") : base.phase;
+  return { ...base, phase, compares: settledOnly(base.compares), swapOptions: settledOnly(base.swapOptions) };
 }
 
 /** Photo, then occasion, then a streamed styling run that lands on the looks. */
@@ -175,9 +216,15 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
     shownUrl.current = photo?.url;
   }, [photo?.url]);
 
-  // Keep the flow for a visit to the home page and back
+  // Keep the flow for a visit to the home page and back; persist looks across refreshes
   useEffect(() => {
     saved = { phase, photo, occasionId, sentence, tier, looks, parsed, compares, swapOptions, cart, prep, browseFilters, focusLook };
+    if (looks.length) {
+      try {
+        const p: PersistedSession = { occasionId, sentence, tier, looks, parsed, cart, prep };
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(p));
+      } catch {}
+    }
   }, [phase, photo, occasionId, sentence, tier, looks, parsed, compares, swapOptions, cart, prep, browseFilters, focusLook]);
 
   const record = (next: Phase, replace: boolean) => {
@@ -511,6 +558,7 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
 
     const swapped: Look = {
       ...before,
+      name: displayName(option.name, option.storeName),
       items,
       total: roundTotal(items),
       fitCheck: null,

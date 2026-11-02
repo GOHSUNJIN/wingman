@@ -53,7 +53,7 @@ export function tidyReply(reply: string): string {
   let out = reply.trim().replace(/[\s}]+$/, "");
   const quotes = (out.match(/["\u201C\u201D]/g) ?? []).length;
   if (quotes % 2 === 1 && /["\u201D]$/.test(out)) out = out.slice(0, -1).trimEnd();
-  return out;
+  return out.replace(/\s*—\s*/g, ", ");
 }
 
 /** Refine: one chat request applied to the parsed occasion. The occasion type and time stay. */
@@ -243,7 +243,10 @@ export async function fitCheck(args: {
       "Never comment on his body, weight or face shape negatively. Ignore glasses.",
     content,
   });
-  return args.looks.map((_, i) => result.checks[i] ?? { score: 7, reasoning: "A solid, occasion-appropriate look." });
+  return args.looks.map((_, i) => {
+    const c = result.checks[i] ?? { score: 7, reasoning: "A solid, occasion-appropriate look." };
+    return { ...c, reasoning: c.reasoning.replace(/\s*—\s*/g, ", ") };
+  });
 }
 
 /** Step 6: a three-step night-before grooming routine. No medical claims. */
