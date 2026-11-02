@@ -1,42 +1,35 @@
+import Image from "next/image";
+
 const LOOKS = [
   {
     num: "No. 1",
-    name: "Ballroom Navy",
-    score: "8.4",
+    name: "Velvet Midnight",
+    score: "8.7",
     scoreGold: true,
-    stores: "Benjamin Barker, Massimo Dutti",
-    price: "S$756",
-    bg: "#3A342D",
-    jacket: "#1A1E2B",
-    shirt: "#E4E0D8",
-    tie: "#6B4A32",
-    lapel: "#222738",
+    stores: "Kevin Seah",
+    price: "S$4,600",
+    image: "/home/lookbook-1.jpg",
+    alt: "Deep red velvet jacket try-on render",
   },
   {
     num: "No. 2",
-    name: "Warm Charcoal",
-    score: "7.9",
+    name: "Warm Pinstripe",
+    score: "8.3",
     scoreGold: false,
-    stores: "Massimo Dutti, COS",
-    price: "S$788",
-    bg: "#33363A",
-    jacket: "#3C3C42",
-    shirt: "#D9CDB5",
-    tie: null,
-    lapel: null,
+    stores: "The Jacket Maker",
+    price: "S$3,079",
+    image: "/home/lookbook-2.jpg",
+    alt: "Brown double-breasted pinstripe suit try-on render",
   },
   {
     num: "No. 3",
-    name: "Soft Tailoring",
-    score: "7.2",
+    name: "Navy Classic",
+    score: "7.8",
     scoreGold: false,
-    stores: "COS, Uniqlo, Massimo Dutti",
-    price: "S$549",
-    bg: "#2E3A3E",
-    jacket: "#4E5140",
-    shirt: "#E6DCC8",
-    tie: null,
-    lapel: null,
+    stores: "Colony Clothing",
+    price: "S$1,890",
+    image: "/home/lookbook-3.jpg",
+    alt: "Ring Jacket 1954 navy blazer try-on render",
   },
 ] as const;
 
@@ -44,7 +37,7 @@ export function Lookbook() {
   return (
     <section id="looks" style={{ background: "#0A0A0B" }}>
       <style>{`
-        .look-card:hover .look-thumb { transform: scale(1.02); }
+        .look-card:hover .look-thumb { transform: scale(1.03); }
         .look-thumb { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
       `}</style>
       <div
@@ -103,45 +96,23 @@ export function Lookbook() {
         >
           {LOOKS.map((look) => (
             <figure key={look.num} className="look-card" style={{ margin: 0, display: "flex", flexDirection: "column", gap: "18px" }}>
-              {/* TODO: replace SVG with real try-on render for this look */}
               <div
                 style={{
                   position: "relative",
                   aspectRatio: "3 / 4",
                   overflow: "hidden",
-                  background: look.bg,
+                  background: "#141416",
                 }}
               >
-                <svg
+                <Image
+                  src={look.image}
+                  alt={look.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="look-thumb"
-                  viewBox="0 0 600 900"
-                  preserveAspectRatio="xMidYMid slice"
-                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
-                  role="img"
-                  aria-label={`${look.num}: ${look.name} (placeholder)`}
-                >
-                  <rect width="600" height="900" fill={look.bg} />
-                  <path d="M40 900 L58 640 Q70 520 160 486 L246 452 L300 486 L354 452 L440 486 Q530 520 542 640 L560 900 Z" fill={look.jacket} />
-                  {look.lapel && (
-                    <>
-                      <path d="M150 600 L138 900" stroke="#0A0A0B" strokeOpacity="0.35" strokeWidth="5" />
-                      <path d="M450 600 L462 900" stroke="#0A0A0B" strokeOpacity="0.35" strokeWidth="5" />
-                    </>
-                  )}
-                  <path d="M246 452 L300 486 L354 452 L336 600 L300 660 L264 600 Z" fill={look.shirt} />
-                  {look.tie && (
-                    <path d="M292 496 L308 496 L314 520 L318 690 L300 716 L282 690 L286 520 Z" fill={look.tie} />
-                  )}
-                  {look.lapel && (
-                    <>
-                      <path d="M246 452 L216 470 L250 560 L230 580 L300 760 L272 600 Z" fill={look.lapel} />
-                      <path d="M354 452 L384 470 L350 560 L370 580 L300 760 L328 600 Z" fill={look.lapel} />
-                    </>
-                  )}
-                  <path d="M262 360 L338 360 L346 470 L300 490 L254 470 Z" fill="#3E342D" />
-                  <ellipse cx="300" cy="288" rx="80" ry="100" fill="#46392F" />
-                  <path d="M218 270 Q214 180 300 176 Q388 178 384 268 Q372 222 300 218 Q236 220 218 270 Z" fill="#16130F" />
-                </svg>
+                  style={{ objectFit: "cover", objectPosition: "50% 15%" }}
+                  unoptimized
+                />
                 <span
                   style={{
                     position: "absolute",
@@ -151,6 +122,7 @@ export function Lookbook() {
                     fontSize: "15px",
                     background: "#0A0A0B",
                     padding: "6px 10px",
+                    zIndex: 1,
                   }}
                 >
                   {look.num}
