@@ -219,143 +219,150 @@ export function SwapStep({
             {cheaper ? `Cheaper ${name}` : `Swapping the ${name.charAt(0).toUpperCase() + name.slice(1)}`}
           </h1>
 
-          {/* Current piece */}
-          <div style={{ marginTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
-            <p style={{ margin: 0, fontSize: 14, color: "#9C978E" }}>
-              Currently:{" "}
-              <span style={{ color: "#ECEBE8" }}>
-                {displayName(current.name, current.storeName)}
-              </span>{" "}
-              · {current.storeName} · {sgd(current.price)}
-            </p>
-          </div>
+          {/* Scrollable area: current piece + options */}
+          <div
+            className="no-scrollbar"
+            style={{ flex: 1, overflowY: "auto", minHeight: 0, marginTop: 22 }}
+          >
+            {/* Current piece */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
+              <p style={{ margin: 0, fontSize: 14, color: "#9C978E" }}>
+                Currently:{" "}
+                <span style={{ color: "#ECEBE8" }}>
+                  {displayName(current.name, current.storeName)}
+                </span>{" "}
+                · {current.storeName} · {sgd(current.price)}
+              </p>
+            </div>
 
-          {/* Options grid */}
-          {state.status === "loading" && (
-            <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
-              Finding {cheaper ? "cheaper " : ""}options…
-            </p>
-          )}
-          {state.status === "error" && (
-            <div style={{ marginTop: 28 }}>
-              <p style={{ color: "#E06C5F", fontSize: 14 }}>{state.error}</p>
-              <button
-                type="button"
-                onClick={onRetry}
+            {/* Options grid */}
+            {state.status === "loading" && (
+              <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
+                Finding {cheaper ? "cheaper " : ""}options…
+              </p>
+            )}
+            {state.status === "error" && (
+              <div style={{ marginTop: 28 }}>
+                <p style={{ color: "#E06C5F", fontSize: 14 }}>{state.error}</p>
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  style={{
+                    marginTop: 8,
+                    background: "none",
+                    border: 0,
+                    color: "#ECEBE8",
+                    fontSize: 14,
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+            {state.status === "done" && state.options.length === 0 && (
+              <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
+                {cheaper
+                  ? `Nothing cheaper in stock goes with this look right now.`
+                  : "Nothing else in stock fits this look and budget right now."}
+              </p>
+            )}
+            {state.options.length > 0 && (
+              <div
                 style={{
-                  marginTop: 8,
-                  background: "none",
-                  border: 0,
-                  color: "#ECEBE8",
-                  fontSize: 14,
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
+                  marginTop: 22,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                  gap: "24px 16px",
+                  paddingBottom: 24,
                 }}
               >
-                Try Again
-              </button>
-            </div>
-          )}
-          {state.status === "done" && state.options.length === 0 && (
-            <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
-              {cheaper
-                ? `Nothing cheaper in stock goes with this look right now.`
-                : "Nothing else in stock fits this look and budget right now."}
-            </p>
-          )}
-          {state.options.length > 0 && (
-            <div
-              style={{
-                marginTop: 22,
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "24px 16px",
-              }}
-            >
-              {state.options.map((option) => {
-                const on = picked === option.id;
-                const diff = Math.round(option.price - current.price);
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => {
-                      setPicked(option.id);
-                      onPick(option);
-                    }}
-                    style={{
-                      background: "none",
-                      border: 0,
-                      padding: 0,
-                      textAlign: "left",
-                      color: "#ECEBE8",
-                      cursor: "pointer",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 10,
-                      fontFamily: "inherit",
-                    }}
-                  >
-                    <div
+                {state.options.map((option) => {
+                  const on = picked === option.id;
+                  const diff = Math.round(option.price - current.price);
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => {
+                        setPicked(option.id);
+                        onPick(option);
+                      }}
                       style={{
-                        position: "relative",
-                        height: 170,
+                        background: "none",
+                        border: 0,
+                        padding: 0,
+                        textAlign: "left",
+                        color: "#ECEBE8",
+                        cursor: "pointer",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: on ? "#26262A" : "#141416",
-                        outline: on ? "1px solid #ECEBE8" : "none",
-                        outlineOffset: -1,
+                        flexDirection: "column",
+                        gap: 10,
+                        fontFamily: "inherit",
                       }}
                     >
-                      <ProductImage src={option.image} sizes="160px" className="h-full w-full object-contain" />
-                      {on && (
+                      <div
+                        style={{
+                          position: "relative",
+                          height: 170,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: on ? "#26262A" : "#141416",
+                          outline: on ? "1px solid #ECEBE8" : "none",
+                          outlineOffset: -1,
+                        }}
+                      >
+                        <ProductImage src={option.image} sizes="160px" className="h-full w-full object-contain" />
+                        {on && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              top: 10,
+                              left: 10,
+                              fontSize: 11,
+                              fontWeight: 600,
+                              background: "#ECEBE8",
+                              color: "#0A0A0B",
+                              padding: "4px 8px",
+                            }}
+                          >
+                            Trying on
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                        <span style={{ fontSize: 14 }}>{displayName(option.name, option.storeName)}</span>
                         <span
                           style={{
-                            position: "absolute",
-                            top: 10,
-                            left: 10,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            background: "#ECEBE8",
-                            color: "#0A0A0B",
-                            padding: "4px 8px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: 13,
+                            color: "#9C978E",
                           }}
                         >
-                          Trying on
+                          <span>{option.storeName}</span>
+                          <span style={{ color: "#ECEBE8" }}>{sgd(option.price)}</span>
                         </span>
-                      )}
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                      <span style={{ fontSize: 14 }}>{displayName(option.name, option.storeName)}</span>
-                      <span
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          fontSize: 13,
-                          color: "#9C978E",
-                        }}
-                      >
-                        <span>{option.storeName}</span>
-                        <span style={{ color: "#ECEBE8" }}>{sgd(option.price)}</span>
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: diff < 0 ? "#5FB58A" : "#9C978E",
-                        }}
-                      >
-                        {priceDiff(option.price, current.price)} vs current
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: diff < 0 ? "#5FB58A" : "#9C978E",
+                          }}
+                        >
+                          {priceDiff(option.price, current.price)} vs current
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <button
             type="button"

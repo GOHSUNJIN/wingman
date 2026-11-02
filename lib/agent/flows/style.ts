@@ -122,16 +122,20 @@ async function buildLooks(args: {
   lap(`selected ${valid.length} looks`);
 
   const itemsByLook: LookItems[] = valid.map((pick) => lookItems(pick, pool));
+  const singleItems: LookItem[][] = itemsByLook.map((bySlot) => {
+    const all = SLOTS.flatMap((slot) => (bySlot[slot] ? [toItem(slot, bySlot[slot]!)] : []));
+    const slot = all.some((item) => item.slot === "outerwear") ? "outerwear" : "top";
+    return all.filter((item) => item.slot === slot);
+  });
   const looks: Look[] = valid.map((pick, i) => ({
     name: pick.name,
-    // A budget cap can mix tiers; the look sits in the dearest tier it uses.
     tier: TIERS[Math.max(...Object.values(itemsByLook[i]).map((p) => TIERS.indexOf(p!.tier)))],
     why: pick.why,
-    items: SLOTS.flatMap((slot) => (itemsByLook[i][slot] ? [toItem(slot, itemsByLook[i][slot]!)] : [])),
+    items: singleItems[i],
     hair: null,
     renders: { errors: [] },
     fitCheck: null,
-    total: lookTotal(itemsByLook[i]),
+    total: singleItems[i].reduce((sum, item) => sum + item.price, 0),
   }));
   emit({ type: "looks", occasion, looks });
 

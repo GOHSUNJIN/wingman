@@ -154,6 +154,12 @@
   html::-webkit-scrollbar {
     display: none;
   }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-size: var(--step-body);

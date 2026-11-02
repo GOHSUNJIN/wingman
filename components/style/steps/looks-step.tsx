@@ -474,7 +474,6 @@ export function LooksStep({
                     key={item.slot}
                     item={item}
                     onSwap={onSwap ? (slot) => onSwap(active, slot) : undefined}
-                    onCheaper={onSwap ? (slot) => onSwap(active, slot, true) : undefined}
                   />
                 ))}
               </ul>
@@ -593,7 +592,6 @@ export function LooksStep({
     scoring: scoring && !look.fitCheck,
     onCompare: onCompare && (() => onCompare(i)),
     onSwap: onSwap && ((slot: LookItem["slot"]) => onSwap(i, slot)),
-    onCheaper: onSwap && ((slot: LookItem["slot"]) => onSwap(i, slot, true)),
     inCart: look.items.filter((item) => showsInRender(look, item.slot)).every((item) => inCartIds.has(item.id)),
     cartIds: inCartIds,
     onAddToCart: () => onAddToCart(look),
@@ -778,7 +776,6 @@ function LookCard({
   scoring,
   onCompare,
   onSwap,
-  onCheaper,
   inCart,
   cartIds,
   onAddToCart,
@@ -792,7 +789,6 @@ function LookCard({
   scoring: boolean;
   onCompare?: () => void;
   onSwap?: (slot: LookItem["slot"]) => void;
-  onCheaper?: (slot: LookItem["slot"]) => void;
   inCart: boolean;
   cartIds: Set<string>;
   onAddToCart: () => void;
@@ -898,7 +894,7 @@ function LookCard({
         </div>
         <p style={{ marginTop: 20, fontSize: 14, color: "#9C978E" }}>{look.why}</p>
         <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-          {swappable.map((item) => <PieceRow key={item.slot} item={item} onSwap={onSwap} onCheaper={onCheaper} />)}
+          {swappable.map((item) => <PieceRow key={item.slot} item={item} onSwap={onSwap} />)}
         </ul>
         {alongside.length > 0 && (
           <>
@@ -934,13 +930,11 @@ function LookCard({
 function PieceRow({
   item,
   onSwap,
-  onCheaper,
   inCart,
   onAdd,
 }: {
   item: LookItem;
   onSwap?: (slot: LookItem["slot"]) => void;
-  onCheaper?: (slot: LookItem["slot"]) => void;
   inCart?: boolean;
   onAdd?: () => void;
 }) {
@@ -964,7 +958,7 @@ function PieceRow({
         </span>
       </a>
       {onSwap ? (
-        <span style={{ display: "flex", flexShrink: 0, flexDirection: "column", gap: 6 }}>
+        <span style={{ display: "flex", flexShrink: 0 }}>
           <button
             type="button"
             onClick={() => onSwap(item.slot)}
@@ -972,15 +966,6 @@ function PieceRow({
           >
             Swap
           </button>
-          {onCheaper && (
-            <button
-              type="button"
-              onClick={() => onCheaper(item.slot)}
-              style={{ background: "none", border: 0, padding: 0, color: "#9C978E", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
-            >
-              Cheaper
-            </button>
-          )}
         </span>
       ) : onAdd ? (
         <span style={{ display: "flex", flexShrink: 0, flexDirection: "column", gap: 6 }}>
