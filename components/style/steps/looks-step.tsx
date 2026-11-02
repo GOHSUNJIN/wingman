@@ -564,6 +564,24 @@ export function LooksStep({
                 </button>
               )}
               <div style={{ height: 1, background: "#2A2A2E" }} />
+              {onCompare && (
+                <button
+                  type="button"
+                  onClick={() => onCompare(active)}
+                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4, textAlign: "left" }}
+                >
+                  Compare prices
+                </button>
+              )}
+              {hasPrep && (
+                <button
+                  type="button"
+                  onClick={onPrep}
+                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4, textAlign: "left" }}
+                >
+                  Your night-before prep plan
+                </button>
+              )}
               <nav
                 aria-label="More actions"
                 style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}
@@ -782,10 +800,19 @@ export function LooksStep({
       )}
 
       <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
+        {hasPrep && (
+          <button
+            type="button"
+            onClick={onPrep}
+            style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
+          >
+            Your night-before prep plan
+          </button>
+        )}
         <button
           type="button"
           onClick={onBrowse}
-          style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
+          style={{ background: "none", border: 0, padding: "8px 0", color: "#9C978E", fontSize: 14, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
         >
           Browse every piece
         </button>

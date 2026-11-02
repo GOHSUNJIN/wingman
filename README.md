@@ -21,7 +21,7 @@ What to look for:
 - **The looks:** 2 to 3 complete outfits from real stores, each tried on your photo with a Fit Check score.
 - **Compare prices:** the same look rebuilt at Budget, Mid-range and Luxury, side by side, with real SGD totals.
 - **Refine and swap:** type "more casual" or "under S$500" in the bar at the bottom. Wingman says in a sentence what it changed and turns down requests it cannot act on before spending any units. Or tap **Swap** on any piece to pick from 6 in-stock alternatives.
-- **Prep plan:** a three-step grooming routine for the night before, drawn from a skin analysis of your photo.
+- **Prep plan:** a three-step grooming routine for the night before your event.
 - **Checkout:** tap **Add this look to cart**, pick in-stock sizes and tap **Checkout at {store}**. The store's real cart opens with your pieces in it. You pay there; Wingman never takes payment.
 
 > Every try-on on the live site is a real YouCam render of your photo. The site caps itself at 700 YouCam units total; once they are used, looks still arrive with their pieces and prices but without the try-on until the cap is raised.
@@ -40,11 +40,10 @@ What to look for:
 | API | What it does in Wingman | Units per call |
 |---|---|---|
 | AI Clothes Virtual Try-On (v3, `garment_category: auto`) | Puts each look's top or jacket on your photo. Also re-renders after a swap and for every tier in Price Compare. | 2 |
-| AI Skin Analysis (SD concerns) | Reads your skin so the night-before prep plan is personal rather than generic. | 9 for 4 concerns |
 
 The catalog covers tops and outerwear only. Trousers, shoes and watches are excluded: a waist-up selfie hides legs and feet and the watch try-on requires a separate hand photo.
 
-Each API needs different framing, so the server prepares the photo automatically: the full image for clothes and a close face crop for skin analysis. Claude finds the face so the crop lands correctly. Location data is stripped before anything leaves the server.
+The server prepares the photo automatically before sending it to YouCam: Claude finds the face so the crop lands correctly. Location data is stripped before anything leaves the server.
 
 **Keeping units safe:** every call reserves its units in Supabase first and Wingman refuses any call that would exceed `YOUCAM_UNIT_LIMIT` (700). Failed tasks release their units. Results are cached by photo, product, API and settings so a repeat costs nothing; swapping a top re-uses the cached render. Building the whole app consumed 70 units.
 
@@ -53,13 +52,12 @@ Each API needs different framing, so the server prepares the photo automatically
 ```mermaid
 flowchart TD
     A[Selfie + one sentence + budget tier] --> B[Claude parses the occasion<br/>formality, setting, time, constraints]
-    A --> C[Photo prepared<br/>face found, crop per API]
-    C --> D[YouCam Skin Analysis<br/>in the background, never blocks]
+    A --> C[Photo prepared<br/>face found, crop for try-on]
     B --> E[Candidate pool<br/>in-stock products in the tier<br/>from 17 Shopify stores]
     E --> F[Claude picks 2 to 3 looks<br/>ids and budget checked, one retry]
     F --> G[YouCam renders each look<br/>clothes try-on per top and jacket]
     G --> H[Claude Fit Check<br/>score out of 10 + reason]
-    D --> I[Claude prep plan<br/>3 grooming steps, no medical claims]
+    C --> I[Claude prep plan<br/>3 grooming steps, no medical claims]
     H --> P[Looks scoring under 6 dropped]
     P --> J[Looks open once every try-on<br/>has landed, with a retry for any that failed]
     J --> K[Refine by chat / Swap a piece / Compare prices]
@@ -69,10 +67,10 @@ flowchart TD
 
 - **`POST /api/style`** streams progress as newline-delimited JSON: each try-on as it lands, any that failed and a ready signal once the looks are scored.
 - **`POST /api/photo/check`** checks a photo when it is chosen (brightness, blur and a Claude look at framing: one person, head in frame, shoulders visible, facing the camera). No YouCam units used.
-- **`POST /api/refine`** — Claude first decides whether the request is something Wingman can do. Off-topic requests, changes to hair colour and things it does not sell (hats, ties) are turned down with a one-line reply before any units are spent. Otherwise Claude updates the brief, replies with what it changed and runs look selection, renders and Fit Checks again with the old looks as context.
-- **`POST /api/swap/options` and `/api/swap`** — 6 in-stock alternatives for one slot that fit the rest of the look, then a re-render and new score.
-- **`POST /api/compare`** — for each piece, products in the other tiers are ranked by colour, cut and formality; Claude picks the closest stand-in and explains what changes at that price.
-- **`GET /api/browse`** — the whole in-stock catalog, filtered by category, tier, price, colour family and size.
+- **`POST /api/refine`**: Claude first decides whether the request is something Wingman can do. Off-topic requests, changes to hair colour and things it does not sell (hats, ties) are turned down with a one-line reply before any units are spent. Otherwise Claude updates the brief, replies with what it changed and runs look selection, renders and Fit Checks again with the old looks as context.
+- **`POST /api/swap/options` and `/api/swap`**: 6 in-stock alternatives for one slot that fit the rest of the look, then a re-render and new score.
+- **`POST /api/compare`**: for each piece, products in the other tiers are ranked by colour, cut and formality; Claude picks the closest stand-in and explains what changes at that price.
+- **`GET /api/browse`**: the whole in-stock catalog, filtered by category, tier, price, colour family and size.
 - **Checkout** builds `https://{store}/cart/{variantId}:{qty},...` per store ([`lib/cart.ts`](lib/cart.ts)). Only in-stock variants are shown; where a size repeats across colours the picker shows "White / Small" so the right colour lands in the cart.
 
 **The catalog** comes from each store's public `products.json`. Each store is verified first (feed shape, a Shopify fingerprint and a working cart link). Claude Haiku tags every product (category, colour, formality and occasions) and picks its cleanest image for try-on. Prices are converted to SGD and Budget, Mid-range and Luxury tiers are computed per category from the catalog's own price spread, because Singapore menswear prices do not fit fixed thresholds.
@@ -137,7 +135,7 @@ npm run dev
 
 Open http://localhost:3000 at phone width and tap **Start with a photo**. `fixtures/selfies/demo.jpg` works as a test photo.
 
-**Mock mode** (`MOCK_YOUCAM=true`): every try-on returns the saved sample render after a short delay and skin analysis uses a saved response. Claude, the catalog and checkout still run for real. Use it for UI work to spend no units.
+**Mock mode** (`MOCK_YOUCAM=true`): every try-on returns the saved sample render after a short delay. Claude, the catalog and checkout still run for real. Use it for UI work to spend no units.
 
 **Deploying:** add the same variables to the Vercel project with `MOCK_YOUCAM=false`. [`vercel.json`](vercel.json) adds a daily cron that deletes expired renders.
 
@@ -228,14 +226,13 @@ All tables have row-level security on with no policies, so only the server's ser
 - 17 stores and about 5,000 products. Shoes and budget-tier pieces are the thinnest categories.
 - Prices are converted to SGD with fixed rates in [`lib/catalog/pipeline/fx.ts`](lib/catalog/pipeline/fx.ts). A store that charges in USD shows its own price at checkout.
 - Stock and prices are as fresh as the last `npm run catalog:fetch`.
-- Skin analysis needs a straight-on face. When it fails (tilted head, glasses) the prep plan is general rather than personal; it never blocks the flow.
 - The 700-unit cap is shared across all visitors. A full styling run uses up to 24 units.
 
 ## Built by
 
-**Goh Sun Jin** — [linkedin.com/in/gohsunjin](https://linkedin.com/in/gohsunjin)
+**Goh Sun Jin** [linkedin.com/in/gohsunjin](https://linkedin.com/in/gohsunjin)
 
-**Prabhakaran Ritish** — [linkedin.com/in/prabhakaran-ritish-45286921a](https://linkedin.com/in/prabhakaran-ritish-45286921a)
+**Prabhakaran Ritish** [linkedin.com/in/prabhakaran-ritish-45286921a](https://linkedin.com/in/prabhakaran-ritish-45286921a)
 
 ## License
 
