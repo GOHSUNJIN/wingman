@@ -224,7 +224,7 @@ export function PhotoStep({
                   objectFit: "cover",
                   objectPosition: photo.check?.faceY != null
                     ? `50% ${Math.round(photo.check.faceY * 100)}%`
-                    : "50% 0%",
+                    : "50% 35%",
                   transitionProperty: "object-position",
                   transitionDuration: "1.4s",
                   transitionTimingFunction: "cubic-bezier(0.2, 0.7, 0.2, 1)",

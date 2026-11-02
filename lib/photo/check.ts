@@ -169,8 +169,9 @@ export async function checkPhoto(input: Buffer): Promise<PhotoCheck> {
     }),
   ]);
   const problems = problemsFrom(metrics, vision);
-  const faceY = vision && vision.people === 1 && vision.face_visible
-    ? vision.face_top + vision.face_height / 2
-    : undefined;
+  // Use face coordinates when visible, or when plausibly detected despite being covered (mirror selfies).
+  const hasFaceCoords = vision && vision.people === 1 &&
+    (vision.face_visible || (vision.face_width > 0.04 && vision.face_height > 0.04 && !vision.face_cut_off));
+  const faceY = hasFaceCoords ? vision!.face_top + vision!.face_height / 2 : undefined;
   return { ok: problems.every((p) => p.soft), problems, zoom: zoomFrom(metrics, vision) ?? undefined, faceY };
 }

@@ -304,27 +304,11 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
           case "refined":
             setNotice(event.reply);
             break;
-          case "prune": {
-            let droppedMsg = "";
-            setLooks((prev) => {
-              const removed = prev.filter((_, i) => !event.keep.includes(i));
-              const withScores = removed.filter((l) => l.fitCheck != null);
-              if (withScores.length > 0) {
-                const names = withScores.map((l) => `${l.name} (${l.fitCheck!.score}/10)`).join(", ");
-                droppedMsg =
-                  withScores.length === 1
-                    ? `Wingman left out ${names} (scored below 6/10 for this occasion).`
-                    : `Wingman left out ${withScores.length} looks that scored below 6/10: ${names}.`;
-              } else {
-                droppedMsg = `Wingman left out ${event.dropped === 1 ? "a look" : `${event.dropped} looks`} that scored below 6/10 for this occasion.`;
-              }
-              return event.keep.flatMap((i) => (prev[i] ? [prev[i]] : []));
-            });
-            setNotice((prev) => (prev ? `${prev} ${droppedMsg}` : droppedMsg));
+          case "prune":
+            setLooks((prev) => event.keep.flatMap((i) => (prev[i] ? [prev[i]] : [])));
             setCompares({});
             setFocusLook(0);
             break;
-          }
           case "prep":
             setPrep({ plan: event.prepPlan, skinAnalysed: event.skinAnalysed });
             break;
