@@ -147,10 +147,6 @@ export const STORES = [
   { name: "Arden Teal", domain: "ardenteal.com" },
   { name: "The Jacket Maker", domain: "thejacketmaker.sg" },
   { name: "WHY&CO", domain: "whyandco.com" },
-  { name: "BOLDR", domain: "boldrsupply.co" },
-  { name: "Zelos", domain: "zeloswatches.com" },
-  { name: "Vario", domain: "vario.sg" },
-  { name: "Red Army Watches", domain: "redarmywatches.com" },
   { name: "Cufflinks.com.sg", domain: "cufflinks.com.sg" },
 ];
 export const IN_STOCK_PIECES = 1594;

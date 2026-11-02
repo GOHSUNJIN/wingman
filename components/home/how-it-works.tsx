@@ -257,11 +257,10 @@ export function HowItWorks() {
           boxSizing: "border-box",
         }}
       >
-        <span style={{ fontSize: "15px", color: "#9C978E", textTransform: "uppercase", letterSpacing: "0.08em" }}>How it works</span>
         <h2
           id="how-heading"
           style={{
-            margin: "16px 0 0",
+            margin: 0,
             fontFamily: "var(--font-dm-serif), Georgia, serif",
             fontWeight: 400,
             fontSize: "clamp(40px, 5.4vw, 72px)",

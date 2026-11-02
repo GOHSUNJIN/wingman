@@ -74,17 +74,6 @@ export function HeroWindow() {
           <a href="#how" className="hero-nav-link">How It Works</a>
           <a href="/catalog" className="hero-nav-link">Catalog</a>
           <Link href="/style" className="hero-see">Style Me</Link>
-          <Link
-            href="/style"
-            aria-label="Cart"
-            style={{ color: "#9C978E", display: "flex", alignItems: "center" }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden>
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-          </Link>
         </nav>
       </header>
 
@@ -252,20 +241,6 @@ export function HeroWindow() {
                 <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 26, lineHeight: 1, color: "#C8A96A" }}>8.3</span>
                 <span style={{ fontSize: 10, color: "#9C978E" }}>Fit score</span>
               </div>
-              <span
-                style={{
-                  position: "absolute",
-                  top: 14,
-                  left: 14,
-                  background: "#C8A96A",
-                  color: "#0A0A0B",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: "5px 8px",
-                }}
-              >
-                Top pick
-              </span>
             </div>
             <figcaption style={{ paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>

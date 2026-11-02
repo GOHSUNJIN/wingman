@@ -8,7 +8,6 @@ const SUB_SCORES = [
   { label: "Colour on you", value: 8.5 },
   { label: "Budget", value: 7.8 },
 ] as const;
-// TODO: sub-scores come from the AI fit check response (lib/agent/steps.ts)
 
 const NOTES = [
   {
@@ -20,8 +19,8 @@ const NOTES = [
     body: "Adds a little width up top and suits your frame better than a padded cut.",
   },
   {
-    title: "Brown Tie and Loafers",
-    body: "Keep it warm rather than corporate. Budget dips slightly for the loafers.",
+    title: "Open Collar Shirt",
+    body: "White underneath reads crisp without the tie's formality, and keeps the look from going too dark.",
   },
 ] as const;
 
@@ -117,11 +116,10 @@ export function FitCheck() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: "15px", color: "#9C978E", textTransform: "uppercase", letterSpacing: "0.08em" }}>Fit Check</span>
             <h2
               id="fit-heading"
               style={{
-                margin: "16px 0 0",
+                margin: 0,
                 fontFamily: "var(--font-dm-serif), Georgia, serif",
                 fontWeight: 400,
                 fontSize: "clamp(40px, 5.4vw, 72px)",
@@ -168,9 +166,9 @@ export function FitCheck() {
 
               {/* Numbered pins */}
               {[
-                { left: "25%", top: "68%" },
-                { left: "76%", top: "56%" },
-                { left: "50%", top: "70%" },
+                { left: "25%", top: "60%" },
+                { left: "76%", top: "50%" },
+                { left: "50%", top: "40%" },
               ].map((pos, i) => (
                 <span
                   key={i}

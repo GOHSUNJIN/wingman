@@ -180,20 +180,6 @@ export function FinalCta() {
                 style={{ objectFit: "cover", objectPosition: "50% 10%" }}
                 unoptimized
               />
-              <span
-                style={{
-                  position: "absolute",
-                  top: 12,
-                  left: 12,
-                  background: "#C8A96A",
-                  color: "#0A0A0B",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: "4px 8px",
-                }}
-              >
-                Top pick
-              </span>
               <div
                 style={{
                   position: "absolute",
