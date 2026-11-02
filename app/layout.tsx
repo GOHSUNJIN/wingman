@@ -6,6 +6,7 @@ import { DM_Serif_Display, DM_Sans } from "next/font/google";
 const dmSerifDisplay = DM_Serif_Display({
   weight: "400",
   style: ["normal", "italic"],
+  subsets: ["latin"],
   variable: "--font-dm-serif",
   display: "swap",
 });
