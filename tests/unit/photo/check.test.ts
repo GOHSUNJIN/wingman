@@ -22,6 +22,7 @@ const clear = {
   left_eye_y: 0.18,
   right_eye_x: 0.54,
   right_eye_y: 0.18,
+  body_top: 0.05,
 };
 const codes = (m = good, v: typeof clear | null = clear) => problemsFrom(m, v).map((p) => p.code);
 
@@ -45,13 +46,15 @@ describe("problemsFrom", () => {
     expect(problems.map((p) => [p.code, p.soft])).toEqual([["FACE_LOW_RES", true]]);
   });
 
-  it("zooms into a person standing too far back instead of rejecting the photo", () => {
-    const far = { ...clear, face_left: 0.475, face_top: 0.15, face_width: 0.05, face_height: 0.05 };
-    expect(codes(good, far)).toEqual([]);
+  it("zooms to cut empty space above the person's head", () => {
+    // body_top: 0.4 — person occupies only the bottom 60% of the frame
+    const far = { ...clear, body_top: 0.4, face_left: 0.4, face_top: 0.5, face_width: 0.08, face_height: 0.1 };
+    expect(codes(good, far)).toEqual([]);   // zoom skips FACE_LOW_RES
     const zoom = zoomFrom(good, far)!;
-    expect(zoom.width).toBeCloseTo(0.24, 2);
-    expect(zoom.x + zoom.width / 2).toBeCloseTo(0.5, 2);
-    expect(zoomFrom(good, clear)).toBeNull();
+    // good is 2000x2500; cropH = 0.64; idealCropW = (0.64 * 2500) / (1.25 * 2000) = 0.64
+    expect(zoom.width).toBeCloseTo(0.64, 2);
+    expect(zoom.x + zoom.width / 2).toBeCloseTo(0.5, 2);   // centered
+    expect(zoomFrom(good, clear)).toBeNull();               // body_top: 0.05 — already fills frame
     expect(zoomFrom(good, { ...far, people: 2 })).toBeNull();
     expect(zoomFrom(good, null)).toBeNull();
   });
