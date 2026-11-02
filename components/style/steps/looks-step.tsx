@@ -66,10 +66,7 @@ export function LooksStep({
   const cartTotal = cart.filter((l) => !isSoldOut(l)).reduce((sum, l) => sum + l.price * l.qty, 0);
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(focusLook);
-  const [tab, setTab] = useState<"look" | "additional">("look");
   const wide = useWide();
-
-  useEffect(() => { setTab("look"); }, [active]);
 
   const goTo = (i: number, behavior: ScrollBehavior = "smooth") => {
     setActive(i);
@@ -468,79 +465,38 @@ export function LooksStep({
                 </div>
               </div>
 
-              {/* Sub-tabs */}
-              <div role="tablist" aria-label="Pieces" style={{ marginTop: 16, display: "flex", gap: 24 }}>
-                {(["look", "additional"] as const).map((id) => {
-                  const label = id === "look" ? "The Look" : "Additional";
-                  const on = tab === id;
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      role="tab"
-                      aria-selected={on}
-                      onClick={() => setTab(id)}
-                      style={{
-                        background: "none",
-                        border: 0,
-                        padding: "0 0 8px",
-                        fontSize: 14,
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                        color: on ? "#ECEBE8" : "#9C978E",
-                        fontWeight: on ? 600 : 400,
-                        boxShadow: on ? "inset 0 -1px 0 #ECEBE8" : "none",
-                      }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-
               {/* Piece list */}
-              {tab === "look" ? (
-                <ul
-                  role="tabpanel"
-                  style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}
-                >
-                  {(shown?.items ?? []).map((item) => (
-                    <PieceRow key={item.slot} item={item} />
-                  ))}
-                </ul>
-              ) : (
-                <div role="tabpanel">
-                  <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-                    {swappable.map((item) => (
+              <ul
+                style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}
+              >
+                {swappable.map((item) => (
+                  <PieceRow
+                    key={item.slot}
+                    item={item}
+                    onSwap={onSwap ? (slot) => onSwap(active, slot) : undefined}
+                    onCheaper={onSwap ? (slot) => onSwap(active, slot, true) : undefined}
+                  />
+                ))}
+              </ul>
+              {alongside.length > 0 && (
+                <>
+                  <span style={{ display: "block", marginTop: 20, fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
+                    Also in this look
+                  </span>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, color: "#9C978E" }}>
+                    Picked for the outfit, not shown on you.
+                  </p>
+                  <ul style={{ listStyle: "none", margin: "10px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {alongside.map((item) => (
                       <PieceRow
                         key={item.slot}
                         item={item}
-                        onSwap={onSwap ? (slot) => onSwap(active, slot) : undefined}
-                        onCheaper={onSwap ? (slot) => onSwap(active, slot, true) : undefined}
+                        inCart={inCartIds.has(item.id)}
+                        onAdd={() => onAddPiece(item)}
                       />
                     ))}
                   </ul>
-                  {alongside.length > 0 && (
-                    <>
-                      <span style={{ display: "block", marginTop: 20, fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
-                        Also in this look
-                      </span>
-                      <p style={{ margin: "4px 0 0", fontSize: 13, color: "#9C978E" }}>
-                        Picked for the outfit, not shown on you.
-                      </p>
-                      <ul style={{ listStyle: "none", margin: "10px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-                        {alongside.map((item) => (
-                          <PieceRow
-                            key={item.slot}
-                            item={item}
-                            inCart={inCartIds.has(item.id)}
-                            onAdd={() => onAddPiece(item)}
-                          />
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </div>
+                </>
               )}
             </div>
 
@@ -844,9 +800,6 @@ function LookCard({
   onViewCart: () => void;
 }) {
   const rendering = !look.renders.outfit && look.renders.errors.length === 0;
-  const [tab, setTab] = useState<"look" | "additional">("look");
-  const tabId = `look-${index}`;
-
   const onThem = look.items.filter((i) => showsInRender(look, i.slot));
   const hasOuterwear = look.items.some((i) => i.slot === "outerwear");
   const swappable = hasOuterwear
@@ -930,69 +883,32 @@ function LookCard({
           )}
         </div>
 
-        <div role="tablist" style={{ marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, background: "rgba(10,10,11,0.4)", padding: 4 }}>
-          {(["look", "additional"] as const).map((id) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              id={`${tabId}-${id}-tab`}
-              aria-selected={tab === id}
-              aria-controls={`${tabId}-${id}`}
-              onClick={() => setTab(id)}
-              style={{
-                minHeight: 44,
-                background: tab === id ? "#ECEBE8" : "none",
-                color: tab === id ? "#0A0A0B" : "#ECEBE8",
-                border: 0,
-                fontSize: 13,
-                cursor: "pointer",
-                fontFamily: "inherit",
-              }}
-            >
-              {id === "look" ? "The look" : "Additional"}
-            </button>
-          ))}
-        </div>
-
-        {tab === "look" ? (
-          <div role="tabpanel" id={`${tabId}-look`} aria-labelledby={`${tabId}-look-tab`}>
-            <div style={{ marginTop: 20, background: "#1C1C1F", padding: 16 }} aria-live="polite">
-              {look.fitCheck ? (
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                  <FitRing score={look.fitCheck.score} />
-                  <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
-                    <p style={{ margin: 0, fontWeight: 500 }}>Fit Check</p>
-                    <p style={{ margin: "8px 0 0", fontSize: 13, color: "#9C978E" }}>{look.fitCheck.reasoning}</p>
-                  </div>
-                </div>
-              ) : (
-                <p style={{ margin: 0, fontSize: 13, color: "#9C978E" }}>{scoring ? "Scoring this look…" : "No score."}</p>
-              )}
+        <div style={{ marginTop: 20, background: "#1C1C1F", padding: 16 }} aria-live="polite">
+          {look.fitCheck ? (
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+              <FitRing score={look.fitCheck.score} />
+              <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
+                <p style={{ margin: 0, fontWeight: 500 }}>Fit Check</p>
+                <p style={{ margin: "8px 0 0", fontSize: 13, color: "#9C978E" }}>{look.fitCheck.reasoning}</p>
+              </div>
             </div>
-            <p style={{ marginTop: 20, fontSize: 14, color: "#9C978E" }}>{look.why}</p>
-            {look.items.length > 0 && (
-              <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-                {look.items.map((item) => <PieceRow key={item.slot} item={item} />)}
-              </ul>
-            )}
-          </div>
-        ) : (
-          <div role="tabpanel" id={`${tabId}-additional`} aria-labelledby={`${tabId}-additional-tab`}>
-            <ul style={{ listStyle: "none", margin: "20px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-              {swappable.map((item) => <PieceRow key={item.slot} item={item} onSwap={onSwap} onCheaper={onCheaper} />)}
+          ) : (
+            <p style={{ margin: 0, fontSize: 13, color: "#9C978E" }}>{scoring ? "Scoring this look…" : "No score."}</p>
+          )}
+        </div>
+        <p style={{ marginTop: 20, fontSize: 14, color: "#9C978E" }}>{look.why}</p>
+        <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+          {swappable.map((item) => <PieceRow key={item.slot} item={item} onSwap={onSwap} onCheaper={onCheaper} />)}
+        </ul>
+        {alongside.length > 0 && (
+          <>
+            <p style={{ margin: "20px 0 8px", fontSize: 12, color: "#9C978E" }}>Also in this look</p>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+              {alongside.map((item) => (
+                <PieceRow key={item.slot} item={item} inCart={cartIds.has(item.id)} onAdd={() => onAddPiece(item)} />
+              ))}
             </ul>
-            {alongside.length > 0 && (
-              <>
-                <p style={{ margin: "20px 0 8px", fontSize: 12, color: "#9C978E" }}>Also in this look</p>
-                <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-                  {alongside.map((item) => (
-                    <PieceRow key={item.slot} item={item} inCart={cartIds.has(item.id)} onAdd={() => onAddPiece(item)} />
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
+          </>
         )}
 
         <div style={{ marginTop: "auto", paddingTop: 20 }}>
