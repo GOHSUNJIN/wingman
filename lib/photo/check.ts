@@ -181,6 +181,10 @@ export async function checkPhoto(input: Buffer): Promise<PhotoCheck> {
       return null;
     }),
   ]);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[photo-check] vision:", JSON.stringify({ body_top: vision?.body_top, face_top: vision?.face_top, face_width: vision?.face_width, face_covered: vision?.face_covered, people: vision?.people }));
+    console.log("[photo-check] zoom:", JSON.stringify(zoomFrom(metrics, vision)));
+  }
   const problems = problemsFrom(metrics, vision);
   // Use face centre when visible; fall back to face hint coords (mirror selfie); then body_top as last resort.
   const hasFaceCoords = vision && vision.people === 1 &&
