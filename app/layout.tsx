@@ -22,9 +22,9 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://wingman-eight-beta.vercel.app"),
-  title: { default: "Wingman: see the look on you", template: "%s · Wingman" },
+  title: { default: "Wingman", template: "%s · Wingman" },
   description: DESCRIPTION,
-  openGraph: { title: "Wingman: see the look on you", description: DESCRIPTION, siteName: "Wingman", type: "website" },
+  openGraph: { title: "Wingman", description: DESCRIPTION, siteName: "Wingman", type: "website" },
   twitter: { card: "summary_large_image" },
   appleWebApp: { capable: true, title: "Wingman", statusBarStyle: "black-translucent" },
 };
