@@ -10,6 +10,7 @@ const LOOKS = [
     price: "S$4,600",
     image: "/home/lookbook-1.jpg",
     alt: "Deep red velvet jacket try-on render",
+    url: "https://kevinseah.com/products/velvet-jacket-made-to-order",
   },
   {
     num: "No. 2",
@@ -20,6 +21,7 @@ const LOOKS = [
     price: "S$3,079",
     image: "/home/lookbook-2.jpg",
     alt: "Brown double-breasted pinstripe suit try-on render",
+    url: "https://thejacketmaker.sg/products/bennett-brown-pinstripe-classic-double-breasted-suit",
   },
   {
     num: "No. 3",
@@ -30,6 +32,7 @@ const LOOKS = [
     price: "S$1,890",
     image: "/home/lookbook-3.jpg",
     alt: "Ring Jacket 1954 navy blazer try-on render",
+    url: "https://colonyclothing.net/products/ring-jacket-rc055f03x",
   },
 ] as const;
 
@@ -95,7 +98,14 @@ export function Lookbook() {
           }}
         >
           {LOOKS.map((look) => (
-            <figure key={look.num} className="look-card" style={{ margin: 0, display: "flex", flexDirection: "column", gap: "18px" }}>
+            <a
+              key={look.num}
+              href={look.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="look-card"
+              style={{ margin: 0, display: "flex", flexDirection: "column", gap: "18px", textDecoration: "none", color: "inherit" }}
+            >
               <div
                 style={{
                   position: "relative",
@@ -110,7 +120,12 @@ export function Lookbook() {
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="look-thumb"
-                  style={{ objectFit: "cover", objectPosition: "50% 15%" }}
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "50% 8%",
+                    transform: "scale(1.18)",
+                    transformOrigin: "50% 15%",
+                  }}
                   unoptimized
                 />
                 <span
@@ -127,15 +142,24 @@ export function Lookbook() {
                 >
                   {look.num}
                 </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "16px",
+                    right: "16px",
+                    fontSize: "12px",
+                    color: "#9C978E",
+                    background: "rgba(10,10,11,0.7)",
+                    padding: "4px 8px",
+                    zIndex: 1,
+                  }}
+                >
+                  View item ↗
+                </span>
               </div>
-              <figcaption style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-dm-serif), Georgia, serif",
-                      fontSize: "28px",
-                    }}
-                  >
+                  <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: "28px" }}>
                     {look.name}
                   </span>
                   <span
@@ -151,8 +175,8 @@ export function Lookbook() {
                 <span style={{ fontSize: "14px", color: "#9C978E" }}>
                   {look.stores} · {look.price}
                 </span>
-              </figcaption>
-            </figure>
+              </div>
+            </a>
           ))}
         </div>
       </div>
