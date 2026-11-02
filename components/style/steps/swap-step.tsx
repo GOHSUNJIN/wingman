@@ -105,7 +105,7 @@ export function SwapStep({
               alt={`You in ${look.name}`}
               fill
               sizes="628px"
-              style={{ objectFit: "cover", objectPosition: "50% 20%" }}
+              style={{ objectFit: "contain" }}
               {...RAW_IMG_PROPS}
             />
           ) : (

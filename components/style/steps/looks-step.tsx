@@ -164,7 +164,7 @@ export function LooksStep({
                 alt={`You in ${shown.name}`}
                 fill
                 sizes="628px"
-                style={{ objectFit: "cover", objectPosition: "50% 20%" }}
+                style={{ objectFit: "contain" }}
                 {...RAW_IMG_PROPS}
               />
             ) : photo ? (
@@ -173,7 +173,7 @@ export function LooksStep({
                 alt="Your photo"
                 fill
                 sizes="628px"
-                style={{ objectFit: "cover", objectPosition: "50% 20%", opacity: 0.4 }}
+                style={{ objectFit: "contain", opacity: 0.4 }}
                 {...RAW_IMG_PROPS}
               />
             ) : (

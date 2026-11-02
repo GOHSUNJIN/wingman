@@ -89,7 +89,7 @@ export function OccasionStep(props: {
               alt="Your photo"
               fill
               sizes="628px"
-              style={{ objectFit: "cover", objectPosition: "50% 20%" }}
+              style={{ objectFit: "contain" }}
               {...RAW_IMG_PROPS}
             />
           ) : (

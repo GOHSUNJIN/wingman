@@ -111,7 +111,7 @@ export function LoadingStep({
               alt="Your photo being analysed"
               fill
               sizes="628px"
-              style={{ objectFit: "cover", objectPosition: "50% 20%" }}
+              style={{ objectFit: "contain" }}
               {...RAW_IMG_PROPS}
             />
           ) : (
