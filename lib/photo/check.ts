@@ -44,6 +44,8 @@ const VisionSchema = z.object({
   left_eye_y: z.number().min(0).max(1),
   right_eye_x: z.number().min(0).max(1),
   right_eye_y: z.number().min(0).max(1),
+  /** Top of the person's visible body (top of head or highest visible point) as a fraction from the top of the image. */
+  body_top: z.number().min(0).max(1),
 });
 export type PhotoVision = z.infer<typeof VisionSchema>;
 
@@ -117,7 +119,7 @@ export function problemsFrom(metrics: PhotoMetrics, vision: PhotoVision | null):
 }
 
 /** Cache key of a photo's vision check, by the hash of the normalised photo. */
-const checkKey = (hash: string) => ({ selfieHash: hash, api: "photo-check", params: { v: 4 } });
+const checkKey = (hash: string) => ({ selfieHash: hash, api: "photo-check", params: { v: 5 } });
 
 /**
  * The face box from this photo's earlier check, in pixels of the normalised photo, so styling
@@ -152,7 +154,8 @@ async function lookAtPhoto(normalised: Buffer): Promise<PhotoVision> {
           "or more). face_covered is true only when a hand, mask, hat brim or hair hides a large part of the face; " +
           "glasses and sunglasses never count. face_left, face_top, face_width and face_height are the face box, hairline " +
           "to chin and ear to ear, as fractions (0 to 1) of the photo's width and height from the top-left corner. " +
-          "left_eye and right_eye are the centre of each pupil as fractions; left_eye is the eye on the left side of the image.",
+          "left_eye and right_eye are the centre of each pupil as fractions; left_eye is the eye on the left side of the image. " +
+          "body_top is the topmost visible point of the person (top of head, or top of shoulders if the head is cut off or hidden) as a fraction from the top of the image.",
       },
     ],
   });
@@ -169,9 +172,13 @@ export async function checkPhoto(input: Buffer): Promise<PhotoCheck> {
     }),
   ]);
   const problems = problemsFrom(metrics, vision);
-  // Use face coordinates when visible, or when plausibly detected despite being covered (mirror selfies).
+  // Use face centre when visible; fall back to face hint coords (mirror selfie); then body_top as last resort.
   const hasFaceCoords = vision && vision.people === 1 &&
     (vision.face_visible || (vision.face_width > 0.04 && vision.face_height > 0.04 && !vision.face_cut_off));
-  const faceY = hasFaceCoords ? vision!.face_top + vision!.face_height / 2 : undefined;
+  const faceY = hasFaceCoords
+    ? vision!.face_top + vision!.face_height / 2
+    : vision && vision.people === 1 && vision.body_top < 0.8
+      ? vision.body_top + 0.15
+      : undefined;
   return { ok: problems.every((p) => p.soft), problems, zoom: zoomFrom(metrics, vision) ?? undefined, faceY };
 }
