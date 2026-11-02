@@ -53,7 +53,7 @@ export function ErrorStep({
         <ErrorIcon code={code} />
       </div>
       <h1 className="mt-4 text-head">
-        {photoProblem ? "Try another photo" : code === "NO_LOOKS" ? "No looks worth showing" : "That didn't work"}
+        {photoProblem ? "Try another photo" : code === "NO_LOOKS" ? "No matches found" : "That didn't work"}
       </h1>
       <p role="alert" className="mt-4 max-w-[38ch] text-lead">
         {message}

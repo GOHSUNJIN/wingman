@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils/cn";
 
 const STEP_LABELS: Record<StyleStep, string> = {
   reading: "Reading the occasion",
-  picking: "Pulling looks from stores",
+  picking: "Sourcing outfits",
   rendering: "Trying them on you",
   scoring: "Scoring the fit",
 };

@@ -6,7 +6,7 @@ const STEPS = [
   },
   {
     num: "2",
-    heading: "Describe the Night",
+    heading: "Tell Us the Occasion",
     body: "Pick the occasion, tell it about the venue and dress code in your own words and set a budget.",
   },
   {

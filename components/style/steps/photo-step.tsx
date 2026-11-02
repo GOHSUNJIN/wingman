@@ -542,7 +542,7 @@ export function PhotoStep({
           )}
           {photo?.zoomed && !checking && !hard && (
             <p role="status" style={{ margin: "16px 0 0", fontSize: "14px", color: M }}>
-              You were a little far from the camera, so we zoomed in to waist up.
+              We zoomed in to frame you better.
             </p>
           )}
           {photo && !checking && shown.length > 0 && (
@@ -597,7 +597,7 @@ export function PhotoStep({
                         cursor: "pointer",
                       }}
                     >
-                      Choose a Different Photo
+                      Swap Photo
                     </label>
                     {!hard && (
                       <button
@@ -616,7 +616,7 @@ export function PhotoStep({
                           alignSelf: "flex-start",
                         }}
                       >
-                        Use it anyway
+                        Use this one
                       </button>
                     )}
                   </>
