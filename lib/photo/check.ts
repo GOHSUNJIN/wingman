@@ -71,17 +71,20 @@ export function zoomFrom(metrics: PhotoMetrics, vision: PhotoVision | null): Box
   // Normal path: face clearly detected and not cut off by the edge.
   if (vision.face_visible && !vision.face_cut_off) {
     const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
-    const box = zoomBox(face, width, height, SHARP_FACE_PX);
+    // A covered face (phone/hand blocking) makes the reported size unreliable — don't zoom for
+    // sharpness alone; only zoom if the person is genuinely too far (below ZOOM_BELOW threshold).
+    const minFacePx = vision.face_covered ? 0 : SHARP_FACE_PX;
+    const box = zoomBox(face, width, height, minFacePx);
     return box && { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
   }
 
   // Face covered or obscured (mirror selfie with phone in front, hand blocking, etc.):
   // Claude often still reports plausible face coordinates even when face_visible is false.
-  // Use them to drive the waist-up crop if they look reasonable.
+  // Only zoom if the person is genuinely far; covered faces have unreliable size estimates.
   const hasFaceHint = vision.face_width > 0.04 && vision.face_height > 0.04 && !vision.face_cut_off;
   if (hasFaceHint) {
     const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
-    const box = zoomBox(face, width, height, SHARP_FACE_PX);
+    const box = zoomBox(face, width, height, 0);
     if (box) return { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
   }
 

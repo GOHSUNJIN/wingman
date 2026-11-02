@@ -560,11 +560,6 @@ export function PhotoStep({
                   <p style={{ margin: "4px 0 0", fontSize: "14px", color: M }}>{p.tip}</p>
                 </div>
               ))}
-              {!hard && (
-                <p style={{ margin: "12px 0 0", fontSize: "13px", color: M }}>
-                  It may still work, so you can use it anyway.
-                </p>
-              )}
             </div>
           )}
 
@@ -604,19 +599,20 @@ export function PhotoStep({
                         type="button"
                         onClick={onNext}
                         style={{
-                          background: "none",
+                          height: "56px",
+                          background: "#1C1C1F",
+                          color: T,
                           border: 0,
-                          padding: 0,
-                          fontSize: "14px",
-                          color: M,
-                          textDecoration: "underline",
-                          textUnderlineOffset: "4px",
-                          textDecorationThickness: "1px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "15px",
+                          fontWeight: 500,
+                          letterSpacing: "0.04em",
                           cursor: "pointer",
-                          alignSelf: "flex-start",
                         }}
                       >
-                        Use this one
+                        Use This One
                       </button>
                     )}
                   </>
