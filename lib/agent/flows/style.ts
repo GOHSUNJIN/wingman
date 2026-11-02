@@ -106,19 +106,9 @@ async function buildLooks(args: {
   const rules = { maxBudget: occasion.maxBudget };
   const select = (errors?: string[]) =>
     selectLooks({ occasion, sentence: args.sentence, pool, face: photo.closeFace, refine: args.refine, errors });
-  // Same photo, brief and candidates: the same looks, without asking Claude again. A catalog
-  // refresh or stock change alters the candidates, so it misses.
-  const candidates = sha256(stableStringify(SLOTS.map((slot) => pool[slot].map((p) => p.id))));
-  const picks = await memo(
-    { selfieHash: photo.hash, api: "select-looks", params: { occasion, sentence: args.sentence, refine: args.refine, candidates, model: LLM.agent.model, v: 3 } },
-    async () => {
-      const first = await select();
-      const errors = pickErrors(first, pool, rules);
-      if (!errors.length) return first;
-      console.warn(`[style] retrying selection: ${errors.join(" ")}`);
-      return select(errors);
-    },
-  );
+  const first = await select();
+  const errors = pickErrors(first, pool, rules);
+  const picks = errors.length ? (console.warn(`[style] retrying selection: ${errors.join(" ")}`), await select(errors)) : first;
   // Keep only looks that pass on their own; a still-broken or repeated look is dropped rather than shown.
   const valid: LookPick[] = distinctLooks(picks.filter((p) => pickErrors([p], pool, rules).length === 0));
   if (valid.length === 0) {

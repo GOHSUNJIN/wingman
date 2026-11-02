@@ -504,7 +504,7 @@ export function LooksStep({
                   role="tabpanel"
                   style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}
                 >
-                  {onThem.map((item) => (
+                  {(shown?.items ?? []).map((item) => (
                     <PieceRow key={item.slot} item={item} />
                   ))}
                 </ul>
@@ -971,9 +971,9 @@ function LookCard({
               )}
             </div>
             <p style={{ marginTop: 20, fontSize: 14, color: "#9C978E" }}>{look.why}</p>
-            {onThem.length > 0 && (
+            {look.items.length > 0 && (
               <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-                {onThem.map((item) => <PieceRow key={item.slot} item={item} />)}
+                {look.items.map((item) => <PieceRow key={item.slot} item={item} />)}
               </ul>
             )}
           </div>

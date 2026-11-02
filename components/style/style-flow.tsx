@@ -302,7 +302,6 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
             setLooks((prev) => prev.map((look, i) => ({ ...look, fitCheck: event.checks[i] ?? look.fitCheck })));
             break;
           case "refined":
-            setNotice(event.reply);
             break;
           case "prune":
             setLooks((prev) => event.keep.flatMap((i) => (prev[i] ? [prev[i]] : [])));
