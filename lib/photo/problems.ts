@@ -38,7 +38,7 @@ export const PHOTO_PROBLEMS = {
   FACE_LOW_RES: {
     soft: true,
     message: "Your face is a little small in this photo.",
-    tip: "The try-on still works, but grooming tips may be more general. The original photo from your camera works best.",
+    tip: "The try-on still works. For a sharper result use the original photo from your camera.",
   },
   FACE_COVERED: {
     soft: true,

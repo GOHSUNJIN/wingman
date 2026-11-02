@@ -205,6 +205,16 @@ export function PhotoStep({
           {photo ? (
             /* ── Uploaded state ── */
             <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+              <style>{`
+                @keyframes photoLock {
+                  0%   { opacity: 0; transform: scale(1.06); }
+                  18%  { opacity: 1; transform: scale(1); }
+                  65%  { opacity: 1; }
+                  100% { opacity: 0; }
+                }
+              `}</style>
+
+              {/* Image — starts at top of frame, pans to face when check returns faceY */}
               <Image
                 src={photo.url}
                 alt="Your uploaded selfie"
@@ -214,22 +224,62 @@ export function PhotoStep({
                   objectFit: "cover",
                   objectPosition: photo.check?.faceY != null
                     ? `50% ${Math.round(photo.check.faceY * 100)}%`
-                    : "50% 30%",
-                  transition: "object-position 0.4s ease",
+                    : "50% 0%",
+                  transitionProperty: "object-position",
+                  transitionDuration: "1.4s",
+                  transitionTimingFunction: "cubic-bezier(0.2, 0.7, 0.2, 1)",
+                  willChange: "object-position",
                 }}
                 {...RAW_IMG_PROPS}
               />
 
-              {/* Checking overlay */}
+              {/* Gold scan line while checking */}
+              {checking && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    height: 120,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    animation: "wmScan 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <div style={{ flex: 1, background: "rgba(200,169,106,0.08)" }} />
+                  <div style={{ height: 2, background: G }} />
+                </div>
+              )}
+
+              {/* Gold border flash when face is locked in */}
+              {photo.check?.faceY != null && !checking && (
+                <div
+                  key={photo.url}
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    border: `2px solid ${G}`,
+                    animation: "photoLock 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+
+              {/* Checking label */}
               {checking && (
                 <div
                   style={{
                     position: "absolute",
                     inset: 0,
-                    background: "rgba(10,10,11,0.35)",
+                    background: "rgba(10,10,11,0.28)",
                     display: "flex",
                     alignItems: "flex-end",
                     padding: "0 40px 36px",
+                    pointerEvents: "none",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -243,7 +293,7 @@ export function PhotoStep({
                         animation: "wmPulse 1.6s ease-in-out infinite",
                       }}
                     />
-                    <span style={{ fontSize: "13px" }}>Checking your photo…</span>
+                    <span style={{ fontSize: "13px" }}>Finding your face…</span>
                   </div>
                 </div>
               )}
