@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { z } from "zod";
 import { cached, memo } from "@/lib/agent/memo";
 import { generateStructured } from "@/lib/llm/client";
-import { zoomBox, type Box } from "./crops";
+import { type Box } from "./crops";
 import { faceFromFractions, normalisePhoto, type Face } from "./prepare";
 import { photoProblem, type PhotoCheck, type PhotoProblem } from "./problems";
 
@@ -63,36 +63,42 @@ export async function measurePhoto(normalised: Buffer, width: number, height: nu
   return { width, height, brightness, sharpness };
 }
 
-/** Where to crop a photo taken from too far away, as fractions of its size; null when it's close enough. */
+/**
+ * Where to crop an uploaded photo to maximise body coverage, as fractions of its size.
+ * Goal: cut empty space above the person's head; show as much body as possible.
+ * Returns null when the person already fills the frame well enough.
+ */
 export function zoomFrom(metrics: PhotoMetrics, vision: PhotoVision | null): Box | null {
   if (!vision || vision.people !== 1) return null;
   const { width, height } = metrics;
 
-  // Normal path: face clearly detected and not cut off by the edge.
-  if (vision.face_visible && !vision.face_cut_off) {
-    const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
-    // A covered face (phone/hand blocking) makes the reported size unreliable — don't zoom for
-    // sharpness alone; only zoom if the person is genuinely too far (below ZOOM_BELOW threshold).
-    const minFacePx = vision.face_covered ? 0 : SHARP_FACE_PX;
-    const box = zoomBox(face, width, height, minFacePx);
-    return box && { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
-  }
+  // Find where the person starts. body_top is the primary anchor (top of head).
+  // Fall back to face_top offset if body_top wasn't set (shouldn't happen with v6 schema).
+  const bodyTop = vision.body_top > 0.01
+    ? vision.body_top
+    : vision.face_visible
+      ? Math.max(0, vision.face_top - vision.face_height * 0.5)
+      : null;
 
-  // Face covered or obscured (mirror selfie with phone in front, hand blocking, etc.):
-  // Claude often still reports plausible face coordinates even when face_visible is false.
-  // Only zoom if the person is genuinely far; covered faces have unreliable size estimates.
-  const hasFaceHint = vision.face_width > 0.04 && vision.face_height > 0.04 && !vision.face_cut_off;
-  if (hasFaceHint) {
-    const face = { x: vision.face_left * width, y: vision.face_top * height, width: vision.face_width * width, height: vision.face_height * height };
-    const box = zoomBox(face, width, height, 0);
-    if (box) return { x: box.x / width, y: box.y / height, width: box.width / width, height: box.height / height };
-  }
+  if (bodyTop === null) return null;
 
-  // Last resort: person present but face undetectable. If the photo is much taller than 4:5
-  // the person is likely standing far away in a full-body shot. Take a top-centre waist-up crop.
-  const targetH = width * 1.25;
-  if (targetH >= height * 0.9) return null;
-  return { x: 0, y: 0, width: 1, height: targetH / height };
+  // Only crop when there's meaningful empty space above (>15% of image height).
+  if (bodyTop < 0.15) return null;
+
+  // Crop from just above the head to the very bottom — maximize body in frame.
+  const HEAD_PADDING = 0.04;
+  const cropY = Math.max(0, bodyTop - HEAD_PADDING);
+  const cropH = 1.0 - cropY;
+
+  // Target 4:5 aspect ratio (YouCam VTO standard); fall back to full width if too tall.
+  const idealCropW = (cropH * height) / (1.25 * width);
+  const cropW = Math.min(1.0, idealCropW);
+  const cropX = (1.0 - cropW) / 2; // center horizontally
+
+  // Skip if the crop wouldn't meaningfully reduce the image (< 15% area removed).
+  if (cropW * cropH > 0.85) return null;
+
+  return { x: cropX, y: cropY, width: cropW, height: cropH };
 }
 
 /** Problems found, hard ones first. `vision` is null when the Claude check couldn't run. */
@@ -109,7 +115,8 @@ export function problemsFrom(metrics: PhotoMetrics, vision: PhotoVision | null):
       const facePx = vision.face_width * metrics.width;
       if (!zoomFrom(metrics, vision)) {
         if (facePx < MIN_FACE_PX) codes.push("FACE_TOO_SMALL");
-        else if (facePx < SHARP_FACE_PX) codes.push("FACE_LOW_RES");
+        // Don't flag low-res when the face is covered — the phone makes it look small.
+        else if (facePx < SHARP_FACE_PX && !vision.face_covered) codes.push("FACE_LOW_RES");
       }
       if (vision.face_covered) codes.push("FACE_COVERED");
       if (!vision.facing_camera) codes.push("NOT_FACING");
@@ -122,7 +129,7 @@ export function problemsFrom(metrics: PhotoMetrics, vision: PhotoVision | null):
 }
 
 /** Cache key of a photo's vision check, by the hash of the normalised photo. */
-const checkKey = (hash: string) => ({ selfieHash: hash, api: "photo-check", params: { v: 5 } });
+const checkKey = (hash: string) => ({ selfieHash: hash, api: "photo-check", params: { v: 6 } });
 
 /**
  * The face box from this photo's earlier check, in pixels of the normalised photo, so styling
