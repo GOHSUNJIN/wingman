@@ -20,7 +20,7 @@ What to look for:
 
 - **The looks:** 2 to 3 complete outfits from real stores, each tried on your photo with a Fit Check score.
 - **Compare prices:** the same look rebuilt at Budget, Mid-range and Luxury, side by side, with real SGD totals.
-- **Refine and swap:** type "more casual" or "under S$500" in the bar at the bottom. Wingman says in a sentence what it changed and turns down requests it cannot act on before spending any units. Or open a look's **Additional** tab to swap any piece for 6 alternatives, or find **Cheaper** options that cost at least 10% less.
+- **Refine and swap:** type "more casual" or "under S$500" in the bar at the bottom. Wingman says in a sentence what it changed and turns down requests it cannot act on before spending any units. Or tap **Swap** on any piece to pick from 6 in-stock alternatives.
 - **Prep plan:** a three-step grooming routine for the night before, drawn from a skin analysis of your photo.
 - **Checkout:** tap **Add this look to cart**, pick in-stock sizes and tap **Checkout at {store}**. The store's real cart opens with your pieces in it. You pay there; Wingman never takes payment.
 
