@@ -12,7 +12,7 @@ const STEPS = [
   {
     num: "3",
     heading: "See Every Look on You",
-    body: "Complete outfits, each tried on your photo. Swap any piece or find a cheaper one and watch it re-render.",
+    body: "Complete outfits, each tried on your photo. Swap any piece or find a cheaper one and see it re-render.",
   },
 ] as const;
 
