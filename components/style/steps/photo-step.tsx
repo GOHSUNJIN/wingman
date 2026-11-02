@@ -412,12 +412,12 @@ export function PhotoStep({
             overflow: "hidden",
           }}
         >
-          {/* Scrollable content */}
+          {/* Content */}
           <div
             style={{
               flex: 1,
               minHeight: 0,
-              overflowY: "auto",
+              overflow: "hidden",
               padding: "32px 64px 0",
               boxSizing: "border-box",
             }}
@@ -468,11 +468,11 @@ export function PhotoStep({
               trust.
             </p>
 
-            {/* Tips + example figure */}
+            {/* Tips + example figure — hidden once a photo is uploaded */}
             <div
               style={{
                 marginTop: "20px",
-                display: "flex",
+                display: photo ? "none" : "flex",
                 gap: "28px",
                 alignItems: "flex-start",
               }}
