@@ -407,175 +407,182 @@ export function PhotoStep({
           style={{
             flex: 1,
             minWidth: 0,
-            padding: "32px 64px 28px",
-            boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
           }}
         >
-          <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
-            Step one
-          </span>
-          <h1
-            style={{
-              margin: "12px 0 0",
-              fontFamily: "var(--font-dm-serif), Georgia, serif",
-              fontWeight: 400,
-              fontSize: "52px",
-              lineHeight: 1,
-              textTransform: "uppercase" as const,
-              letterSpacing: "0.02em",
-            }}
-          >
-            Your Photo
-          </h1>
-
-          {/* Notice (after deleting photo) */}
-          {notice && (
-            <p
-              role="status"
-              style={{
-                margin: "12px 0 0",
-                padding: "10px 14px",
-                background: S,
-                fontSize: "13px",
-                color: M,
-              }}
-            >
-              {notice}
-            </p>
-          )}
-
-          <p
-            style={{
-              margin: "12px 0 0",
-              fontSize: "15px",
-              lineHeight: 1.55,
-              color: M,
-              maxWidth: "440px",
-            }}
-          >
-            Every look is tried on this picture. A clear, honest selfie gets you a try-on you can
-            trust.
-          </p>
-
-          {/* Tips + example figure */}
+          {/* Scrollable content */}
           <div
             style={{
-              marginTop: "20px",
-              display: "flex",
-              gap: "28px",
-              alignItems: "flex-start",
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              padding: "32px 64px 0",
+              boxSizing: "border-box",
             }}
           >
-            <ul
+            <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+              Step one
+            </span>
+            <h1
               style={{
-                listStyle: "none",
-                margin: 0,
-                padding: 0,
-                display: "flex",
-                flexDirection: "column",
-                gap: "14px",
-                flex: 1,
+                margin: "12px 0 0",
+                fontFamily: "var(--font-dm-serif), Georgia, serif",
+                fontWeight: 400,
+                fontSize: "52px",
+                lineHeight: 1,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.02em",
               }}
             >
-              {TIPS.map((tip) => (
-                <li
-                  key={tip.title}
-                  style={{ display: "flex", alignItems: "center", gap: "14px" }}
-                >
-                  {tip.icon}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                    <span style={{ fontSize: "14px", fontWeight: 500 }}>{tip.title}</span>
-                    <span style={{ fontSize: "12px", color: M }}>{tip.subtitle}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+              Your Photo
+            </h1>
 
-            {/* Example figure */}
-            <figure
-              style={{
-                margin: 0,
-                width: "96px",
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
-            >
-              <div
+            {/* Notice (after deleting photo) */}
+            {notice && (
+              <p
+                role="status"
                 style={{
-                  width: "96px",
-                  height: "128px",
-                  position: "relative",
-                  overflow: "hidden",
-                  background: "#1C1C1F",
-                }}
-              >
-                <Image
-                  src="/home/before.jpg"
-                  alt="Example: waist-up, front-facing, evenly lit selfie"
-                  fill
-                  sizes="96px"
-                  className="object-cover object-[50%_20%]"
-                />
-              </div>
-              <figcaption
-                style={{
-                  fontSize: "11px",
-                  letterSpacing: "0.02em",
+                  margin: "12px 0 0",
+                  padding: "10px 14px",
+                  background: S,
+                  fontSize: "13px",
                   color: M,
                 }}
               >
-                Like this
-              </figcaption>
-            </figure>
-          </div>
+                {notice}
+              </p>
+            )}
 
-          {/* Problems / alerts */}
-          {problem && (
-            <p role="alert" style={{ margin: "24px 0 0", fontSize: "14px", color: "#E06C5F" }}>
-              {problem}
-            </p>
-          )}
-          {photo?.zoomed && !checking && !hard && (
-            <p role="status" style={{ margin: "16px 0 0", fontSize: "14px", color: M }}>
-              We zoomed in to frame you better.
-            </p>
-          )}
-          {photo && !checking && shown.length > 0 && (
-            <div
-              role="alert"
+            <p
               style={{
-                margin: "24px 0 0",
-                padding: "16px 20px",
-                background: S,
+                margin: "12px 0 0",
+                fontSize: "15px",
+                lineHeight: 1.55,
+                color: M,
+                maxWidth: "440px",
               }}
             >
-              {shown.map((p) => (
-                <div key={p.code} style={{ marginTop: p === shown[0] ? 0 : "16px" }}>
-                  <p style={{ margin: 0, fontSize: "15px", fontWeight: 500 }}>{p.message}</p>
-                  <p style={{ margin: "4px 0 0", fontSize: "14px", color: M }}>{p.tip}</p>
-                </div>
-              ))}
-            </div>
-          )}
+              Every look is tried on this picture. A clear, honest selfie gets you a try-on you can
+              trust.
+            </p>
 
-          {/* ── Bottom actions ── */}
+            {/* Tips + example figure */}
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                gap: "28px",
+                alignItems: "flex-start",
+              }}
+            >
+              <ul
+                style={{
+                  listStyle: "none",
+                  margin: 0,
+                  padding: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  flex: 1,
+                }}
+              >
+                {TIPS.map((tip) => (
+                  <li
+                    key={tip.title}
+                    style={{ display: "flex", alignItems: "center", gap: "14px" }}
+                  >
+                    {tip.icon}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                      <span style={{ fontSize: "14px", fontWeight: 500 }}>{tip.title}</span>
+                      <span style={{ fontSize: "12px", color: M }}>{tip.subtitle}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Example figure */}
+              <figure
+                style={{
+                  margin: 0,
+                  width: "96px",
+                  flexShrink: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "96px",
+                    height: "128px",
+                    position: "relative",
+                    overflow: "hidden",
+                    background: "#1C1C1F",
+                  }}
+                >
+                  <Image
+                    src="/home/before.jpg"
+                    alt="Example: waist-up, front-facing, evenly lit selfie"
+                    fill
+                    sizes="96px"
+                    className="object-cover object-[50%_20%]"
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    fontSize: "11px",
+                    letterSpacing: "0.02em",
+                    color: M,
+                  }}
+                >
+                  Like this
+                </figcaption>
+              </figure>
+            </div>
+
+            {/* Problems / alerts */}
+            {problem && (
+              <p role="alert" style={{ margin: "24px 0 0", fontSize: "14px", color: "#E06C5F" }}>
+                {problem}
+              </p>
+            )}
+            {photo?.zoomed && !checking && !hard && (
+              <p role="status" style={{ margin: "16px 0 0", fontSize: "14px", color: M }}>
+                We zoomed in to frame you better.
+              </p>
+            )}
+            {photo && !checking && shown.length > 0 && (
+              <div
+                role="alert"
+                style={{
+                  margin: "24px 0 0",
+                  padding: "16px 20px",
+                  background: S,
+                }}
+              >
+                {shown.map((p) => (
+                  <div key={p.code} style={{ marginTop: p === shown[0] ? 0 : "16px" }}>
+                    <p style={{ margin: 0, fontSize: "15px", fontWeight: 500 }}>{p.message}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: "14px", color: M }}>{p.tip}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Pinned footer: actions + privacy ── */}
           <div
             style={{
-              marginTop: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
+              flexShrink: 0,
+              padding: "20px 64px 28px",
+              boxSizing: "border-box",
             }}
           >
             {photo && !checking && (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {shown.length > 0 ? (
-                  /* Hard block or soft warn: replace first, bypass available */
                   <>
                     <label
                       htmlFor={inputId}
@@ -617,7 +624,6 @@ export function PhotoStep({
                     )}
                   </>
                 ) : (
-                  /* Good photo: proceed */
                   <>
                     <button
                       type="button"
@@ -657,7 +663,7 @@ export function PhotoStep({
               </div>
             )}
 
-            <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: M }}>
+            <p style={{ margin: photo && !checking ? "16px 0 0" : "0", fontSize: "12px", lineHeight: 1.5, color: M }}>
               Your photo is only used to render your try-ons. Delete it any time from your looks.
             </p>
           </div>
