@@ -43,6 +43,18 @@ const SLOT_NAMES: Record<LookItem["slot"], string> = {
   outerwear: "Layers",
 };
 
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return wide;
+}
+
 /** The whole in-stock catalog with filters. */
 export function BrowseStep({
   filters,
@@ -67,8 +79,10 @@ export function BrowseStep({
   const [status, setStatus] = useState<"loading" | "done" | "error">("loading");
   const [more, setMore] = useState(false);
   const [selected, setSelected] = useState<BrowseItem | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const key = JSON.stringify(filters);
   const loaded = useRef<string | null>(null);
+  const wide = useWide();
 
   const query = (offset: number) => {
     const params = new URLSearchParams({ offset: String(offset) });
@@ -108,19 +122,422 @@ export function BrowseStep({
   const set = (patch: Partial<BrowseFilters>) => onFilters({ ...filters, ...patch });
   const facets = page?.facets;
 
+  // ── Filter sidebar content (shared between wide and mobile) ──
+  const filterSidebarContent = (
+    <>
+      {/* Count */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 30, lineHeight: 1 }}>
+          {status === "done" && page ? page.total : "..."}
+        </span>
+        <span style={{ fontSize: 12, color: "#9C978E" }}>
+          {status === "done" && page
+            ? `${page.total === 1 ? "piece" : "pieces"} across stores`
+            : status === "loading" ? "Loading…" : "Couldn't load"}
+        </span>
+      </div>
+
+      {/* Category */}
+      <FilterGroup label="Category">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {CATEGORIES.map((c) => {
+            const on = filters.category === c.value;
+            return (
+              <FilterChip
+                key={c.value}
+                on={on}
+                onClick={() =>
+                  onFilters({ category: c.value, sort: filters.sort, tier: filters.tier, price: filters.price, store: filters.store })
+                }
+              >
+                {c.label}
+              </FilterChip>
+            );
+          })}
+        </div>
+      </FilterGroup>
+
+      {/* Budget */}
+      <FilterGroup label="Budget">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {TIERS.map((t) => {
+            const on = filters.tier === t;
+            return (
+              <FilterChip key={t} on={on} onClick={() => set({ tier: on ? undefined : t })}>
+                {TIER_LABELS[t]}
+              </FilterChip>
+            );
+          })}
+        </div>
+      </FilterGroup>
+
+      {/* Price */}
+      <FilterGroup label="Price">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {PRICES.map((p) => {
+            const on = filters.price === p.value;
+            return (
+              <FilterChip key={p.value} on={on} onClick={() => set({ price: on ? undefined : p.value })}>
+                {p.label}
+              </FilterChip>
+            );
+          })}
+        </div>
+      </FilterGroup>
+
+      {/* Colour */}
+      {(facets?.colours ?? []).length > 0 && (
+        <FilterGroup label="Colour">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {(facets?.colours ?? []).map((c) => {
+              const on = filters.colour === c.value;
+              return (
+                <FilterChip key={c.value} on={on} onClick={() => set({ colour: on ? undefined : c.value })}>
+                  {c.value}
+                  {c.count != null && (
+                    <span style={{ marginLeft: 6, opacity: 0.6, fontVariantNumeric: "tabular-nums" }}>{c.count}</span>
+                  )}
+                </FilterChip>
+              );
+            })}
+          </div>
+        </FilterGroup>
+      )}
+
+      {/* Size */}
+      {(facets?.sizes ?? []).length > 0 && (
+        <FilterGroup label="Size">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
+            {(facets?.sizes ?? []).map((s) => {
+              const on = filters.size === s.value;
+              return (
+                <FilterChip key={s.value} on={on} onClick={() => set({ size: on ? undefined : s.value })}>
+                  {s.value}
+                </FilterChip>
+              );
+            })}
+          </div>
+        </FilterGroup>
+      )}
+
+      {/* Store */}
+      {(facets?.stores ?? []).length > 0 && (
+        <FilterGroup label="Store">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {(facets?.stores ?? []).map((s) => {
+              const on = filters.store === s.value;
+              return (
+                <FilterChip key={s.value} on={on} onClick={() => set({ store: on ? undefined : s.value })}>
+                  {s.label}
+                </FilterChip>
+              );
+            })}
+          </div>
+        </FilterGroup>
+      )}
+    </>
+  );
+
+  // ── Product grid content (shared) ──
+  const productGridContent = (
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              background: "none",
+              border: 0,
+              padding: 0,
+              color: "#9C978E",
+              fontSize: 13,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              textAlign: "left",
+            }}
+          >
+            ← {backLabel}
+          </button>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-dm-serif), serif",
+              fontWeight: 400,
+              fontSize: wide ? 44 : 34,
+              lineHeight: 1,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Every Piece
+          </h1>
+        </div>
+        <button
+          type="button"
+          onClick={() => set({ sort: SORTS[filters.sort].next })}
+          style={{
+            background: "none",
+            border: 0,
+            padding: 0,
+            color: "#9C978E",
+            fontSize: 13,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+          aria-label={`Sorted by ${SORTS[filters.sort].label.toLowerCase()}. Change sort order`}
+        >
+          {SORTS[filters.sort].label}
+        </button>
+      </div>
+
+      {/* Empty state */}
+      {page && page.total === 0 && status === "done" && (
+        <div style={{ marginTop: 32 }}>
+          <p style={{ fontSize: 14, color: "#9C978E" }}>
+            Nothing matches all of those. Try a wider price range or another colour or clear the filters.
+          </p>
+          <button
+            type="button"
+            onClick={() => onFilters({ category: filters.category, sort: filters.sort })}
+            style={{
+              marginTop: 8,
+              background: "none",
+              border: 0,
+              padding: 0,
+              color: "#ECEBE8",
+              fontSize: 14,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              textDecoration: "underline",
+              textUnderlineOffset: 4,
+            }}
+          >
+            Clear filters
+          </button>
+        </div>
+      )}
+
+      {/* Product grid */}
+      <div
+        style={{
+          marginTop: 28,
+          display: "grid",
+          gridTemplateColumns: wide ? "repeat(4, minmax(0, 1fr))" : "repeat(2, minmax(0, 1fr))",
+          gap: wide ? "32px 24px" : "24px 16px",
+          opacity: status === "loading" ? 0.5 : 1,
+          transition: "opacity 0.15s",
+        }}
+      >
+        {page?.items.map((item) => {
+          const isSelected = selected?.id === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => setSelected(item)}
+              style={{
+                background: "none",
+                border: 0,
+                padding: 0,
+                textAlign: "left",
+                color: "#ECEBE8",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                fontFamily: "inherit",
+              }}
+            >
+              <div
+                style={{
+                  aspectRatio: "1 / 1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: isSelected ? "#26262A" : "#141416",
+                  outline: isSelected ? "1px solid #ECEBE8" : "none",
+                  outlineOffset: -1,
+                  overflow: "hidden",
+                }}
+              >
+                <ProductImage
+                  src={item.image}
+                  sizes={wide ? "(min-width: 1024px) 15rem, (min-width: 640px) 30vw, 45vw" : "45vw"}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span style={{ fontSize: wide ? 15 : 13 }}>{displayName(item.name, item.storeName)}</span>
+                <span
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 13,
+                    color: "#9C978E",
+                  }}
+                >
+                  <span>{item.storeName}</span>
+                  <span style={{ color: "#ECEBE8", fontVariantNumeric: "tabular-nums" }}>{sgd(item.price)}</span>
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Load more */}
+      {page && page.items.length < page.total && (
+        <button
+          type="button"
+          onClick={loadMore}
+          disabled={more}
+          style={{
+            marginTop: 40,
+            width: "100%",
+            height: 44,
+            background: "#1C1C1F",
+            color: "#ECEBE8",
+            border: 0,
+            fontSize: 14,
+            cursor: more ? "default" : "pointer",
+            fontFamily: "inherit",
+            opacity: more ? 0.5 : 1,
+          }}
+        >
+          {more ? "Loading…" : `Show more (${page.total - page.items.length} left)`}
+        </button>
+      )}
+    </>
+  );
+
+  // ── WIDE layout ──
+  if (wide) {
+    return (
+      <div
+        style={{
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          background: "#0A0A0B",
+          color: "#ECEBE8",
+          fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        }}
+      >
+        {/* ── Header ── */}
+        <header
+          style={{
+            height: 64,
+            flexShrink: 0,
+            background: "#141416",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 40px",
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-dm-serif), serif",
+              fontSize: 20,
+              letterSpacing: "0.2em",
+              color: "#ECEBE8",
+              textDecoration: "none",
+            }}
+          >
+            WINGMAN
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <WmDots current={4} />
+            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Browse every piece</span>
+          </div>
+        </header>
+
+        {/* ── Main ── */}
+        <main style={{ flex: 1, display: "flex", minHeight: 0, position: "relative" }}>
+
+          {/* ── Left: filter sidebar ── */}
+          <aside
+            aria-label="Filters"
+            style={{
+              width: 260,
+              flexShrink: 0,
+              background: "#141416",
+              padding: "28px 28px 32px",
+              boxSizing: "border-box",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: 26,
+            }}
+          >
+            {filterSidebarContent}
+          </aside>
+
+          {/* ── Center: product grid ── */}
+          <section
+            style={{
+              flex: 1,
+              minWidth: 0,
+              overflowY: "auto",
+              padding: "32px 48px 48px",
+              boxSizing: "border-box",
+            }}
+          >
+            {productGridContent}
+          </section>
+
+          {/* ── Right: slide-in item panel ── */}
+          {selected && (
+            <>
+              {/* Backdrop */}
+              <div
+                aria-hidden
+                onClick={() => setSelected(null)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 260,
+                  right: 0,
+                  bottom: 0,
+                  background: "rgba(10,10,11,0.55)",
+                }}
+              />
+              <ItemPanel
+                item={selected}
+                looks={looks}
+                inCart={inCart.has(selected.id)}
+                onAddToLook={(i) => onAddToLook(i, selected)}
+                onAddToCart={() => {
+                  onAddToCart(selected);
+                  setSelected(null);
+                }}
+                onClose={() => setSelected(null)}
+                fullWidth={false}
+              />
+            </>
+          )}
+        </main>
+      </div>
+    );
+  }
+
+  // ── MOBILE layout ──
   return (
     <div
       style={{
-        height: "100dvh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
         background: "#0A0A0B",
         color: "#ECEBE8",
         fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
       }}
     >
-      {/* ── Header ── */}
+      {/* Mobile header */}
       <header
         style={{
           height: 64,
@@ -129,14 +546,14 @@ export function BrowseStep({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 40px",
+          padding: "0 20px",
         }}
       >
         <Link
           href="/"
           style={{
             fontFamily: "var(--font-dm-serif), serif",
-            fontSize: 20,
+            fontSize: 18,
             letterSpacing: "0.2em",
             color: "#ECEBE8",
             textDecoration: "none",
@@ -144,189 +561,60 @@ export function BrowseStep({
         >
           WINGMAN
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <WmDots current={4} />
-          <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Browse every piece</span>
         </div>
       </header>
 
-      {/* ── Main ── */}
-      <main style={{ flex: 1, display: "flex", minHeight: 0, position: "relative" }}>
-
-        {/* ── Left: filter sidebar ── */}
-        <aside
-          aria-label="Filters"
+      {/* Filters drawer (shown when filtersOpen) */}
+      {filtersOpen && (
+        <div
           style={{
-            width: 260,
-            flexShrink: 0,
             background: "#141416",
-            padding: "28px 28px 32px",
+            padding: "20px 20px 28px",
             boxSizing: "border-box",
-            overflowY: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: 26,
+            gap: 24,
           }}
         >
-          {/* Count */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span
-              style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 30, lineHeight: 1 }}
-            >
-              {status === "done" && page ? page.total : "..."}
-            </span>
-            <span style={{ fontSize: 12, color: "#9C978E" }}>
-              {status === "done" && page
-                ? `${page.total === 1 ? "piece" : "pieces"} across stores`
-                : status === "loading" ? "Loading…" : "Couldn't load"}
-            </span>
-          </div>
-
-          {/* Category */}
-          <FilterGroup label="Category">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {CATEGORIES.map((c) => {
-                const on = filters.category === c.value;
-                return (
-                  <FilterChip
-                    key={c.value}
-                    on={on}
-                    onClick={() =>
-                      onFilters({ category: c.value, sort: filters.sort, tier: filters.tier, price: filters.price, store: filters.store })
-                    }
-                  >
-                    {c.label}
-                  </FilterChip>
-                );
-              })}
-            </div>
-          </FilterGroup>
-
-          {/* Budget */}
-          <FilterGroup label="Budget">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {TIERS.map((t) => {
-                const on = filters.tier === t;
-                return (
-                  <FilterChip key={t} on={on} onClick={() => set({ tier: on ? undefined : t })}>
-                    {TIER_LABELS[t]}
-                  </FilterChip>
-                );
-              })}
-            </div>
-          </FilterGroup>
-
-          {/* Price */}
-          <FilterGroup label="Price">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {PRICES.map((p) => {
-                const on = filters.price === p.value;
-                return (
-                  <FilterChip key={p.value} on={on} onClick={() => set({ price: on ? undefined : p.value })}>
-                    {p.label}
-                  </FilterChip>
-                );
-              })}
-            </div>
-          </FilterGroup>
-
-          {/* Colour */}
-          {(facets?.colours ?? []).length > 0 && (
-            <FilterGroup label="Colour">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {(facets?.colours ?? []).map((c) => {
-                  const on = filters.colour === c.value;
-                  return (
-                    <FilterChip key={c.value} on={on} onClick={() => set({ colour: on ? undefined : c.value })}>
-                      {c.value}
-                      {c.count != null && (
-                        <span style={{ marginLeft: 6, opacity: 0.6, fontVariantNumeric: "tabular-nums" }}>{c.count}</span>
-                      )}
-                    </FilterChip>
-                  );
-                })}
-              </div>
-            </FilterGroup>
-          )}
-
-          {/* Size */}
-          {(facets?.sizes ?? []).length > 0 && (
-            <FilterGroup label="Size">
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
-                {(facets?.sizes ?? []).map((s) => {
-                  const on = filters.size === s.value;
-                  return (
-                    <FilterChip key={s.value} on={on} onClick={() => set({ size: on ? undefined : s.value })}>
-                      {s.value}
-                    </FilterChip>
-                  );
-                })}
-              </div>
-            </FilterGroup>
-          )}
-
-          {/* Store */}
-          {(facets?.stores ?? []).length > 0 && (
-            <FilterGroup label="Store">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {(facets?.stores ?? []).map((s) => {
-                  const on = filters.store === s.value;
-                  return (
-                    <FilterChip key={s.value} on={on} onClick={() => set({ store: on ? undefined : s.value })}>
-                      {s.label}
-                    </FilterChip>
-                  );
-                })}
-              </div>
-            </FilterGroup>
-          )}
-        </aside>
-
-        {/* ── Center: product grid ── */}
-        <section
-          style={{
-            flex: 1,
-            minWidth: 0,
-            overflowY: "auto",
-            padding: "32px 48px 48px",
-            boxSizing: "border-box",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                type="button"
-                onClick={onBack}
-                style={{
-                  background: "none",
-                  border: 0,
-                  padding: 0,
-                  color: "#9C978E",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  textAlign: "left",
-                }}
-              >
-                ← {backLabel}
-              </button>
-              <h1
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--font-dm-serif), serif",
-                  fontWeight: 400,
-                  fontSize: 44,
-                  lineHeight: 1,
-                  textTransform: "uppercase" as const,
-                  letterSpacing: "0.02em",
-                }}
-              >
-                Every Piece
-              </h1>
-            </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>Filters</span>
             <button
               type="button"
-              onClick={() => set({ sort: SORTS[filters.sort].next })}
+              onClick={() => setFiltersOpen(false)}
+              style={{
+                background: "none",
+                border: 0,
+                color: "#9C978E",
+                fontSize: 13,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              Done
+            </button>
+          </div>
+          {filterSidebarContent}
+        </div>
+      )}
+
+      {/* Product grid section */}
+      <section
+        style={{
+          flex: 1,
+          padding: "20px 20px 48px",
+          boxSizing: "border-box",
+          position: "relative",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 4 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button
+              type="button"
+              onClick={onBack}
               style={{
                 background: "none",
                 border: 0,
@@ -335,147 +623,193 @@ export function BrowseStep({
                 fontSize: 13,
                 cursor: "pointer",
                 fontFamily: "inherit",
+                textAlign: "left",
+              }}
+            >
+              ← {backLabel}
+            </button>
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-dm-serif), serif",
+                fontWeight: 400,
+                fontSize: 34,
+                lineHeight: 1,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.02em",
+              }}
+            >
+              Every Piece
+            </h1>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((v) => !v)}
+              style={{
+                height: 34,
+                padding: "0 14px",
+                background: filtersOpen ? "#ECEBE8" : "#1C1C1F",
+                color: filtersOpen ? "#0A0A0B" : "#ECEBE8",
+                border: 0,
+                fontSize: 13,
+                fontWeight: filtersOpen ? 600 : 400,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+              aria-expanded={filtersOpen}
+            >
+              Filters
+            </button>
+            <button
+              type="button"
+              onClick={() => set({ sort: SORTS[filters.sort].next })}
+              style={{
+                background: "none",
+                border: 0,
+                padding: 0,
+                color: "#9C978E",
+                fontSize: 12,
+                cursor: "pointer",
+                fontFamily: "inherit",
               }}
               aria-label={`Sorted by ${SORTS[filters.sort].label.toLowerCase()}. Change sort order`}
             >
               {SORTS[filters.sort].label}
             </button>
           </div>
+        </div>
 
-          {/* Empty state */}
-          {page && page.total === 0 && status === "done" && (
-            <div style={{ marginTop: 32 }}>
-              <p style={{ fontSize: 14, color: "#9C978E" }}>
-                Nothing matches all of those. Try a wider price range or another colour or clear the filters.
-              </p>
+        {/* Empty state */}
+        {page && page.total === 0 && status === "done" && (
+          <div style={{ marginTop: 32 }}>
+            <p style={{ fontSize: 14, color: "#9C978E" }}>
+              Nothing matches all of those. Try clearing the filters.
+            </p>
+            <button
+              type="button"
+              onClick={() => onFilters({ category: filters.category, sort: filters.sort })}
+              style={{
+                marginTop: 8,
+                background: "none",
+                border: 0,
+                padding: 0,
+                color: "#ECEBE8",
+                fontSize: 14,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                textDecoration: "underline",
+                textUnderlineOffset: 4,
+              }}
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+
+        {/* 2-column product grid on mobile */}
+        <div
+          style={{
+            marginTop: 20,
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: "24px 16px",
+            opacity: status === "loading" ? 0.5 : 1,
+            transition: "opacity 0.15s",
+          }}
+        >
+          {page?.items.map((item) => {
+            const isSelected = selected?.id === item.id;
+            return (
               <button
+                key={item.id}
                 type="button"
-                onClick={() => onFilters({ category: filters.category, sort: filters.sort })}
+                aria-pressed={isSelected}
+                onClick={() => setSelected(item)}
                 style={{
-                  marginTop: 8,
                   background: "none",
                   border: 0,
                   padding: 0,
+                  textAlign: "left",
                   color: "#ECEBE8",
-                  fontSize: 14,
                   cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
                   fontFamily: "inherit",
-                  textDecoration: "underline",
-                  textUnderlineOffset: 4,
                 }}
               >
-                Clear filters
-              </button>
-            </div>
-          )}
-
-          {/* Product grid */}
-          <div
-            style={{
-              marginTop: 28,
-              display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-              gap: "32px 24px",
-              opacity: status === "loading" ? 0.5 : 1,
-              transition: "opacity 0.15s",
-            }}
-          >
-            {page?.items.map((item) => {
-              const isSelected = selected?.id === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => setSelected(item)}
+                <div
                   style={{
-                    background: "none",
-                    border: 0,
-                    padding: 0,
-                    textAlign: "left",
-                    color: "#ECEBE8",
-                    cursor: "pointer",
+                    aspectRatio: "1 / 1",
                     display: "flex",
-                    flexDirection: "column",
-                    gap: 12,
-                    fontFamily: "inherit",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: isSelected ? "#26262A" : "#141416",
+                    outline: isSelected ? "1px solid #ECEBE8" : "none",
+                    outlineOffset: -1,
+                    overflow: "hidden",
                   }}
                 >
-                  <div
+                  <ProductImage
+                    src={item.image}
+                    sizes="45vw"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  <span style={{ fontSize: 13 }}>{displayName(item.name, item.storeName)}</span>
+                  <span
                     style={{
-                      aspectRatio: "1 / 1",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: isSelected ? "#26262A" : "#141416",
-                      outline: isSelected ? "1px solid #ECEBE8" : "none",
-                      outlineOffset: -1,
-                      overflow: "hidden",
+                      justifyContent: "space-between",
+                      fontSize: 12,
+                      color: "#9C978E",
                     }}
                   >
-                    <ProductImage
-                      src={item.image}
-                      sizes="(min-width: 1024px) 15rem, (min-width: 640px) 30vw, 45vw"
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    <span style={{ fontSize: 15 }}>{displayName(item.name, item.storeName)}</span>
-                    <span
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: 13,
-                        color: "#9C978E",
-                      }}
-                    >
-                      <span>{item.storeName}</span>
-                      <span style={{ color: "#ECEBE8", fontVariantNumeric: "tabular-nums" }}>{sgd(item.price)}</span>
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                    <span>{item.storeName}</span>
+                    <span style={{ color: "#ECEBE8", fontVariantNumeric: "tabular-nums" }}>{sgd(item.price)}</span>
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Load more */}
-          {page && page.items.length < page.total && (
-            <button
-              type="button"
-              onClick={loadMore}
-              disabled={more}
-              style={{
-                marginTop: 40,
-                width: "100%",
-                height: 44,
-                background: "#1C1C1F",
-                color: "#ECEBE8",
-                border: 0,
-                fontSize: 14,
-                cursor: more ? "default" : "pointer",
-                fontFamily: "inherit",
-                opacity: more ? 0.5 : 1,
-              }}
-            >
-              {more ? "Loading…" : `Show more (${page.total - page.items.length} left)`}
-            </button>
-          )}
-        </section>
+        {/* Load more */}
+        {page && page.items.length < page.total && (
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={more}
+            style={{
+              marginTop: 32,
+              width: "100%",
+              height: 44,
+              background: "#1C1C1F",
+              color: "#ECEBE8",
+              border: 0,
+              fontSize: 14,
+              cursor: more ? "default" : "pointer",
+              fontFamily: "inherit",
+              opacity: more ? 0.5 : 1,
+            }}
+          >
+            {more ? "Loading…" : `Show more (${page.total - page.items.length} left)`}
+          </button>
+        )}
 
-        {/* ── Right: slide-in item panel ── */}
+        {/* Full-width item panel on mobile */}
         {selected && (
           <>
-            {/* Backdrop */}
             <div
               aria-hidden
               onClick={() => setSelected(null)}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 260,
-                right: 0,
-                bottom: 0,
+                position: "fixed",
+                inset: 0,
                 background: "rgba(10,10,11,0.55)",
+                zIndex: 40,
               }}
             />
             <ItemPanel
@@ -488,10 +822,11 @@ export function BrowseStep({
                 setSelected(null);
               }}
               onClose={() => setSelected(null)}
+              fullWidth={true}
             />
           </>
         )}
-      </main>
+      </section>
     </div>
   );
 }
@@ -503,6 +838,7 @@ function ItemPanel({
   onAddToLook,
   onAddToCart,
   onClose,
+  fullWidth,
 }: {
   item: BrowseItem;
   looks: Look[];
@@ -510,6 +846,7 @@ function ItemPanel({
   onAddToLook: (look: number) => void;
   onAddToCart: () => void;
   onClose: () => void;
+  fullWidth: boolean;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const name = displayName(item.name, item.storeName);
@@ -529,13 +866,15 @@ function ItemPanel({
       aria-modal="true"
       aria-label={name}
       style={{
-        position: "absolute",
-        top: 0,
-        right: 0,
+        position: "fixed",
+        top: fullWidth ? 0 : undefined,
         bottom: 0,
-        width: 460,
+        right: 0,
+        ...(fullWidth
+          ? { left: 0, zIndex: 50 }
+          : { top: 0, width: 460, zIndex: 50 }),
         background: "#1C1C1F",
-        padding: "28px 44px 32px",
+        padding: fullWidth ? "20px 20px 32px" : "28px 44px 32px",
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
@@ -570,7 +909,7 @@ function ItemPanel({
       <div
         style={{
           marginTop: 18,
-          height: 300,
+          height: fullWidth ? 240 : 300,
           flexShrink: 0,
           background: "#26262A",
           display: "flex",
@@ -579,7 +918,7 @@ function ItemPanel({
           overflow: "hidden",
         }}
       >
-        <ProductImage src={item.image} sizes="400px" className="h-full w-full object-contain" />
+        <ProductImage src={item.image} sizes={fullWidth ? "100vw" : "400px"} className="h-full w-full object-contain" />
       </div>
 
       {/* Item info */}
@@ -588,7 +927,7 @@ function ItemPanel({
           margin: "24px 0 0",
           fontFamily: "var(--font-dm-serif), serif",
           fontWeight: 400,
-          fontSize: 30,
+          fontSize: fullWidth ? 24 : 30,
           lineHeight: 1.1,
         }}
       >

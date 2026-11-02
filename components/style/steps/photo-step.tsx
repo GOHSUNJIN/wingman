@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { RAW_IMG_PROPS } from "@/components/style/flow-shell";
 import type { Photo } from "@/components/style/style-flow";
 import { downscalePhoto } from "@/lib/photo/downscale";
@@ -61,6 +61,18 @@ const TIPS = [
   },
 ] as const;
 
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return wide;
+}
+
 export function PhotoStep({
   photo,
   onPhoto,
@@ -78,6 +90,7 @@ export function PhotoStep({
   const [problem, setProblem] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const latest = useRef<string | null>(null);
+  const wide = useWide();
 
   async function choose(file: File | undefined) {
     if (!file) return;
@@ -126,35 +139,591 @@ export function PhotoStep({
   const shown = hard ? [hard] : soft;
   const canProceed = photo && !checking && !hard;
 
+  // ── WIDE layout ──
+  if (wide) {
+    return (
+      <div
+        style={{
+          height: "100dvh",
+          background: B,
+          color: T,
+          fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        {/* ── Header ─────────────────────────────────────────────────────────── */}
+        <header
+          style={{
+            height: "64px",
+            flexShrink: 0,
+            background: S,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 40px",
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-dm-serif), Georgia, serif",
+              fontSize: "20px",
+              letterSpacing: "0.2em",
+              color: T,
+              textDecoration: "none",
+            }}
+          >
+            WINGMAN
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              aria-label="Step 1 of 5"
+              role="status"
+            >
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    background: i === 0 ? G : "#3A3A3F",
+                    animation: i === 0 ? "wmPulse 1.6s ease-in-out infinite" : "none",
+                  }}
+                />
+              ))}
+            </div>
+            <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+              01 · Your photo
+            </span>
+          </div>
+        </header>
+
+        {/* ── Main ───────────────────────────────────────────────────────────── */}
+        <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
+
+          {/* ── LEFT: Photo panel ─────────────────────────────────────────── */}
+          <section
+            aria-label="Photo upload"
+            style={{
+              width: "628px",
+              flexShrink: 0,
+              position: "relative",
+              background: S,
+              display: "flex",
+            }}
+          >
+            {photo ? (
+              /* ── Uploaded state ── */
+              <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+                <style>{`
+                  @keyframes photoLock {
+                    0%   { opacity: 0; transform: scale(1.06); }
+                    18%  { opacity: 1; transform: scale(1); }
+                    65%  { opacity: 1; }
+                    100% { opacity: 0; }
+                  }
+                `}</style>
+
+                {/* Image — contain so the full body (head to feet) is always visible */}
+                <Image
+                  src={photo.url}
+                  alt="Your uploaded selfie"
+                  fill
+                  sizes="628px"
+                  style={{
+                    objectFit: "contain",
+                    objectPosition: "center",
+                  }}
+                  {...RAW_IMG_PROPS}
+                />
+
+                {/* Gold scan line while checking */}
+                {checking && (
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      height: 120,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "flex-end",
+                      animation: "wmScan 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <div style={{ flex: 1, background: "rgba(200,169,106,0.08)" }} />
+                    <div style={{ height: 2, background: G }} />
+                  </div>
+                )}
+
+                {/* Gold border flash when face is locked in */}
+                {photo.check?.faceY != null && !checking && (
+                  <div
+                    key={photo.url}
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      border: `2px solid ${G}`,
+                      animation: "photoLock 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards",
+                      pointerEvents: "none",
+                    }}
+                  />
+                )}
+
+                {/* Checking label */}
+                {checking && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "rgba(10,10,11,0.28)",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      padding: "0 40px 36px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background: G,
+                          animation: "wmPulse 1.6s ease-in-out infinite",
+                        }}
+                      />
+                      <span style={{ fontSize: "13px" }}>Finding your face…</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom scrim */}
+                {!checking && (
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: "180px",
+                      background: "linear-gradient(to top, rgba(10,10,11,0.85), rgba(10,10,11,0))",
+                    }}
+                  />
+                )}
+
+                {/* Bottom info bar */}
+                {!checking && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: "40px",
+                      right: "40px",
+                      bottom: "32px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+                        Uploaded
+                      </span>
+                      <span style={{ fontSize: "14px" }}>Your photo</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      style={{
+                        background: "none",
+                        border: 0,
+                        padding: 0,
+                        fontSize: "14px",
+                        color: T,
+                        textDecoration: "underline",
+                        textUnderlineOffset: "4px",
+                        textDecorationThickness: "1px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Replace Photo
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* ── Empty state ── */
+              <div style={{ flex: 1, padding: "48px", display: "flex" }}>
+                <label
+                  htmlFor={inputId}
+                  style={{
+                    flex: 1,
+                    background: B,
+                    border: "1px dashed #5A5650",
+                    color: T,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "20px",
+                    cursor: "pointer",
+                    transition: "background 180ms ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = S)}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = B)}
+                >
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={T}
+                    strokeWidth="1.25"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 16V4" />
+                    <path d="M7 9l5-5 5 5" />
+                    <path d="M4 16v4h16v-4" />
+                  </svg>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-dm-serif), Georgia, serif",
+                      fontSize: "32px",
+                    }}
+                  >
+                    {busy ? "Reading…" : "Upload Your Photo"}
+                  </span>
+                  <span style={{ fontSize: "14px", color: M }}>
+                    Drag a selfie here, or click to choose. JPG or PNG, up to 15 MB.
+                  </span>
+                </label>
+              </div>
+            )}
+          </section>
+
+          {/* ── RIGHT: Content panel ──────────────────────────────────────── */}
+          <section
+            style={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* Content */}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
+                padding: "32px 64px 0",
+                boxSizing: "border-box",
+              }}
+            >
+              <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
+                Step one
+              </span>
+              <h1
+                style={{
+                  margin: "12px 0 0",
+                  fontFamily: "var(--font-dm-serif), Georgia, serif",
+                  fontWeight: 400,
+                  fontSize: "52px",
+                  lineHeight: 1,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                Your Photo
+              </h1>
+
+              {/* Notice (after deleting photo) */}
+              {notice && (
+                <p
+                  role="status"
+                  style={{
+                    margin: "12px 0 0",
+                    padding: "10px 14px",
+                    background: S,
+                    fontSize: "13px",
+                    color: M,
+                  }}
+                >
+                  {notice}
+                </p>
+              )}
+
+              <p
+                style={{
+                  margin: "12px 0 0",
+                  fontSize: "15px",
+                  lineHeight: 1.55,
+                  color: M,
+                  maxWidth: "440px",
+                }}
+              >
+                Every look is tried on this picture. A clear, honest selfie gets you a try-on you can
+                trust.
+              </p>
+
+              {/* Tips + example figure — hidden once a photo is uploaded */}
+              <div
+                style={{
+                  marginTop: "20px",
+                  display: photo ? "none" : "flex",
+                  gap: "28px",
+                  alignItems: "flex-start",
+                }}
+              >
+                <ul
+                  style={{
+                    listStyle: "none",
+                    margin: 0,
+                    padding: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "14px",
+                    flex: 1,
+                  }}
+                >
+                  {TIPS.map((tip) => (
+                    <li
+                      key={tip.title}
+                      style={{ display: "flex", alignItems: "center", gap: "14px" }}
+                    >
+                      {tip.icon}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 500 }}>{tip.title}</span>
+                        <span style={{ fontSize: "12px", color: M }}>{tip.subtitle}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Example figure */}
+                <figure
+                  style={{
+                    margin: 0,
+                    width: "96px",
+                    flexShrink: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "96px",
+                      height: "128px",
+                      position: "relative",
+                      overflow: "hidden",
+                      background: "#1C1C1F",
+                    }}
+                  >
+                    <Image
+                      src="/home/before.jpg"
+                      alt="Example: waist-up, front-facing, evenly lit selfie"
+                      fill
+                      sizes="96px"
+                      className="object-cover object-[50%_20%]"
+                    />
+                  </div>
+                  <figcaption
+                    style={{
+                      fontSize: "11px",
+                      letterSpacing: "0.02em",
+                      color: M,
+                    }}
+                  >
+                    Like this
+                  </figcaption>
+                </figure>
+              </div>
+
+              {/* Problems / alerts */}
+              {problem && (
+                <p role="alert" style={{ margin: "24px 0 0", fontSize: "14px", color: "#E06C5F" }}>
+                  {problem}
+                </p>
+              )}
+              {photo?.zoomed && !checking && !hard && (
+                <p role="status" style={{ margin: "16px 0 0", fontSize: "14px", color: M }}>
+                  We zoomed in to frame you better.
+                </p>
+              )}
+              {photo && !checking && shown.length > 0 && (
+                <div
+                  role="alert"
+                  style={{
+                    margin: "24px 0 0",
+                    padding: "16px 20px",
+                    background: S,
+                  }}
+                >
+                  {shown.map((p) => (
+                    <div key={p.code} style={{ marginTop: p === shown[0] ? 0 : "16px" }}>
+                      <p style={{ margin: 0, fontSize: "15px", fontWeight: 500 }}>{p.message}</p>
+                      <p style={{ margin: "4px 0 0", fontSize: "14px", color: M }}>{p.tip}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Pinned footer: actions + privacy ── */}
+            <div
+              style={{
+                flexShrink: 0,
+                padding: "20px 64px 28px",
+                boxSizing: "border-box",
+              }}
+            >
+              {photo && !checking && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {shown.length > 0 ? (
+                    <>
+                      <label
+                        htmlFor={inputId}
+                        style={{
+                          height: "56px",
+                          background: G,
+                          color: B,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "15px",
+                          fontWeight: 600,
+                          letterSpacing: "0.04em",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Swap Photo
+                      </label>
+                      {!hard && (
+                        <button
+                          type="button"
+                          onClick={onNext}
+                          style={{
+                            height: "56px",
+                            background: "#1C1C1F",
+                            color: T,
+                            border: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "15px",
+                            fontWeight: 500,
+                            letterSpacing: "0.04em",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Use This One
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={onNext}
+                        style={{
+                          height: "56px",
+                          background: G,
+                          color: B,
+                          border: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "15px",
+                          fontWeight: 600,
+                          letterSpacing: "0.04em",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Use This Photo
+                      </button>
+                      <label
+                        htmlFor={inputId}
+                        style={{
+                          alignSelf: "flex-start",
+                          fontSize: "14px",
+                          color: M,
+                          textDecoration: "underline",
+                          textUnderlineOffset: "4px",
+                          textDecorationThickness: "1px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Choose a different photo
+                      </label>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <p style={{ margin: photo && !checking ? "16px 0 0" : "0", fontSize: "12px", lineHeight: 1.5, color: M }}>
+                Your photo is only used to render your try-ons. Delete it any time from your looks.
+              </p>
+            </div>
+          </section>
+        </main>
+
+        {/* ── Hidden file input ─────────────────────────────────────────────── */}
+        <input
+          ref={fileRef}
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={(e) => {
+            void choose(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── MOBILE layout ──
   return (
     <div
       style={{
-        height: "100dvh",
+        minHeight: "100dvh",
         background: B,
         color: T,
         fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
       }}
     >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* Mobile header */}
       <header
         style={{
-          height: "64px",
+          height: 64,
           flexShrink: 0,
           background: S,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 40px",
+          padding: "0 20px",
         }}
       >
         <Link
           href="/"
           style={{
             fontFamily: "var(--font-dm-serif), Georgia, serif",
-            fontSize: "20px",
+            fontSize: 18,
             letterSpacing: "0.2em",
             color: T,
             textDecoration: "none",
@@ -162,9 +731,9 @@ export function PhotoStep({
         >
           WINGMAN
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
-            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
             aria-label="Step 1 of 5"
             role="status"
           >
@@ -173,8 +742,8 @@ export function PhotoStep({
                 key={i}
                 aria-hidden="true"
                 style={{
-                  width: "8px",
-                  height: "8px",
+                  width: 8,
+                  height: 8,
                   borderRadius: "50%",
                   background: i === 0 ? G : "#3A3A3F",
                   animation: i === 0 ? "wmPulse 1.6s ease-in-out infinite" : "none",
@@ -182,487 +751,264 @@ export function PhotoStep({
               />
             ))}
           </div>
-          <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
-            01 · Your photo
-          </span>
         </div>
       </header>
 
-      {/* ── Main ───────────────────────────────────────────────────────────── */}
-      <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
-
-        {/* ── LEFT: Photo panel ─────────────────────────────────────────── */}
-        <section
-          aria-label="Photo upload"
-          style={{
-            width: "628px",
-            flexShrink: 0,
-            position: "relative",
-            background: S,
-            display: "flex",
-          }}
-        >
-          {photo ? (
-            /* ── Uploaded state ── */
-            <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-              <style>{`
-                @keyframes photoLock {
-                  0%   { opacity: 0; transform: scale(1.06); }
-                  18%  { opacity: 1; transform: scale(1); }
-                  65%  { opacity: 1; }
-                  100% { opacity: 0; }
-                }
-              `}</style>
-
-              {/* Image — contain so the full body (head to feet) is always visible */}
-              <Image
-                src={photo.url}
-                alt="Your uploaded selfie"
-                fill
-                sizes="628px"
-                style={{
-                  objectFit: "contain",
-                  objectPosition: "center",
-                }}
-                {...RAW_IMG_PROPS}
-              />
-
-              {/* Gold scan line while checking */}
-              {checking && (
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    height: 120,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    animation: "wmScan 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <div style={{ flex: 1, background: "rgba(200,169,106,0.08)" }} />
-                  <div style={{ height: 2, background: G }} />
-                </div>
-              )}
-
-              {/* Gold border flash when face is locked in */}
-              {photo.check?.faceY != null && !checking && (
-                <div
-                  key={photo.url}
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    border: `2px solid ${G}`,
-                    animation: "photoLock 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards",
-                    pointerEvents: "none",
-                  }}
-                />
-              )}
-
-              {/* Checking label */}
-              {checking && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(10,10,11,0.28)",
-                    display: "flex",
-                    alignItems: "flex-end",
-                    padding: "0 40px 36px",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        background: G,
-                        animation: "wmPulse 1.6s ease-in-out infinite",
-                      }}
-                    />
-                    <span style={{ fontSize: "13px" }}>Finding your face…</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Bottom scrim */}
-              {!checking && (
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: "180px",
-                    background: "linear-gradient(to top, rgba(10,10,11,0.85), rgba(10,10,11,0))",
-                  }}
-                />
-              )}
-
-              {/* Bottom info bar */}
-              {!checking && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "40px",
-                    right: "40px",
-                    bottom: "32px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-end",
-                  }}
-                >
-                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
-                      Uploaded
-                    </span>
-                    <span style={{ fontSize: "14px" }}>Your photo</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    style={{
-                      background: "none",
-                      border: 0,
-                      padding: 0,
-                      fontSize: "14px",
-                      color: T,
-                      textDecoration: "underline",
-                      textUnderlineOffset: "4px",
-                      textDecorationThickness: "1px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Replace Photo
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* ── Empty state ── */
-            <div style={{ flex: 1, padding: "48px", display: "flex" }}>
-              <label
-                htmlFor={inputId}
-                style={{
-                  flex: 1,
-                  background: B,
-                  border: "1px dashed #5A5650",
-                  color: T,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "20px",
-                  cursor: "pointer",
-                  transition: "background 180ms ease",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = S)}
-                onMouseLeave={(e) => (e.currentTarget.style.background = B)}
-              >
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={T}
-                  strokeWidth="1.25"
-                  aria-hidden="true"
-                >
-                  <path d="M12 16V4" />
-                  <path d="M7 9l5-5 5 5" />
-                  <path d="M4 16v4h16v-4" />
-                </svg>
-                <span
-                  style={{
-                    fontFamily: "var(--font-dm-serif), Georgia, serif",
-                    fontSize: "32px",
-                  }}
-                >
-                  {busy ? "Reading…" : "Upload Your Photo"}
-                </span>
-                <span style={{ fontSize: "14px", color: M }}>
-                  Drag a selfie here, or click to choose. JPG or PNG, up to 15 MB.
-                </span>
-              </label>
-            </div>
-          )}
-        </section>
-
-        {/* ── RIGHT: Content panel ──────────────────────────────────────── */}
-        <section
-          style={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          {/* Content */}
-          <div
-            style={{
-              flex: 1,
-              minHeight: 0,
-              overflow: "hidden",
-              padding: "32px 64px 0",
-              boxSizing: "border-box",
-            }}
-          >
-            <span style={{ fontSize: "12px", letterSpacing: "0.02em", color: M }}>
-              Step one
-            </span>
-            <h1
-              style={{
-                margin: "12px 0 0",
-                fontFamily: "var(--font-dm-serif), Georgia, serif",
-                fontWeight: 400,
-                fontSize: "52px",
-                lineHeight: 1,
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.02em",
-              }}
-            >
-              Your Photo
-            </h1>
-
-            {/* Notice (after deleting photo) */}
-            {notice && (
-              <p
-                role="status"
-                style={{
-                  margin: "12px 0 0",
-                  padding: "10px 14px",
-                  background: S,
-                  fontSize: "13px",
-                  color: M,
-                }}
-              >
-                {notice}
-              </p>
-            )}
-
-            <p
-              style={{
-                margin: "12px 0 0",
-                fontSize: "15px",
-                lineHeight: 1.55,
-                color: M,
-                maxWidth: "440px",
-              }}
-            >
-              Every look is tried on this picture. A clear, honest selfie gets you a try-on you can
-              trust.
-            </p>
-
-            {/* Tips + example figure — hidden once a photo is uploaded */}
-            <div
-              style={{
-                marginTop: "20px",
-                display: photo ? "none" : "flex",
-                gap: "28px",
-                alignItems: "flex-start",
-              }}
-            >
-              <ul
-                style={{
-                  listStyle: "none",
-                  margin: 0,
-                  padding: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "14px",
-                  flex: 1,
-                }}
-              >
-                {TIPS.map((tip) => (
-                  <li
-                    key={tip.title}
-                    style={{ display: "flex", alignItems: "center", gap: "14px" }}
-                  >
-                    {tip.icon}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                      <span style={{ fontSize: "14px", fontWeight: 500 }}>{tip.title}</span>
-                      <span style={{ fontSize: "12px", color: M }}>{tip.subtitle}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Example figure */}
-              <figure
-                style={{
-                  margin: 0,
-                  width: "96px",
-                  flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "96px",
-                    height: "128px",
-                    position: "relative",
-                    overflow: "hidden",
-                    background: "#1C1C1F",
-                  }}
-                >
-                  <Image
-                    src="/home/before.jpg"
-                    alt="Example: waist-up, front-facing, evenly lit selfie"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-[50%_20%]"
-                  />
-                </div>
-                <figcaption
-                  style={{
-                    fontSize: "11px",
-                    letterSpacing: "0.02em",
-                    color: M,
-                  }}
-                >
-                  Like this
-                </figcaption>
-              </figure>
-            </div>
-
-            {/* Problems / alerts */}
-            {problem && (
-              <p role="alert" style={{ margin: "24px 0 0", fontSize: "14px", color: "#E06C5F" }}>
-                {problem}
-              </p>
-            )}
-            {photo?.zoomed && !checking && !hard && (
-              <p role="status" style={{ margin: "16px 0 0", fontSize: "14px", color: M }}>
-                We zoomed in to frame you better.
-              </p>
-            )}
-            {photo && !checking && shown.length > 0 && (
+      {/* Photo block: 4:5 aspect ratio */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "4 / 5",
+          background: S,
+          flexShrink: 0,
+          overflow: "hidden",
+        }}
+      >
+        {photo ? (
+          <>
+            <Image
+              src={photo.url}
+              alt="Your uploaded selfie"
+              fill
+              sizes="100vw"
+              style={{ objectFit: "contain", objectPosition: "center" }}
+              {...RAW_IMG_PROPS}
+            />
+            {checking && (
               <div
-                role="alert"
+                aria-hidden="true"
                 style={{
-                  margin: "24px 0 0",
-                  padding: "16px 20px",
-                  background: S,
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  height: 120,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                  animation: "wmScan 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+                  pointerEvents: "none",
                 }}
               >
-                {shown.map((p) => (
-                  <div key={p.code} style={{ marginTop: p === shown[0] ? 0 : "16px" }}>
-                    <p style={{ margin: 0, fontSize: "15px", fontWeight: 500 }}>{p.message}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: "14px", color: M }}>{p.tip}</p>
-                  </div>
-                ))}
+                <div style={{ flex: 1, background: "rgba(200,169,106,0.08)" }} />
+                <div style={{ height: 2, background: G }} />
               </div>
             )}
-          </div>
-
-          {/* ── Pinned footer: actions + privacy ── */}
-          <div
+            {photo.check?.faceY != null && !checking && (
+              <div
+                key={photo.url}
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  border: `2px solid ${G}`,
+                  animation: "photoLock 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards",
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+            {checking && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 16,
+                  left: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  pointerEvents: "none",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{ width: 6, height: 6, borderRadius: "50%", background: G, animation: "wmPulse 1.6s ease-in-out infinite" }}
+                />
+                <span style={{ fontSize: 13 }}>Finding your face…</span>
+              </div>
+            )}
+          </>
+        ) : (
+          <label
+            htmlFor={inputId}
             style={{
-              flexShrink: 0,
-              padding: "20px 64px 28px",
-              boxSizing: "border-box",
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 16,
+              cursor: "pointer",
+              background: B,
+              border: "1px dashed #5A5650",
             }}
           >
-            {photo && !checking && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {shown.length > 0 ? (
-                  <>
-                    <label
-                      htmlFor={inputId}
-                      style={{
-                        height: "56px",
-                        background: G,
-                        color: B,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "15px",
-                        fontWeight: 600,
-                        letterSpacing: "0.04em",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Swap Photo
-                    </label>
-                    {!hard && (
-                      <button
-                        type="button"
-                        onClick={onNext}
-                        style={{
-                          height: "56px",
-                          background: "#1C1C1F",
-                          color: T,
-                          border: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "15px",
-                          fontWeight: 500,
-                          letterSpacing: "0.04em",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Use This One
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={T} strokeWidth="1.25" aria-hidden="true">
+              <path d="M12 16V4" />
+              <path d="M7 9l5-5 5 5" />
+              <path d="M4 16v4h16v-4" />
+            </svg>
+            <span style={{ fontFamily: "var(--font-dm-serif), Georgia, serif", fontSize: 26, textAlign: "center" }}>
+              {busy ? "Reading…" : "Upload Your Photo"}
+            </span>
+            <span style={{ fontSize: 13, color: M, textAlign: "center", padding: "0 20px" }}>
+              Tap to choose a photo. JPG or PNG.
+            </span>
+          </label>
+        )}
+      </div>
+
+      {/* Content below the photo */}
+      <div style={{ padding: "0 20px 40px", display: "flex", flexDirection: "column", flex: 1 }}>
+        <span style={{ marginTop: 24, fontSize: 12, letterSpacing: "0.02em", color: M }}>Step one</span>
+        <h1
+          style={{
+            margin: "8px 0 0",
+            fontFamily: "var(--font-dm-serif), Georgia, serif",
+            fontWeight: 400,
+            fontSize: 40,
+            lineHeight: 1,
+            textTransform: "uppercase" as const,
+            letterSpacing: "0.02em",
+          }}
+        >
+          Your Photo
+        </h1>
+
+        {notice && (
+          <p
+            role="status"
+            style={{ margin: "12px 0 0", padding: "10px 14px", background: S, fontSize: 13, color: M }}
+          >
+            {notice}
+          </p>
+        )}
+
+        <p style={{ margin: "12px 0 0", fontSize: 14, lineHeight: 1.55, color: M }}>
+          Every look is tried on this picture. A clear, honest selfie gets you a try-on you can trust.
+        </p>
+
+        {!photo && (
+          <ul style={{ listStyle: "none", margin: "20px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+            {TIPS.map((tip) => (
+              <li key={tip.title} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                {tip.icon}
+                <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  <span style={{ fontSize: 14, fontWeight: 500 }}>{tip.title}</span>
+                  <span style={{ fontSize: 12, color: M }}>{tip.subtitle}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {problem && (
+          <p role="alert" style={{ margin: "20px 0 0", fontSize: 14, color: "#E06C5F" }}>
+            {problem}
+          </p>
+        )}
+        {photo?.zoomed && !checking && !hard && (
+          <p role="status" style={{ margin: "16px 0 0", fontSize: 14, color: M }}>
+            We zoomed in to frame you better.
+          </p>
+        )}
+        {photo && !checking && shown.length > 0 && (
+          <div role="alert" style={{ margin: "20px 0 0", padding: "16px 20px", background: S }}>
+            {shown.map((p) => (
+              <div key={p.code} style={{ marginTop: p === shown[0] ? 0 : 16 }}>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 500 }}>{p.message}</p>
+                <p style={{ margin: "4px 0 0", fontSize: 14, color: M }}>{p.tip}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions pinned to bottom of content area */}
+        <div style={{ marginTop: "auto", paddingTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+          {photo && !checking && (
+            <>
+              {shown.length > 0 ? (
+                <>
+                  <label
+                    htmlFor={inputId}
+                    style={{
+                      height: 52,
+                      background: G,
+                      color: B,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 15,
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                      cursor: "pointer",
+                      width: "100%",
+                    }}
+                  >
+                    Swap Photo
+                  </label>
+                  {!hard && (
                     <button
                       type="button"
                       onClick={onNext}
                       style={{
-                        height: "56px",
-                        background: G,
-                        color: B,
+                        height: 52,
+                        background: "#1C1C1F",
+                        color: T,
                         border: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "15px",
-                        fontWeight: 600,
-                        letterSpacing: "0.04em",
+                        width: "100%",
+                        fontSize: 15,
+                        fontWeight: 500,
                         cursor: "pointer",
+                        fontFamily: "inherit",
                       }}
                     >
-                      Use This Photo
+                      Use This One
                     </button>
-                    <label
-                      htmlFor={inputId}
-                      style={{
-                        alignSelf: "flex-start",
-                        fontSize: "14px",
-                        color: M,
-                        textDecoration: "underline",
-                        textUnderlineOffset: "4px",
-                        textDecorationThickness: "1px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Choose a different photo
-                    </label>
-                  </>
-                )}
-              </div>
-            )}
-
-            <p style={{ margin: photo && !checking ? "16px 0 0" : "0", fontSize: "12px", lineHeight: 1.5, color: M }}>
-              Your photo is only used to render your try-ons. Delete it any time from your looks.
-            </p>
-          </div>
-        </section>
-      </main>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={onNext}
+                    style={{
+                      height: 52,
+                      background: G,
+                      color: B,
+                      border: 0,
+                      width: "100%",
+                      fontSize: 15,
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    Use This Photo
+                  </button>
+                  <label
+                    htmlFor={inputId}
+                    style={{
+                      textAlign: "center",
+                      fontSize: 14,
+                      color: M,
+                      textDecoration: "underline",
+                      textUnderlineOffset: 4,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Choose a different photo
+                  </label>
+                </>
+              )}
+            </>
+          )}
+          <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5, color: M }}>
+            Your photo is only used to render your try-ons. Delete it any time from your looks.
+          </p>
+        </div>
+      </div>
 
       {/* ── Hidden file input ─────────────────────────────────────────────── */}
       <input

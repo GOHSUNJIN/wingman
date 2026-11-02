@@ -4,7 +4,7 @@
 
 Built for the **YouCam API Skin AI & eCommerce VTO Hackathon** (Perfect Corp, Devpost).
 
-**Live demo:** https://wingman-1608.vercel.app
+**Live demo:** [wingman-1608.vercel.app](https://wingman-1608.vercel.app)
 
 ---
 
@@ -12,7 +12,7 @@ Wingman is an AI occasion stylist for men. Give it a selfie and one sentence abo
 
 ## Try it in 60 seconds
 
-1. Open https://wingman-1608.vercel.app on your phone or laptop.
+1. Open [wingman-1608.vercel.app](https://wingman-1608.vercel.app) on your phone or laptop.
 2. Tap **Start with a photo** and upload a waist-up, front-facing selfie. Glasses are fine.
 3. Keep the prefilled brief, pick **Mid-range** and tap **Style me**. Each try-on fills in on the loading screen, and your looks open once every one is ready, in about a minute.
 
@@ -57,7 +57,7 @@ flowchart TD
     E --> F[Claude picks 2 to 3 looks<br/>ids and budget checked, one retry]
     F --> G[YouCam renders each look<br/>clothes try-on per top and jacket]
     G --> H[Claude Fit Check<br/>score out of 10 + reason]
-    C --> I[Claude prep plan<br/>3 grooming steps, no medical claims]
+    B --> I[Night-before prep plan<br/>3 grooming steps]
     H --> P[Looks scoring under 6 dropped]
     P --> J[Looks open once every try-on<br/>has landed, with a retry for any that failed]
     J --> K[Refine by chat / Swap a piece / Compare prices]
@@ -80,7 +80,7 @@ flowchart TD
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 15 (App Router), TypeScript strict |
-| Styling | Tailwind CSS 4, Panchang + Switzer fonts (self-hosted) |
+| Styling | Tailwind CSS 4, DM Serif Display + DM Sans (Google Fonts, loaded at build time) |
 | Database and storage | Supabase Postgres + private storage buckets with signed URLs |
 | AI | Claude via `@anthropic-ai/sdk`: `claude-sonnet-4-6` for styling and Fit Check; `claude-haiku-4-5-20251001` for prep plans and catalog tagging |
 | Vision | YouCam API, server-side only |
@@ -153,7 +153,7 @@ Open http://localhost:3000 at phone width and tap **Start with a photo**. `fixtu
 | `npm run catalog:fetch` | Builds the catalog: fetches feeds, keeps menswear, tags with Claude, converts to SGD, picks try-on images and colours, assigns relative tiers and writes to Supabase. Resumable. `--store <domain>` for one store, `--dry-run` to skip writes. |
 | `npm run photo:check` | Checks a photo before spending YouCam units: finds the face and writes the crops each API would get. |
 | `npm run style:demo` | Calls `POST /api/style` with the demo photo and prints the looks, Fit Checks and prep plan. Start `npm run dev` first; `MOCK_YOUCAM` decides mock or live renders. Flags: `--tier`, `--occasion`, `--max-budget`, `--photo`, `--url`, `--compare` to also price-compare the first look, `--refine "more casual"` to refine the looks and `--swap top` to swap a piece of the first look. |
-| `npm run screenshots` | Captures every screen at 390px into `docs/screenshots/`. Start `npm run dev` first; with `MOCK_YOUCAM=true` every try-on is the saved sample. |
+| `npm run screenshots` | Captures every screen at 1280px into `docs/screenshots/`. Start `npm run dev` first; with `MOCK_YOUCAM=true` every try-on is the saved sample. |
 | `npm run youcam:smoke` | One real call per YouCam API on `fixtures/selfies/demo.jpg`. Saves responses for mock mode and prints units used. A second run costs zero units. |
 
 ## Project structure
@@ -230,9 +230,9 @@ All tables have row-level security on with no policies, so only the server's ser
 
 ## Built by
 
-**Goh Sun Jin** [linkedin.com/in/gohsunjin](https://linkedin.com/in/gohsunjin)
+**[Goh Sun Jin](https://linkedin.com/in/gohsunjin)**
 
-**Prabhakaran Ritish** [linkedin.com/in/prabhakaran-ritish-45286921a](https://linkedin.com/in/prabhakaran-ritish-45286921a)
+**[Prabhakaran Ritish](https://linkedin.com/in/prabhakaran-ritish-45286921a)**
 
 ## License
 

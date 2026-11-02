@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RAW_IMG_PROPS } from "@/components/style/flow-shell";
 import { ProductImage } from "@/components/style/product-image";
 import { showsInRender, type Look, type LookItem } from "@/lib/agent/events";
@@ -20,6 +20,18 @@ function priceDiff(next: number, current: number) {
   const d = Math.round(next - current);
   if (d === 0) return "Same price";
   return d > 0 ? `S$${d} more` : `S$${-d} less`;
+}
+
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return wide;
 }
 
 export function SwapStep({
@@ -45,20 +57,384 @@ export function SwapStep({
   const [focused, setFocused] = useState<string | null>(null);
   const showsInTryOn = showsInRender(look, slot);
   const rendering = !!picked && showsInTryOn;
+  const wide = useWide();
 
+  // ── WIDE layout ──
+  if (wide) {
+    return (
+      <div
+        style={{
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          background: "#0A0A0B",
+          color: "#ECEBE8",
+          fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        }}
+      >
+        {/* ── Header ── */}
+        <header
+          style={{
+            height: 64,
+            flexShrink: 0,
+            background: "#141416",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 40px",
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-dm-serif), serif",
+              fontSize: 20,
+              letterSpacing: "0.2em",
+              color: "#ECEBE8",
+              textDecoration: "none",
+            }}
+          >
+            WINGMAN
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <WmDots current={4} />
+            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Swap a piece</span>
+          </div>
+        </header>
+
+        {/* ── Main ── */}
+        <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
+          {/* Left: look render */}
+          <section
+            style={{
+              width: 628,
+              flexShrink: 0,
+              position: "relative",
+              overflow: "hidden",
+              background: "#141416",
+            }}
+          >
+            {look.renders.outfit ? (
+              <Image
+                src={look.renders.outfit}
+                alt={`You in ${look.name}`}
+                fill
+                sizes="628px"
+                style={{ objectFit: "contain" }}
+                {...RAW_IMG_PROPS}
+              />
+            ) : (
+              <LookSvg />
+            )}
+
+            {/* Look label */}
+            <div
+              style={{ position: "absolute", top: 32, left: 36, display: "flex", flexDirection: "column", gap: 6 }}
+            >
+              <span style={{ fontSize: 12, color: "#9C978E" }}>Look 1</span>
+              <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22 }}>{look.name}</span>
+            </div>
+
+            {/* Rendering overlay */}
+            {rendering && (
+              <>
+                <div style={{ position: "absolute", inset: 0, background: "rgba(10,10,11,0.2)" }} />
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    height: 120,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    animation: "wmScan 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+                  }}
+                >
+                  <div style={{ flex: 1, background: "rgba(200,169,106,0.07)" }} />
+                  <div style={{ height: 2, background: "#C8A96A" }} />
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 140,
+                    background: "linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 36,
+                    right: 36,
+                    bottom: 30,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "#C8A96A",
+                      animation: "wmPulse 1.6s ease-in-out infinite",
+                    }}
+                  />
+                  <span style={{ fontSize: 13 }}>Trying on the {picked?.toLowerCase()}</span>
+                </div>
+              </>
+            )}
+          </section>
+
+          {/* Right: swap options */}
+          <section
+            style={{
+              flex: 1,
+              minWidth: 0,
+              padding: "32px 64px 32px 56px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                color: "#9C978E",
+                background: "none",
+                border: 0,
+                padding: 0,
+                fontSize: 13,
+                cursor: "pointer",
+                textAlign: "left",
+                fontFamily: "inherit",
+                alignSelf: "flex-start",
+              }}
+            >
+              ← {look.name}
+            </button>
+            <h1
+              style={{
+                margin: "14px 0 0",
+                fontFamily: "var(--font-dm-serif), serif",
+                fontWeight: 400,
+                fontSize: 44,
+                lineHeight: 1,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.02em",
+              }}
+            >
+              {cheaper ? `Cheaper ${name}` : `Swapping the ${name.charAt(0).toUpperCase() + name.slice(1)}`}
+            </h1>
+
+            {/* Scrollable area: current piece + options */}
+            <div
+              className="no-scrollbar"
+              style={{ flex: 1, overflowY: "auto", minHeight: 0, marginTop: 22 }}
+            >
+              {/* Current piece */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
+                <p style={{ margin: 0, fontSize: 14, color: "#9C978E" }}>
+                  Currently:{" "}
+                  <span style={{ color: "#ECEBE8" }}>
+                    {displayName(current.name, current.storeName)}
+                  </span>{" "}
+                  · {current.storeName} · {sgd(current.price)}
+                </p>
+              </div>
+
+              {/* Options grid */}
+              {state.status === "loading" && (
+                <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
+                  Finding {cheaper ? "cheaper " : ""}options…
+                </p>
+              )}
+              {state.status === "error" && (
+                <div style={{ marginTop: 28 }}>
+                  <p style={{ color: "#E06C5F", fontSize: 14 }}>{state.error}</p>
+                  <button
+                    type="button"
+                    onClick={onRetry}
+                    style={{
+                      marginTop: 8,
+                      background: "none",
+                      border: 0,
+                      color: "#ECEBE8",
+                      fontSize: 14,
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+              {state.status === "done" && state.options.length === 0 && (
+                <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
+                  {cheaper
+                    ? `Nothing cheaper in stock goes with this look right now.`
+                    : "Nothing else in stock fits this look and budget right now."}
+                </p>
+              )}
+              {state.options.length > 0 && (
+                <div
+                  style={{
+                    marginTop: 22,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                    gap: "24px 16px",
+                    paddingBottom: 24,
+                  }}
+                >
+                  {state.options.map((option) => {
+                    const on = picked === option.id;
+                    const diff = Math.round(option.price - current.price);
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        aria-pressed={on || focused === option.id}
+                        onClick={() => {
+                          if (focused !== option.id) { setFocused(option.id); return; }
+                          setFocused(null);
+                          setPicked(option.id);
+                          onPick(option);
+                        }}
+                        style={{
+                          background: "none",
+                          border: 0,
+                          padding: 0,
+                          textAlign: "left",
+                          color: "#ECEBE8",
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 10,
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: "relative",
+                            height: 170,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: (on || focused === option.id) ? "#26262A" : "#141416",
+                            outline: (on || focused === option.id) ? "1px solid #ECEBE8" : "none",
+                            outlineOffset: -1,
+                          }}
+                        >
+                          <ProductImage src={option.image} sizes="160px" className="h-full w-full object-contain" />
+                          {on && (
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: 10,
+                                left: 10,
+                                fontSize: 11,
+                                fontWeight: 600,
+                                background: "#ECEBE8",
+                                color: "#0A0A0B",
+                                padding: "4px 8px",
+                              }}
+                            >
+                              Trying on
+                            </span>
+                          )}
+                          {focused === option.id && !on && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                display: "flex",
+                                alignItems: "flex-end",
+                                justifyContent: "center",
+                                paddingBottom: 10,
+                                background: "rgba(10,10,11,0.5)",
+                              }}
+                            >
+                              <span style={{ background: "#C8A96A", color: "#0A0A0B", fontSize: 12, fontWeight: 700, padding: "6px 14px" }}>
+                                Try this on
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                          <span style={{ fontSize: 14 }}>{displayName(option.name, option.storeName)}</span>
+                          <span
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              fontSize: 13,
+                              color: "#9C978E",
+                            }}
+                          >
+                            <span>{option.storeName}</span>
+                            <span style={{ color: "#ECEBE8" }}>{sgd(option.price)}</span>
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: diff < 0 ? "#5FB58A" : "#9C978E",
+                            }}
+                          >
+                            {priceDiff(option.price, current.price)} vs current
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                marginTop: "auto",
+                height: 52,
+                background: "#C8A96A",
+                color: "#0A0A0B",
+                border: 0,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              Keep This Swap
+            </button>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  // ── MOBILE layout ──
   return (
     <div
       style={{
-        height: "100dvh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
         background: "#0A0A0B",
         color: "#ECEBE8",
         fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
       }}
     >
-      {/* ── Header ── */}
+      {/* Mobile header */}
       <header
         style={{
           height: 64,
@@ -67,14 +443,14 @@ export function SwapStep({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 40px",
+          padding: "0 20px",
         }}
       >
         <Link
           href="/"
           style={{
             fontFamily: "var(--font-dm-serif), serif",
-            fontSize: 20,
+            fontSize: 18,
             letterSpacing: "0.2em",
             color: "#ECEBE8",
             textDecoration: "none",
@@ -82,327 +458,258 @@ export function SwapStep({
         >
           WINGMAN
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <WmDots current={4} />
-          <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>04 · Swap a piece</span>
         </div>
       </header>
 
-      {/* ── Main ── */}
-      <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
-        {/* Left: look render */}
-        <section
-          style={{
-            width: 628,
-            flexShrink: 0,
-            position: "relative",
-            overflow: "hidden",
-            background: "#141416",
-          }}
-        >
-          {look.renders.outfit ? (
-            <Image
-              src={look.renders.outfit}
-              alt={`You in ${look.name}`}
-              fill
-              sizes="628px"
-              style={{ objectFit: "contain" }}
-              {...RAW_IMG_PROPS}
-            />
-          ) : (
-            <LookSvg />
-          )}
-
-          {/* Look label */}
-          <div
-            style={{ position: "absolute", top: 32, left: 36, display: "flex", flexDirection: "column", gap: 6 }}
-          >
-            <span style={{ fontSize: 12, color: "#9C978E" }}>Look 1</span>
-            <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22 }}>{look.name}</span>
-          </div>
-
-          {/* Rendering overlay */}
-          {rendering && (
-            <>
-              <div style={{ position: "absolute", inset: 0, background: "rgba(10,10,11,0.2)" }} />
-              <div
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  height: 120,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  animation: "wmScan 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite",
-                }}
-              >
-                <div style={{ flex: 1, background: "rgba(200,169,106,0.07)" }} />
-                <div style={{ height: 2, background: "#C8A96A" }} />
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 140,
-                  background: "linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  left: 36,
-                  right: 36,
-                  bottom: 30,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#C8A96A",
-                    animation: "wmPulse 1.6s ease-in-out infinite",
-                  }}
-                />
-                <span style={{ fontSize: 13 }}>Trying on the {picked?.toLowerCase()}</span>
-              </div>
-            </>
-          )}
-        </section>
-
-        {/* Right: swap options */}
-        <section
-          style={{
-            flex: 1,
-            minWidth: 0,
-            padding: "32px 64px 32px 56px",
-            boxSizing: "border-box",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <button
-            type="button"
-            onClick={onBack}
-            style={{
-              color: "#9C978E",
-              background: "none",
-              border: 0,
-              padding: 0,
-              fontSize: 13,
-              cursor: "pointer",
-              textAlign: "left",
-              fontFamily: "inherit",
-              alignSelf: "flex-start",
-            }}
-          >
-            ← {look.name}
-          </button>
-          <h1
-            style={{
-              margin: "14px 0 0",
-              fontFamily: "var(--font-dm-serif), serif",
-              fontWeight: 400,
-              fontSize: 44,
-              lineHeight: 1,
-              textTransform: "uppercase" as const,
-              letterSpacing: "0.02em",
-            }}
-          >
-            {cheaper ? `Cheaper ${name}` : `Swapping the ${name.charAt(0).toUpperCase() + name.slice(1)}`}
-          </h1>
-
-          {/* Scrollable area: current piece + options */}
-          <div
-            className="no-scrollbar"
-            style={{ flex: 1, overflowY: "auto", minHeight: 0, marginTop: 22 }}
-          >
-            {/* Current piece */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
-              <p style={{ margin: 0, fontSize: 14, color: "#9C978E" }}>
-                Currently:{" "}
-                <span style={{ color: "#ECEBE8" }}>
-                  {displayName(current.name, current.storeName)}
-                </span>{" "}
-                · {current.storeName} · {sgd(current.price)}
-              </p>
+      {/* Look render: 4:5 block */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "4 / 5",
+          background: "#141416",
+          flexShrink: 0,
+          overflow: "hidden",
+        }}
+      >
+        {look.renders.outfit ? (
+          <Image
+            src={look.renders.outfit}
+            alt={`You in ${look.name}`}
+            fill
+            sizes="100vw"
+            style={{ objectFit: "contain" }}
+            {...RAW_IMG_PROPS}
+          />
+        ) : (
+          <LookSvg />
+        )}
+        <div style={{ position: "absolute", top: 20, left: 20, display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontSize: 12, color: "#9C978E" }}>Look 1</span>
+          <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 18 }}>{look.name}</span>
+        </div>
+        {rendering && (
+          <>
+            <div style={{ position: "absolute", inset: 0, background: "rgba(10,10,11,0.2)" }} />
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                height: 120,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                animation: "wmScan 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+              }}
+            >
+              <div style={{ flex: 1, background: "rgba(200,169,106,0.07)" }} />
+              <div style={{ height: 2, background: "#C8A96A" }} />
             </div>
+            <div style={{ position: "absolute", left: 20, bottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#C8A96A", animation: "wmPulse 1.6s ease-in-out infinite" }} />
+              <span style={{ fontSize: 13 }}>Trying on the {picked?.toLowerCase()}</span>
+            </div>
+          </>
+        )}
+      </div>
 
-            {/* Options grid */}
-            {state.status === "loading" && (
-              <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
-                Finding {cheaper ? "cheaper " : ""}options…
-              </p>
-            )}
-            {state.status === "error" && (
-              <div style={{ marginTop: 28 }}>
-                <p style={{ color: "#E06C5F", fontSize: 14 }}>{state.error}</p>
+      {/* Options section */}
+      <div style={{ padding: "0 20px 24px", display: "flex", flexDirection: "column", flex: 1 }}>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            marginTop: 24,
+            color: "#9C978E",
+            background: "none",
+            border: 0,
+            padding: 0,
+            fontSize: 13,
+            cursor: "pointer",
+            textAlign: "left",
+            fontFamily: "inherit",
+            alignSelf: "flex-start",
+          }}
+        >
+          ← {look.name}
+        </button>
+        <h1
+          style={{
+            margin: "12px 0 0",
+            fontFamily: "var(--font-dm-serif), serif",
+            fontWeight: 400,
+            fontSize: 34,
+            lineHeight: 1,
+            textTransform: "uppercase" as const,
+            letterSpacing: "0.02em",
+          }}
+        >
+          {cheaper ? `Cheaper ${name}` : `Swapping the ${name.charAt(0).toUpperCase() + name.slice(1)}`}
+        </h1>
+
+        <p style={{ margin: "12px 0 0", fontSize: 14, color: "#9C978E" }}>
+          Currently:{" "}
+          <span style={{ color: "#ECEBE8" }}>{displayName(current.name, current.storeName)}</span>{" "}
+          · {sgd(current.price)}
+        </p>
+
+        {state.status === "loading" && (
+          <p style={{ marginTop: 24, color: "#9C978E", fontSize: 14 }}>
+            Finding {cheaper ? "cheaper " : ""}options…
+          </p>
+        )}
+        {state.status === "error" && (
+          <div style={{ marginTop: 24 }}>
+            <p style={{ color: "#E06C5F", fontSize: 14 }}>{state.error}</p>
+            <button
+              type="button"
+              onClick={onRetry}
+              style={{
+                marginTop: 8,
+                background: "none",
+                border: 0,
+                color: "#ECEBE8",
+                fontSize: 14,
+                textDecoration: "underline",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+        {state.status === "done" && state.options.length === 0 && (
+          <p style={{ marginTop: 24, color: "#9C978E", fontSize: 14 }}>
+            {cheaper
+              ? "Nothing cheaper in stock goes with this look right now."
+              : "Nothing else in stock fits this look and budget right now."}
+          </p>
+        )}
+
+        {/* 2-column options grid on mobile */}
+        {state.options.length > 0 && (
+          <div
+            style={{
+              marginTop: 20,
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: "20px 12px",
+            }}
+          >
+            {state.options.map((option) => {
+              const on = picked === option.id;
+              const diff = Math.round(option.price - current.price);
+              return (
                 <button
+                  key={option.id}
                   type="button"
-                  onClick={onRetry}
+                  aria-pressed={on || focused === option.id}
+                  onClick={() => {
+                    if (focused !== option.id) { setFocused(option.id); return; }
+                    setFocused(null);
+                    setPicked(option.id);
+                    onPick(option);
+                  }}
                   style={{
-                    marginTop: 8,
                     background: "none",
                     border: 0,
+                    padding: 0,
+                    textAlign: "left",
                     color: "#ECEBE8",
-                    fontSize: 14,
-                    textDecoration: "underline",
                     cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
                     fontFamily: "inherit",
                   }}
                 >
-                  Try Again
-                </button>
-              </div>
-            )}
-            {state.status === "done" && state.options.length === 0 && (
-              <p style={{ marginTop: 28, color: "#9C978E", fontSize: 14 }}>
-                {cheaper
-                  ? `Nothing cheaper in stock goes with this look right now.`
-                  : "Nothing else in stock fits this look and budget right now."}
-              </p>
-            )}
-            {state.options.length > 0 && (
-              <div
-                style={{
-                  marginTop: 22,
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                  gap: "24px 16px",
-                  paddingBottom: 24,
-                }}
-              >
-                {state.options.map((option) => {
-                  const on = picked === option.id;
-                  const diff = Math.round(option.price - current.price);
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      aria-pressed={on || focused === option.id}
-                      onClick={() => {
-                        if (focused !== option.id) { setFocused(option.id); return; }
-                        setFocused(null);
-                        setPicked(option.id);
-                        onPick(option);
-                      }}
-                      style={{
-                        background: "none",
-                        border: 0,
-                        padding: 0,
-                        textAlign: "left",
-                        color: "#ECEBE8",
-                        cursor: "pointer",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 10,
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      <div
+                  <div
+                    style={{
+                      position: "relative",
+                      height: 150,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: (on || focused === option.id) ? "#26262A" : "#141416",
+                      outline: (on || focused === option.id) ? "1px solid #ECEBE8" : "none",
+                      outlineOffset: -1,
+                    }}
+                  >
+                    <ProductImage src={option.image} sizes="45vw" className="h-full w-full object-contain" />
+                    {on && (
+                      <span
                         style={{
-                          position: "relative",
-                          height: 170,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: (on || focused === option.id) ? "#26262A" : "#141416",
-                          outline: (on || focused === option.id) ? "1px solid #ECEBE8" : "none",
-                          outlineOffset: -1,
+                          position: "absolute",
+                          top: 8,
+                          left: 8,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          background: "#ECEBE8",
+                          color: "#0A0A0B",
+                          padding: "3px 6px",
                         }}
                       >
-                        <ProductImage src={option.image} sizes="160px" className="h-full w-full object-contain" />
-                        {on && (
-                          <span
-                            style={{
-                              position: "absolute",
-                              top: 10,
-                              left: 10,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              background: "#ECEBE8",
-                              color: "#0A0A0B",
-                              padding: "4px 8px",
-                            }}
-                          >
-                            Trying on
-                          </span>
-                        )}
-                        {focused === option.id && !on && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              inset: 0,
-                              display: "flex",
-                              alignItems: "flex-end",
-                              justifyContent: "center",
-                              paddingBottom: 10,
-                              background: "rgba(10,10,11,0.5)",
-                            }}
-                          >
-                            <span style={{ background: "#C8A96A", color: "#0A0A0B", fontSize: 12, fontWeight: 700, padding: "6px 14px" }}>
-                              Try this on
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                        <span style={{ fontSize: 14 }}>{displayName(option.name, option.storeName)}</span>
-                        <span
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            fontSize: 13,
-                            color: "#9C978E",
-                          }}
-                        >
-                          <span>{option.storeName}</span>
-                          <span style={{ color: "#ECEBE8" }}>{sgd(option.price)}</span>
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 600,
-                            color: diff < 0 ? "#5FB58A" : "#9C978E",
-                          }}
-                        >
-                          {priceDiff(option.price, current.price)} vs current
+                        Trying on
+                      </span>
+                    )}
+                    {focused === option.id && !on && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          display: "flex",
+                          alignItems: "flex-end",
+                          justifyContent: "center",
+                          paddingBottom: 8,
+                          background: "rgba(10,10,11,0.5)",
+                        }}
+                      >
+                        <span style={{ background: "#C8A96A", color: "#0A0A0B", fontSize: 11, fontWeight: 700, padding: "5px 10px" }}>
+                          Try this on
                         </span>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                    )}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <span style={{ fontSize: 13 }}>{displayName(option.name, option.storeName)}</span>
+                    <span style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#9C978E" }}>
+                      <span>{option.storeName}</span>
+                      <span style={{ color: "#ECEBE8" }}>{sgd(option.price)}</span>
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: diff < 0 ? "#5FB58A" : "#9C978E" }}>
+                      {priceDiff(option.price, current.price)}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
+        )}
 
-          <button
-            type="button"
-            onClick={onBack}
-            style={{
-              marginTop: "auto",
-              height: 52,
-              background: "#C8A96A",
-              color: "#0A0A0B",
-              border: 0,
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            Keep This Swap
-          </button>
-        </section>
-      </main>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            marginTop: "auto",
+            paddingTop: 24,
+            height: 52,
+            background: "#C8A96A",
+            color: "#0A0A0B",
+            border: 0,
+            fontSize: 15,
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          Keep This Swap
+        </button>
+      </div>
     </div>
   );
 }

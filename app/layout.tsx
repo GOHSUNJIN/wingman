@@ -22,7 +22,7 @@ const DESCRIPTION =
   "Tell Wingman the occasion and see yourself ready: a full look from real Singapore stores, tried on your photo and one tap from checkout.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://wingman-eight-beta.vercel.app"),
+  metadataBase: new URL("https://wingman-1608.vercel.app"),
   title: { default: "Wingman", template: "%s · Wingman" },
   description: DESCRIPTION,
   openGraph: { title: "Wingman", description: DESCRIPTION, siteName: "Wingman", type: "website" },

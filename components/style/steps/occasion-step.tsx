@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { RAW_IMG_PROPS } from "@/components/style/flow-shell";
 import type { Photo } from "@/components/style/style-flow";
 import type { Occasion, Tier } from "@/lib/catalog/types";
@@ -14,6 +14,18 @@ const TIER_NOTES: Record<Tier, string> = {
   mid: "Considered labels",
   luxury: "Investment pieces",
 };
+
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return wide;
+}
 
 export function OccasionStep(props: {
   photo: Photo | null;
@@ -28,20 +40,292 @@ export function OccasionStep(props: {
 }) {
   const textId = useId();
   const ready = props.sentence.trim().length >= 3;
+  const wide = useWide();
 
+  // ── WIDE layout ──
+  if (wide) {
+    return (
+      <div
+        style={{
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          background: "#0A0A0B",
+          color: "#ECEBE8",
+          fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        }}
+      >
+        {/* ── Header ── */}
+        <header
+          style={{
+            height: 64,
+            flexShrink: 0,
+            background: "#141416",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 40px",
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-dm-serif), serif",
+              fontSize: 20,
+              letterSpacing: "0.2em",
+              color: "#ECEBE8",
+              textDecoration: "none",
+            }}
+          >
+            WINGMAN
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <WmDots current={2} />
+            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>02 · The occasion</span>
+          </div>
+        </header>
+
+        {/* ── Main ── */}
+        <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
+          {/* Left: photo panel */}
+          <section
+            style={{
+              width: 628,
+              flexShrink: 0,
+              position: "relative",
+              overflow: "hidden",
+              background: "#141416",
+            }}
+          >
+            {props.photo ? (
+              <Image
+                src={props.photo.url}
+                alt="Your photo"
+                fill
+                sizes="628px"
+                style={{ objectFit: "contain" }}
+                {...RAW_IMG_PROPS}
+              />
+            ) : (
+              <PersonSvg />
+            )}
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 260,
+                background: "linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))",
+              }}
+            />
+            <div
+              style={{ position: "absolute", left: 40, bottom: 36, display: "flex", flexDirection: "column", gap: 6 }}
+            >
+              <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>Styling for</span>
+              <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 28 }}>You, on the Day</span>
+            </div>
+          </section>
+
+          {/* Right: form */}
+          <section
+            style={{
+              flex: 1,
+              minWidth: 0,
+              padding: "28px 72px 28px 72px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            <button
+              type="button"
+              onClick={props.onBack}
+              style={{
+                color: "#9C978E",
+                background: "none",
+                border: 0,
+                padding: 0,
+                fontSize: 13,
+                cursor: "pointer",
+                textAlign: "left",
+                alignSelf: "flex-start",
+                fontFamily: "inherit",
+              }}
+            >
+              ← Your Photo
+            </button>
+            <h1
+              style={{
+                margin: "14px 0 0",
+                fontFamily: "var(--font-dm-serif), serif",
+                fontWeight: 400,
+                fontSize: 52,
+                lineHeight: 1,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.02em",
+              }}
+            >
+              The Occasion
+            </h1>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (ready) props.onSubmit();
+              }}
+              style={{ flex: 1, display: "flex", flexDirection: "column" }}
+            >
+              {/* Occasion chips */}
+              <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 10 }}>
+                <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>What&apos;s on</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {OCCASION_CHOICES.map((o) => {
+                    const on = props.occasionId === o.id;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => props.onOccasion(o.id)}
+                        style={{
+                          height: 38,
+                          padding: "0 16px",
+                          border: 0,
+                          fontSize: 13,
+                          cursor: "pointer",
+                          background: on ? "#ECEBE8" : "#1C1C1F",
+                          color: on ? "#0A0A0B" : "#ECEBE8",
+                          fontWeight: on ? 600 : 400,
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Free-text */}
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+                <label
+                  htmlFor={textId}
+                  style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}
+                >
+                  Describe the event
+                </label>
+                <textarea
+                  id={textId}
+                  value={props.sentence}
+                  onChange={(e) => props.onSentence(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  placeholder="Where, when and anything you want or want to avoid"
+                  style={{
+                    height: 96,
+                    resize: "none",
+                    background: "#141416",
+                    color: "#ECEBE8",
+                    border: 0,
+                    padding: "14px 16px",
+                    fontSize: 15,
+                    lineHeight: 1.55,
+                    boxSizing: "border-box",
+                    fontFamily: "inherit",
+                  }}
+                />
+              </div>
+
+              {/* Budget tiers */}
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+                <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
+                  Budget for the whole look
+                </span>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                    gap: 8,
+                  }}
+                >
+                  {(["budget", "mid", "luxury"] as const).map((t) => {
+                    const on = props.tier === t;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => props.onTier(t)}
+                        style={{
+                          textAlign: "left",
+                          padding: 14,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 5,
+                          cursor: "pointer",
+                          color: "#ECEBE8",
+                          boxSizing: "border-box",
+                          background: on ? "#1C1C1F" : "#141416",
+                          border: `1px solid ${on ? "#ECEBE8" : "transparent"}`,
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>{TIER_LABELS[t]}</span>
+                        <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22 }}>
+                          {TIER_RANGES[t]}
+                        </span>
+                        <span style={{ fontSize: 12, color: "#9C978E" }}>{TIER_NOTES[t]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={!ready}
+                style={{
+                  marginTop: "auto",
+                  height: 52,
+                  background: "#C8A96A",
+                  color: "#0A0A0B",
+                  border: 0,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                  cursor: ready ? "pointer" : "not-allowed",
+                  opacity: ready ? 1 : 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "inherit",
+                }}
+              >
+                Style Me →
+              </button>
+            </form>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  // ── MOBILE layout ──
   return (
     <div
       style={{
-        height: "100dvh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
         background: "#0A0A0B",
         color: "#ECEBE8",
         fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
       }}
     >
-      {/* ── Header ── */}
+      {/* Mobile header */}
       <header
         style={{
           height: 64,
@@ -50,14 +334,14 @@ export function OccasionStep(props: {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 40px",
+          padding: "0 20px",
         }}
       >
         <Link
           href="/"
           style={{
             fontFamily: "var(--font-dm-serif), serif",
-            fontSize: 20,
+            fontSize: 18,
             letterSpacing: "0.2em",
             color: "#ECEBE8",
             textDecoration: "none",
@@ -65,235 +349,183 @@ export function OccasionStep(props: {
         >
           WINGMAN
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <WmDots current={2} />
-          <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>02 · The occasion</span>
         </div>
       </header>
 
-      {/* ── Main ── */}
-      <main style={{ flex: 1, display: "flex", minHeight: 0 }}>
-        {/* Left: photo panel */}
-        <section
+      {/* Form content */}
+      <div style={{ padding: "0 20px 40px", display: "flex", flexDirection: "column", flex: 1 }}>
+        <button
+          type="button"
+          onClick={props.onBack}
           style={{
-            width: 628,
-            flexShrink: 0,
-            position: "relative",
-            overflow: "hidden",
-            background: "#141416",
+            marginTop: 24,
+            color: "#9C978E",
+            background: "none",
+            border: 0,
+            padding: 0,
+            fontSize: 13,
+            cursor: "pointer",
+            textAlign: "left",
+            alignSelf: "flex-start",
+            fontFamily: "inherit",
           }}
         >
-          {props.photo ? (
-            <Image
-              src={props.photo.url}
-              alt="Your photo"
-              fill
-              sizes="628px"
-              style={{ objectFit: "contain" }}
-              {...RAW_IMG_PROPS}
-            />
-          ) : (
-            <PersonSvg />
-          )}
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 260,
-              background: "linear-gradient(to top, rgba(10,10,11,0.9), rgba(10,10,11,0))",
-            }}
-          />
-          <div
-            style={{ position: "absolute", left: 40, bottom: 36, display: "flex", flexDirection: "column", gap: 6 }}
-          >
-            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>Styling for</span>
-            <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 28 }}>You, on the Day</span>
-          </div>
-        </section>
+          ← Your Photo
+        </button>
+        <h1
+          style={{
+            margin: "12px 0 0",
+            fontFamily: "var(--font-dm-serif), serif",
+            fontWeight: 400,
+            fontSize: 40,
+            lineHeight: 1,
+            textTransform: "uppercase" as const,
+            letterSpacing: "0.02em",
+          }}
+        >
+          The Occasion
+        </h1>
 
-        {/* Right: form */}
-        <section
-          style={{
-            flex: 1,
-            minWidth: 0,
-            padding: "28px 72px 28px 72px",
-            boxSizing: "border-box",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (ready) props.onSubmit();
           }}
+          style={{ flex: 1, display: "flex", flexDirection: "column" }}
         >
+          {/* Occasion chips */}
+          <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 10 }}>
+            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>What&apos;s on</span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {OCCASION_CHOICES.map((o) => {
+                const on = props.occasionId === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => props.onOccasion(o.id)}
+                    style={{
+                      height: 38,
+                      padding: "0 14px",
+                      border: 0,
+                      fontSize: 13,
+                      cursor: "pointer",
+                      background: on ? "#ECEBE8" : "#1C1C1F",
+                      color: on ? "#0A0A0B" : "#ECEBE8",
+                      fontWeight: on ? 600 : 400,
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Free-text */}
+          <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+            <label
+              htmlFor={textId}
+              style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}
+            >
+              Describe the event
+            </label>
+            <textarea
+              id={textId}
+              value={props.sentence}
+              onChange={(e) => props.onSentence(e.target.value)}
+              rows={4}
+              maxLength={300}
+              placeholder="Where, when and anything you want or want to avoid"
+              style={{
+                minHeight: 120,
+                resize: "none",
+                background: "#141416",
+                color: "#ECEBE8",
+                border: 0,
+                padding: "14px 16px",
+                fontSize: 15,
+                lineHeight: 1.55,
+                boxSizing: "border-box",
+                fontFamily: "inherit",
+              }}
+            />
+          </div>
+
+          {/* Budget tiers */}
+          <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+            <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
+              Budget for the whole look
+            </span>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: 6,
+              }}
+            >
+              {(["budget", "mid", "luxury"] as const).map((t) => {
+                const on = props.tier === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => props.onTier(t)}
+                    style={{
+                      textAlign: "left",
+                      padding: 10,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                      cursor: "pointer",
+                      color: "#ECEBE8",
+                      boxSizing: "border-box",
+                      background: on ? "#1C1C1F" : "#141416",
+                      border: `1px solid ${on ? "#ECEBE8" : "transparent"}`,
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    <span style={{ fontSize: 11, fontWeight: 600 }}>{TIER_LABELS[t]}</span>
+                    <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 15 }}>
+                      {TIER_RANGES[t]}
+                    </span>
+                    <span style={{ fontSize: 11, color: "#9C978E" }}>{TIER_NOTES[t]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <button
-            type="button"
-            onClick={props.onBack}
+            type="submit"
+            disabled={!ready}
             style={{
-              color: "#9C978E",
-              background: "none",
+              marginTop: "auto",
+              paddingTop: 24,
+              height: 52,
+              background: "#C8A96A",
+              color: "#0A0A0B",
               border: 0,
-              padding: 0,
-              fontSize: 13,
-              cursor: "pointer",
-              textAlign: "left",
-              alignSelf: "flex-start",
+              fontSize: 15,
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              cursor: ready ? "pointer" : "not-allowed",
+              opacity: ready ? 1 : 0.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               fontFamily: "inherit",
             }}
           >
-            ← Your Photo
+            Style Me →
           </button>
-          <h1
-            style={{
-              margin: "14px 0 0",
-              fontFamily: "var(--font-dm-serif), serif",
-              fontWeight: 400,
-              fontSize: 52,
-              lineHeight: 1,
-              textTransform: "uppercase" as const,
-              letterSpacing: "0.02em",
-            }}
-          >
-            The Occasion
-          </h1>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (ready) props.onSubmit();
-            }}
-            style={{ flex: 1, display: "flex", flexDirection: "column" }}
-          >
-            {/* Occasion chips */}
-            <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 10 }}>
-              <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>What&apos;s on</span>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {OCCASION_CHOICES.map((o) => {
-                  const on = props.occasionId === o.id;
-                  return (
-                    <button
-                      key={o.id}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => props.onOccasion(o.id)}
-                      style={{
-                        height: 38,
-                        padding: "0 16px",
-                        border: 0,
-                        fontSize: 13,
-                        cursor: "pointer",
-                        background: on ? "#ECEBE8" : "#1C1C1F",
-                        color: on ? "#0A0A0B" : "#ECEBE8",
-                        fontWeight: on ? 600 : 400,
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      {o.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Free-text */}
-            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
-              <label
-                htmlFor={textId}
-                style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}
-              >
-                Describe the event
-              </label>
-              <textarea
-                id={textId}
-                value={props.sentence}
-                onChange={(e) => props.onSentence(e.target.value)}
-                rows={3}
-                maxLength={300}
-                placeholder="Where, when and anything you want or want to avoid"
-                style={{
-                  height: 96,
-                  resize: "none",
-                  background: "#141416",
-                  color: "#ECEBE8",
-                  border: 0,
-                  padding: "14px 16px",
-                  fontSize: 15,
-                  lineHeight: 1.55,
-                  boxSizing: "border-box",
-                  fontFamily: "inherit",
-                }}
-              />
-            </div>
-
-            {/* Budget tiers */}
-            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
-              <span style={{ fontSize: 12, letterSpacing: "0.02em", color: "#9C978E" }}>
-                Budget for the whole look
-              </span>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                  gap: 8,
-                }}
-              >
-                {(["budget", "mid", "luxury"] as const).map((t) => {
-                  const on = props.tier === t;
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => props.onTier(t)}
-                      style={{
-                        textAlign: "left",
-                        padding: 14,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 5,
-                        cursor: "pointer",
-                        color: "#ECEBE8",
-                        boxSizing: "border-box",
-                        background: on ? "#1C1C1F" : "#141416",
-                        border: `1px solid ${on ? "#ECEBE8" : "transparent"}`,
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>{TIER_LABELS[t]}</span>
-                      <span style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: 22 }}>
-                        {TIER_RANGES[t]}
-                      </span>
-                      <span style={{ fontSize: 12, color: "#9C978E" }}>{TIER_NOTES[t]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={!ready}
-              style={{
-                marginTop: "auto",
-                height: 52,
-                background: "#C8A96A",
-                color: "#0A0A0B",
-                border: 0,
-                fontSize: 15,
-                fontWeight: 600,
-                letterSpacing: "0.04em",
-                cursor: ready ? "pointer" : "not-allowed",
-                opacity: ready ? 1 : 0.5,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "inherit",
-              }}
-            >
-              Style Me →
-            </button>
-          </form>
-        </section>
-      </main>
+        </form>
+      </div>
     </div>
   );
 }
