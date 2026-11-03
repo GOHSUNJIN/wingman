@@ -29,7 +29,6 @@ export function LooksStep({
   scoring,
   notice,
   onRestart,
-  onCompare,
   onSwap,
   onRefine,
   cart,
@@ -37,8 +36,6 @@ export function LooksStep({
   onAddPiece,
   onViewCart,
   focusLook = 0,
-  hasPrep,
-  onPrep,
   onBrowse,
   onDeletePhoto,
 }: {
@@ -49,7 +46,6 @@ export function LooksStep({
   scoring: boolean;
   notice: string | null;
   onRestart: () => void;
-  onCompare?: (index: number) => void;
   onSwap?: (index: number, slot: LookItem["slot"], cheaper?: boolean) => void;
   onRefine?: (message: string) => void;
   cart: CartLine[];
@@ -57,8 +53,6 @@ export function LooksStep({
   onAddPiece: (item: LookItem) => void;
   onViewCart: () => void;
   focusLook?: number;
-  hasPrep: boolean;
-  onPrep: () => void;
   onBrowse: () => void;
   onDeletePhoto: () => void;
 }) {
@@ -564,24 +558,6 @@ export function LooksStep({
                 </button>
               )}
               <div style={{ height: 1, background: "#2A2A2E" }} />
-              {onCompare && (
-                <button
-                  type="button"
-                  onClick={() => onCompare(active)}
-                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4, textAlign: "left" }}
-                >
-                  Compare prices
-                </button>
-              )}
-              {hasPrep && (
-                <button
-                  type="button"
-                  onClick={onPrep}
-                  style={{ background: "none", border: 0, padding: 0, color: "#9C978E", cursor: "pointer", fontFamily: "inherit", fontSize: 13, textDecoration: "underline", textUnderlineOffset: 4, textAlign: "left" }}
-                >
-                  Your night-before prep plan
-                </button>
-              )}
               <nav
                 aria-label="More actions"
                 style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}
@@ -650,7 +626,6 @@ export function LooksStep({
     count: looks.length,
     photo,
     scoring: scoring && !look.fitCheck,
-    onCompare: onCompare && (() => onCompare(i)),
     onSwap: onSwap && ((slot: LookItem["slot"]) => onSwap(i, slot)),
     inCart: look.items.filter((item) => showsInRender(look, item.slot)).every((item) => inCartIds.has(item.id)),
     cartIds: inCartIds,
@@ -800,15 +775,6 @@ export function LooksStep({
       )}
 
       <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
-        {hasPrep && (
-          <button
-            type="button"
-            onClick={onPrep}
-            style={{ background: "none", border: 0, padding: "8px 0", color: "#ECEBE8", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 4 }}
-          >
-            Your night-before prep plan
-          </button>
-        )}
         <button
           type="button"
           onClick={onBrowse}
@@ -843,7 +809,6 @@ function LookCard({
   count,
   photo,
   scoring,
-  onCompare,
   onSwap,
   inCart,
   cartIds,
@@ -856,7 +821,6 @@ function LookCard({
   count: number;
   photo: Photo | null;
   scoring: boolean;
-  onCompare?: () => void;
   onSwap?: (slot: LookItem["slot"]) => void;
   inCart: boolean;
   cartIds: Set<string>;
@@ -941,11 +905,6 @@ function LookCard({
             {sgd(look.total)}
             <span style={{ color: "#9C978E" }}> · {TIER_LABELS[look.tier]}</span>
           </p>
-          {onCompare && (
-            <button type="button" onClick={onCompare} style={{ background: "none", border: 0, padding: 0, color: "#ECEBE8", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}>
-              Compare prices
-            </button>
-          )}
         </div>
 
         <div style={{ marginTop: 20, background: "#1C1C1F", padding: 16 }} aria-live="polite">

@@ -861,7 +861,6 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
         scoring={progress.step === "scoring" || looks.some((l) => !l.fitCheck)}
         notice={notice}
         onRestart={() => go("occasion")}
-        onCompare={parsed ? openCompare : undefined}
         onSwap={parsed ? openSwap : undefined}
         onRefine={parsed ? refine : undefined}
         cart={cart}
@@ -872,8 +871,6 @@ export function StyleFlow({ initialOccasion }: { initialOccasion?: Occasion }) {
         onAddPiece={(item) => addToCart([item])}
         onViewCart={() => go("cart")}
         focusLook={focusLook}
-        hasPrep={prep != null}
-        onPrep={() => go("prep")}
         onBrowse={() => go("browse")}
         onDeletePhoto={() => void deletePhoto()}
       />
